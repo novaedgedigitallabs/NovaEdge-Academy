@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "NovaEdge endpoints",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

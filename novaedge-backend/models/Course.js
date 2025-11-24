@@ -1,3 +1,4 @@
+// models/Course.js
 const mongoose = require("mongoose");
 
 const courseSchema = new mongoose.Schema({
@@ -60,6 +61,18 @@ const courseSchema = new mongoose.Schema({
       type: String,
       required: true,
     },
+  },
+
+  // NEW: Tech stack (comma separated or array of strings)
+  techStack: {
+    type: [String],
+    default: [],
+  },
+
+  // NEW: Short prerequisites text
+  prerequisites: {
+    type: String,
+    default: "",
   },
 
   // 7. THE CONTENT (List of Videos)

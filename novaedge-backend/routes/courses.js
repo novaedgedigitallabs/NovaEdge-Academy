@@ -8,6 +8,7 @@ const {
   getCourseLectures,
   addLecture,
   deleteCourse,
+  updateCourse, // new
 } = require("../controllers/courses");
 
 // Import Middleware
@@ -38,10 +39,13 @@ router
 
 // Add Video/Lecture to a course AND Delete Course
 // URL: /api/v1/course/:id
+// routes/courses.js (snippet)
 router
   .route("/course/:id")
   // POST = Add Lecture
   .post(isAuthenticatedUser, authorizeRoles("admin"), addLecture)
+  // PUT = Update course metadata (admin)
+  .put(isAuthenticatedUser, authorizeRoles("admin"), updateCourse)
   // DELETE = Remove Course
   .delete(isAuthenticatedUser, authorizeRoles("admin"), deleteCourse);
 
