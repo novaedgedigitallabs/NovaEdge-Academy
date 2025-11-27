@@ -20,8 +20,8 @@ export default function AdminCoursesPage() {
         const list = Array.isArray(data.courses)
           ? data.courses
           : Array.isArray(data)
-          ? data
-          : data.data || [];
+            ? data
+            : data.data || [];
         if (mounted) setCourses(list);
       } catch (e) {
         if (mounted) setErr(e.message || "Failed to load");
@@ -48,7 +48,7 @@ export default function AdminCoursesPage() {
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold">Courses</h1>
           <Link href="/admin/courses/new">
-            <button className="px-4 py-2 rounded bg-primary text-white">
+            <button className="px-4 py-2 rounded bg-primary text-primary-foreground">
               New Course
             </button>
           </Link>
@@ -72,7 +72,7 @@ export default function AdminCoursesPage() {
                   <div className="font-semibold">
                     {course.title || course.name}
                   </div>
-                  <div className="text-sm text-muted">
+                  <div className="text-sm text-muted-foreground">
                     {course.category || course.description}
                   </div>
                 </div>

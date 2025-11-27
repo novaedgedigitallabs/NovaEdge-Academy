@@ -171,7 +171,7 @@ export default function AdminNewCoursePage() {
               onChange={(e) => setCreatedBy(e.target.value)}
               className="w-full border p-2 rounded"
             />
-            <div className="text-xs text-muted mt-1">
+            <div className="text-xs text-muted-foreground mt-1">
               This will be saved as the course creator (required)
             </div>
           </div>
@@ -179,7 +179,7 @@ export default function AdminNewCoursePage() {
           <div>
             <label className="block text-sm font-medium mb-1">
               Tech Stack{" "}
-              <span className="text-xs text-muted">(comma separated)</span>
+              <span className="text-xs text-muted-foreground">(comma separated)</span>
             </label>
             <input
               value={techStack}
@@ -300,7 +300,7 @@ export default function AdminNewCoursePage() {
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 rounded bg-primary text-white"
+              className="px-4 py-2 rounded bg-primary text-primary-foreground"
             >
               {loading ? "Creating..." : "Create Course"}
             </button>

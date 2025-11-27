@@ -18,8 +18,8 @@ export default function AdminUsersPage() {
         const list = Array.isArray(data.users)
           ? data.users
           : Array.isArray(data)
-          ? data
-          : data.data || [];
+            ? data
+            : data.data || [];
         if (mounted) setUsers(list);
       } catch (e) {
         if (mounted) setErr(e.message || "Failed to load users");
@@ -69,13 +69,13 @@ export default function AdminUsersPage() {
               >
                 <div>
                   <div className="font-semibold">{user.name || user.email}</div>
-                  <div className="text-sm text-muted">{user.email}</div>
+                  <div className="text-sm text-muted-foreground">{user.email}</div>
                 </div>
                 <div className="flex gap-2">
                   {user.role !== "admin" ? (
                     <button
                       onClick={() => updateRole(id, "admin")}
-                      className="px-3 py-1 bg-primary text-white rounded"
+                      className="px-3 py-1 bg-primary text-primary-foreground rounded"
                     >
                       Promote
                     </button>

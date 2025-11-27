@@ -35,21 +35,27 @@ export default function AdminDashboardPage() {
         {err && <div className="text-destructive">{err}</div>}
 
         {stats && (
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="p-4 border rounded">
-              <div className="text-sm text-muted">Users</div>
+              <div className="text-sm text-muted-foreground">Users</div>
               <div className="text-xl font-semibold">
                 {stats.usersCount ?? "—"}
               </div>
             </div>
             <div className="p-4 border rounded">
-              <div className="text-sm text-muted">Courses</div>
+              <div className="text-sm text-muted-foreground">Courses</div>
               <div className="text-xl font-semibold">
                 {stats.coursesCount ?? "—"}
               </div>
             </div>
             <div className="p-4 border rounded">
-              <div className="text-sm text-muted">Revenue</div>
+              <div className="text-sm text-muted-foreground">Enrollments</div>
+              <div className="text-xl font-semibold">
+                {stats.subscriptionsCount ?? "—"}
+              </div>
+            </div>
+            <div className="p-4 border rounded">
+              <div className="text-sm text-muted-foreground">Revenue</div>
               <div className="text-xl font-semibold">₹{stats.revenue ?? 0}</div>
             </div>
           </div>

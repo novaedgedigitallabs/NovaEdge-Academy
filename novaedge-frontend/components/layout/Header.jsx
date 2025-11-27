@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { User, LogOut, LayoutDashboard } from "lucide-react"
 
+import { ModeToggle } from "@/components/ui/mode-toggle"
+
 export default function Header() {
   const { user, logout } = useAuth()
 
@@ -40,6 +42,7 @@ export default function Header() {
           </nav>
         </div>
         <div className="flex items-center gap-4">
+          <ModeToggle />
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

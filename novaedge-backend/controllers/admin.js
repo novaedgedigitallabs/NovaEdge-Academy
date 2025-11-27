@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const Payment = require("../models/Payment");
 const Enrollment = require("../models/Enrollment");
+const Course = require("../models/Course");
 
 // --- 1. GET DASHBOARD STATS (The Money Page) ---
 exports.getDashboardStats = async (req, res) => {
@@ -11,7 +12,10 @@ exports.getDashboardStats = async (req, res) => {
     // B. Count Total Subscriptions (Enrollments)
     const subscriptionsCount = await Enrollment.countDocuments();
 
-    // C. Calculate Total Revenue
+    // C. Count Total Courses
+    const coursesCount = await Course.countDocuments();
+
+    // D. Calculate Total Revenue
     // We fetch all completed payments
     const payments = await Payment.find({ status: "completed" });
 
@@ -21,15 +25,13 @@ exports.getDashboardStats = async (req, res) => {
       return total + payment.amount / 100;
     }, 0);
 
-    // D. Send it all back
+    // E. Send it all back
     res.status(200).json({
       success: true,
-      stats: {
-        users: usersCount,
-        subscriptions: subscriptionsCount,
-        revenue: totalRevenue,
-        paymentsCount: payments.length,
-      },
+      usersCount,
+      subscriptionsCount,
+      coursesCount,
+      revenue: totalRevenue,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

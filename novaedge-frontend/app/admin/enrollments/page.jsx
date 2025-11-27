@@ -18,8 +18,8 @@ export default function AdminEnrollmentsPage() {
         const list = Array.isArray(data.enrollments)
           ? data.enrollments
           : Array.isArray(data)
-          ? data
-          : data.data || [];
+            ? data
+            : data.data || [];
         if (mounted) setEnrollments(list);
       } catch (e) {
         if (mounted) setErr(e.message || "Failed to load enrollments");
@@ -55,12 +55,12 @@ export default function AdminEnrollmentsPage() {
                   <div className="font-semibold">
                     {user.name || user.email || "User"}
                   </div>
-                  <div className="text-sm text-muted">
+                  <div className="text-sm text-muted-foreground">
                     Course:{" "}
                     {course.title || course.name || course._id || course}
                   </div>
                 </div>
-                <div className="text-sm text-muted">
+                <div className="text-sm text-muted-foreground">
                   {new Date(
                     e.createdAt || e.enrolledAt || Date.now()
                   ).toLocaleString()}

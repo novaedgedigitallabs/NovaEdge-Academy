@@ -240,7 +240,7 @@ export default function AdminCourseEditPage() {
                 className="mt-2 h-28 rounded object-cover border"
               />
             )}
-            <div className="text-xs text-muted mt-1">
+            <div className="text-xs text-muted-foreground mt-1">
               Upload new file or keep existing thumbnail.
             </div>
           </div>
@@ -271,7 +271,7 @@ export default function AdminCourseEditPage() {
             <button
               type="submit"
               disabled={saving}
-              className="px-4 py-2 bg-primary text-white rounded"
+              className="px-4 py-2 bg-primary text-primary-foreground rounded"
             >
               {saving ? "Saving..." : "Save Changes"}
             </button>

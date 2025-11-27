@@ -276,7 +276,7 @@ export default function CourseDetailPageClient() {
                 {displayLectures.length > 0 && (
                   <button
                     onClick={() => router.push(`/courses/${courseId}/lecture/${displayLectures[0]._id || displayLectures[0].id}`)}
-                    className="w-full bg-primary text-white py-2 rounded hover:bg-primary/90 transition-colors"
+                    className="w-full bg-primary text-primary-foreground py-2 rounded hover:bg-primary/90 transition-colors"
                   >
                     Start Watching
                   </button>
@@ -284,7 +284,7 @@ export default function CourseDetailPageClient() {
               </div>
             ) : (
               <Link href={`/checkout?courseId=${courseId}`}>
-                <button className="w-full bg-primary text-white py-2 rounded hover:bg-primary/90 transition-colors">
+                <button className="w-full bg-primary text-primary-foreground py-2 rounded hover:bg-primary/90 transition-colors">
                   Enroll Now
                 </button>
               </Link>
