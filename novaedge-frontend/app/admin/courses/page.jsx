@@ -62,7 +62,7 @@ export default function AdminCoursesPage() {
 
         <div className="space-y-3">
           {courses.map((course) => {
-            const id = course._id || course.id;
+            const id = course._id || course._id;
             return (
               <div
                 key={id}

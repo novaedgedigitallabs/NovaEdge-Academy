@@ -5,6 +5,7 @@ const router = express.Router();
 const {
   getAllCourses,
   createCourse,
+  getCourseDetails, // new
   getCourseLectures,
   addLecture,
   deleteCourse,
@@ -21,13 +22,15 @@ const { authorizeRoles } = require("../middleware/admin");
 // URL: /api/v1/courses
 router.route("/courses").get(getAllCourses);
 
+// Get single course details (Public)
+// URL: /api/v1/course/:id
+router.route("/course/:id").get(getCourseDetails);
+
 // --- PROTECTED ROUTES (Student) ---
 
-// Get lectures of a specific course
-// URL: /api/v1/course/:id
-// Note: We check if they are logged in.
-// (Frontend handles the "Check Enrollment" logic before calling this)
-router.route("/course/:id").get(isAuthenticatedUser, getCourseLectures);
+// Get lectures of a specific course (if needed separately)
+// URL: /api/v1/course/:id/lectures
+router.route("/course/:id/lectures").get(isAuthenticatedUser, getCourseLectures);
 
 // --- ADMIN ROUTES (Boss Only) ---
 

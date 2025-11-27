@@ -31,10 +31,10 @@ export default function Header() {
             <Link href="/courses" className="hover:text-foreground transition-colors">
               Courses
             </Link>
-            <Link href="#" className="hover:text-foreground transition-colors">
+            <Link href="/learning-paths" className="hover:text-foreground transition-colors">
               Learning Paths
             </Link>
-            <Link href="#" className="hover:text-foreground transition-colors">
+            <Link href="/mentors" className="hover:text-foreground transition-colors">
               Mentors
             </Link>
           </nav>

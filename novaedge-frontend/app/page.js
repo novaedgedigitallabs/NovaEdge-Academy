@@ -35,10 +35,10 @@ export default function Home() {
         const fetched = Array.isArray(data.courses)
           ? data.courses
           : Array.isArray(data)
-          ? data
-          : data.data && Array.isArray(data.data)
-          ? data.data
-          : [];
+            ? data
+            : data.data && Array.isArray(data.data)
+              ? data.data
+              : [];
 
         if (!ignore) setCourses(fetched);
       } catch (err) {

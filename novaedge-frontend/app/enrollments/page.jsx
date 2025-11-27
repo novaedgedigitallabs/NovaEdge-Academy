@@ -2,7 +2,7 @@
 
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import CourseCard from "@/components/Course/CourseCard";
+import CourseCard from "@/components/course/CourseCard";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -142,7 +142,7 @@ export default function EnrollmentsPage() {
             </div>
             <h3 className="text-lg font-semibold mb-2">No courses yet</h3>
             <p className="text-muted-foreground max-w-sm mx-auto mb-6">
-              You haven't enrolled in any courses yet. Explore our catalog to
+              You haven&apos;t enrolled in any courses yet. Explore our catalog to
               start learning.
             </p>
             <Button asChild>

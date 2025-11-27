@@ -21,6 +21,7 @@ function VerifyContent() {
   const razorpay_payment_id = searchParams.get("razorpay_payment_id");
   const razorpay_order_id = searchParams.get("razorpay_order_id");
   const razorpay_signature = searchParams.get("razorpay_signature");
+  const courseId = searchParams.get("courseId");
 
   const [status, setStatus] = useState(null); // success / failed
   const [loading, setLoading] = useState(true);
@@ -28,7 +29,12 @@ function VerifyContent() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
+    if (
+      !razorpay_payment_id ||
+      !razorpay_order_id ||
+      !razorpay_signature ||
+      !courseId
+    ) {
       setStatus("failed");
       setLoading(false);
       return;
@@ -48,6 +54,7 @@ function VerifyContent() {
               razorpay_payment_id,
               razorpay_order_id,
               razorpay_signature,
+              courseId,
             }),
           }
         );
@@ -87,11 +94,10 @@ function VerifyContent() {
       <Card className="w-full max-w-md text-center">
         <CardHeader>
           <div
-            className={`mx-auto rounded-full p-3 w-16 h-16 flex items-center justify-center mb-4 ${
-              isSuccess
+            className={`mx-auto rounded-full p-3 w-16 h-16 flex items-center justify-center mb-4 ${isSuccess
                 ? "bg-green-100 text-green-600"
                 : "bg-red-100 text-red-600"
-            }`}
+              }`}
           >
             {isSuccess ? (
               <CheckCircle2 className="w-8 h-8" />
@@ -110,7 +116,7 @@ function VerifyContent() {
             {isSuccess
               ? "Thank you for your purchase. You have been successfully enrolled in the course."
               : error ||
-                "Something went wrong with your transaction. Please try again."}
+              "Something went wrong with your transaction. Please try again."}
           </p>
 
           {isSuccess && (

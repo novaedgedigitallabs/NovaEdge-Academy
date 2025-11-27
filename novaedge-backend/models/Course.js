@@ -90,7 +90,7 @@ const courseSchema = new mongoose.Schema({
       video: {
         public_id: {
           type: String,
-          required: true,
+          // required: true, // Not required for YouTube links
         },
         url: {
           type: String,
@@ -118,6 +118,12 @@ const courseSchema = new mongoose.Schema({
   numOfVideos: {
     type: Number,
     default: 0,
+  },
+
+  // Total Course Duration (Auto-calculated)
+  duration: {
+    type: String,
+    default: "0 min",
   },
 
   createdAt: {

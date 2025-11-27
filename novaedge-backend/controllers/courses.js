@@ -20,6 +20,22 @@ async function uploadImage({ filePath, dataUrl, folder = "lms_posters" }) {
   }
 }
 
+// Helper: Calculate total duration string
+function calculateTotalDuration(lectures) {
+  let totalMinutes = 0;
+  lectures.forEach(lec => {
+    totalMinutes += (Number(lec.duration) || 0);
+  });
+
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  if (hours > 0) {
+    return `${hours}h ${minutes}m`;
+  }
+  return `${minutes} min`;
+}
+
 // --- 1. GET ALL COURSES (Public) ---
 exports.getAllCourses = async (req, res) => {
   try {
@@ -39,6 +55,24 @@ exports.getAllCourses = async (req, res) => {
     res.status(200).json({
       success: true,
       courses,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// --- 1.5 GET COURSE DETAILS (Public) ---
+exports.getCourseDetails = async (req, res) => {
+  try {
+    const course = await Course.findById(req.params.id);
+
+    if (!course) {
+      return res.status(404).json({ success: false, message: "Course not found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      course,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -89,6 +123,34 @@ exports.createCourse = async (req, res) => {
         .filter(Boolean);
     }
 
+    // Process Lectures (if provided)
+    let lecturesData = [];
+    let totalDurationStr = "0 min";
+
+    if (req.body.lectures) {
+      try {
+        const parsed = typeof req.body.lectures === "string"
+          ? JSON.parse(req.body.lectures)
+          : req.body.lectures;
+
+        if (Array.isArray(parsed)) {
+          lecturesData = parsed.map(l => ({
+            title: l.title,
+            description: l.description,
+            video: {
+              url: l.videoUrl,
+              public_id: "youtube" // Placeholder for external links
+            },
+            duration: Number(l.duration) || 0
+          }));
+
+          totalDurationStr = calculateTotalDuration(lecturesData);
+        }
+      } catch (e) {
+        console.error("Failed to parse lectures:", e);
+      }
+    }
+
     // Create DB entry
     const course = await Course.create({
       title,
@@ -102,6 +164,9 @@ exports.createCourse = async (req, res) => {
         public_id: uploadedPoster.public_id,
         url: uploadedPoster.secure_url || uploadedPoster.url,
       },
+      lectures: lecturesData,
+      numOfVideos: lecturesData.length,
+      duration: totalDurationStr,
     });
 
     res.status(201).json({
@@ -178,6 +243,32 @@ exports.updateCourse = async (req, res) => {
     }
 
     if (prerequisites !== undefined) course.prerequisites = prerequisites;
+
+    // Process Lectures (if provided)
+    if (req.body.lectures) {
+      try {
+        const parsed = typeof req.body.lectures === "string"
+          ? JSON.parse(req.body.lectures)
+          : req.body.lectures;
+
+        if (Array.isArray(parsed)) {
+          course.lectures = parsed.map(l => ({
+            title: l.title,
+            description: l.description,
+            video: {
+              url: l.videoUrl || (l.video && l.video.url),
+              public_id: (l.video && l.video.public_id) || "youtube"
+            },
+            duration: Number(l.duration) || 0,
+            _id: l._id // Keep existing ID if present
+          }));
+          course.numOfVideos = course.lectures.length;
+          course.duration = calculateTotalDuration(course.lectures);
+        }
+      } catch (e) {
+        console.error("Failed to parse lectures:", e);
+      }
+    }
 
     await course.save();
 

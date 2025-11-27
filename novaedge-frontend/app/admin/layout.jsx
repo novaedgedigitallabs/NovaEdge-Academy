@@ -45,6 +45,24 @@ export default function AdminLayout({ children }) {
           >
             Enrollments
           </Link>
+          <Link
+            href="/admin/careers"
+            className="px-3 py-2 rounded hover:bg-muted"
+          >
+            Careers
+          </Link>
+          <Link
+            href="/admin/blogs"
+            className="px-3 py-2 rounded hover:bg-muted"
+          >
+            Blogs
+          </Link>
+          <Link
+            href="/admin/mentors"
+            className="px-3 py-2 rounded hover:bg-muted"
+          >
+            Mentors
+          </Link>
         </nav>
 
         <div className="mt-6 pt-4 border-t">

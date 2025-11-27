@@ -47,6 +47,10 @@ const certificate = require("./routes/certificate");
 const assessment = require("./routes/assessment");
 const admin = require("./routes/admin");
 const upload = require("./routes/upload");
+const contact = require("./routes/contact");
+const career = require("./routes/career");
+const blog = require("./routes/blog");
+const mentor = require("./routes/mentor");
 
 // 5. Mount Routes
 // All URLs will start with /api/v1
@@ -60,6 +64,10 @@ app.use("/api/v1", certificate);
 app.use("/api/v1", assessment);
 app.use("/api/v1", admin);
 app.use("/api/v1", upload);
+app.use("/api/v1", contact);
+app.use("/api/v1/careers", career);
+app.use("/api/v1/blogs", blog);
+app.use("/api/v1/mentors", mentor);
 
 // 6. Health Check (Simple test route)
 app.get("/", (req, res) => {

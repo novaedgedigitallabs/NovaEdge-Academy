@@ -58,14 +58,20 @@ exports.paymentVerification = async (req, res) => {
     const isAuthentic = expectedSignature === razorpay_signature;
 
     if (isAuthentic) {
+      // Fetch course to get the amount
+      const course = await Course.findById(courseId);
+      if (!course) {
+        return res.status(404).json({ success: false, message: "Course not found" });
+      }
+
       // A. Save Payment Record
-      await Payment.create({
+      const payment = await Payment.create({
         razorpay_order_id,
         razorpay_payment_id,
         razorpay_signature,
         user: req.user.id,
         course: courseId,
-        amount: req.body.amount, // Optional: pass amount from front or fetch from DB
+        amount: course.price, // Use price from DB
         status: "completed",
       });
 
@@ -73,7 +79,7 @@ exports.paymentVerification = async (req, res) => {
       await Enrollment.create({
         user: req.user.id,
         course: courseId,
-        paymentId: razorpay_payment_id, // Storing reference
+        paymentId: payment._id, // Storing reference to our DB Payment document
       });
 
       // C. Redirect to Frontend Success Page

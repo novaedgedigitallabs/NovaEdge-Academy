@@ -20,6 +20,20 @@ export default function AdminNewCoursePage() {
   const [imagePreview, setImagePreview] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Lectures State
+  const [lectures, setLectures] = useState([]);
+  const [newLecture, setNewLecture] = useState({ title: "", description: "", videoUrl: "", duration: "" });
+
+  const addLecture = () => {
+    if (!newLecture.title || !newLecture.videoUrl) return alert("Title and Video URL are required");
+    setLectures([...lectures, newLecture]);
+    setNewLecture({ title: "", description: "", videoUrl: "", duration: "" });
+  };
+
+  const removeLecture = (idx) => {
+    setLectures(lectures.filter((_, i) => i !== idx));
+  };
+
   // required fields now
   const [createdBy, setCreatedBy] = useState("");
   const [category, setCategory] = useState("");
@@ -89,6 +103,7 @@ export default function AdminNewCoursePage() {
         techStack, // optional: backend will parse comma separated
         prerequisites,
         image: imageData, // optional: dataURL or null
+        lectures, // Add lectures to payload
       };
 
       const res = await apiPost("/api/v1/course/new", payload);
@@ -212,6 +227,73 @@ export default function AdminNewCoursePage() {
                 />
               </div>
             )}
+          </div>
+
+          {/* LECTURES SECTION */}
+          <div className="border-t pt-4 mt-6">
+            <h2 className="text-xl font-bold mb-4">Course Lectures</h2>
+
+            <div className="space-y-4 mb-6">
+              {lectures.map((lec, idx) => (
+                <div key={idx} className="p-4 border rounded bg-muted/20 relative">
+                  <button
+                    type="button"
+                    onClick={() => removeLecture(idx)}
+                    className="absolute top-2 right-2 text-red-500 hover:text-red-700 text-sm"
+                  >
+                    Remove
+                  </button>
+                  <h3 className="font-semibold">Lecture {idx + 1}: {lec.title}</h3>
+                  <p className="text-sm text-muted-foreground truncate">{lec.description}</p>
+                  <div className="flex gap-4 text-xs mt-1">
+                    <span className="text-blue-500 truncate max-w-[200px]">{lec.videoUrl}</span>
+                    <span className="text-green-600 font-medium">{lec.duration ? `${lec.duration} min` : "0 min"}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="bg-muted/10 p-4 rounded border space-y-3">
+              <h3 className="font-medium">Add New Lecture</h3>
+              <input
+                placeholder="Lecture Title"
+                value={newLecture.title}
+                onChange={(e) => setNewLecture({ ...newLecture, title: e.target.value })}
+                className="w-full border p-2 rounded"
+              />
+              <textarea
+                placeholder="Lecture Description"
+                value={newLecture.description}
+                onChange={(e) => setNewLecture({ ...newLecture, description: e.target.value })}
+                className="w-full border p-2 rounded"
+              />
+              <div className="grid grid-cols-3 gap-2">
+                <div className="col-span-2">
+                  <input
+                    placeholder="Video URL (YouTube)"
+                    value={newLecture.videoUrl}
+                    onChange={(e) => setNewLecture({ ...newLecture, videoUrl: e.target.value })}
+                    className="w-full border p-2 rounded"
+                  />
+                </div>
+                <div>
+                  <input
+                    type="number"
+                    placeholder="Duration (min)"
+                    value={newLecture.duration}
+                    onChange={(e) => setNewLecture({ ...newLecture, duration: e.target.value })}
+                    className="w-full border p-2 rounded"
+                  />
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={addLecture}
+                className="px-3 py-1 bg-secondary text-secondary-foreground rounded text-sm"
+              >
+                Add Lecture
+              </button>
+            </div>
           </div>
 
           <div>

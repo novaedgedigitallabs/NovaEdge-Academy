@@ -11,12 +11,15 @@ import {
 
 export default function CourseCard({ course }) {
   const courseId = course._id || course.id;
+
+  if (!courseId) return null;
+
   return (
     <Link href={`/courses/${courseId}`} className="group h-full">
       <Card className="h-full flex flex-col overflow-hidden border-border/50 bg-card transition-all duration-300 hover:shadow-lg hover:border-primary/50 group-hover:-translate-y-1">
         <div className="relative aspect-video w-full overflow-hidden">
           <Image
-            src={course.image || "/placeholder.svg"}
+            src={course.poster?.url || course.image || "/placeholder.svg"}
             alt={course.title}
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-105"

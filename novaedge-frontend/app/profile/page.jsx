@@ -226,7 +226,7 @@ export default function ProfilePage() {
                           />
                         </svg>
                       </div>
-                      <p>You haven't earned any certificates yet.</p>
+                      <p>You haven&apos;t earned any certificates yet.</p>
                       <Button
                         variant="link"
                         className="mt-2"
