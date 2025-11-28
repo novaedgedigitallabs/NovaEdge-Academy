@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Clock, Star, Users } from "lucide-react";
+import { Clock, Star, Users, Heart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -8,14 +8,55 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { toggleWishlist } from "@/services/wishlist";
+import { toast } from "sonner";
+import { useState } from "react";
+import { useAuth } from "@/context/auth-context";
 
 export default function CourseCard({ course }) {
   const courseId = course._id || course.id;
+  const { user } = useAuth();
+  // Ideally we check if it's in user.wishlist but for now we just toggle locally or fetch initial state
+  // Since we don't pass full user object here or wishlist state, we might need a context or just optimistic UI
+  // For simplicity, we won't show "filled" heart initially unless we have that data. 
+  // But let's assume we want to show it. 
+  // A better approach is to pass `isWishlisted` prop.
+  // For now, I'll just implement the toggle action.
+  const [isWishlisted, setIsWishlisted] = useState(false); // Placeholder state
 
   if (!courseId) return null;
 
+  const handleWishlist = async (e) => {
+    e.preventDefault(); // Prevent link navigation
+    e.stopPropagation();
+
+    if (!user) {
+      toast.error("Please login to save courses");
+      return;
+    }
+
+    try {
+      setIsWishlisted(!isWishlisted); // Optimistic
+      const res = await toggleWishlist(courseId);
+      toast.success(res.message);
+      setIsWishlisted(res.isAdded);
+    } catch (err) {
+      setIsWishlisted(!isWishlisted); // Revert
+      toast.error("Failed to update wishlist");
+    }
+  };
+
   return (
-    <Link href={`/courses/${courseId}`} className="group h-full">
+    <Link href={`/courses/${courseId}`} className="group h-full relative block">
+      {/* Wishlist Button */}
+      <button
+        onClick={handleWishlist}
+        className="absolute top-3 right-3 z-20 p-2 rounded-full bg-background/80 hover:bg-background text-foreground backdrop-blur transition-colors"
+      >
+        <Heart className={`w-4 h-4 ${isWishlisted ? "fill-red-500 text-red-500" : ""}`} />
+      </button>
+
       <Card className="h-full flex flex-col overflow-hidden border-border/50 bg-card transition-all duration-300 hover:shadow-lg hover:border-primary/50 group-hover:-translate-y-1">
         <div className="relative aspect-video w-full overflow-hidden">
           <Image

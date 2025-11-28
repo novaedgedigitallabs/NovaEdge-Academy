@@ -21,6 +21,22 @@ exports.isAuthenticatedUser = async (req, res, next) => {
     // We save this user in 'req.user' so we can use it in other files
     req.user = await User.findById(decoded.id);
 
+    // 5. Check Session Validity
+    if (decoded.sessionId) {
+      const Session = require("../models/Session");
+      const session = await Session.findById(decoded.sessionId);
+      if (!session || session.isRevoked) {
+        return res.status(401).json({
+          success: false,
+          message: "Session expired or revoked. Please login again.",
+        });
+      }
+      // Update last active
+      session.lastActive = Date.now();
+      await session.save();
+      req.session = session;
+    }
+
     // 5. Allow them to pass to the next step
     next();
   } catch (error) {

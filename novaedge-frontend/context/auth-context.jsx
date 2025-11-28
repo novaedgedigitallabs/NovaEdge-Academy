@@ -71,6 +71,12 @@ export function AuthProvider({ children }) {
         return { ok: false, message };
       }
 
+      // 2FA Check
+      if (data.require2fa) {
+        setIsLoading(false);
+        return { ok: true, require2fa: true, tempToken: data.tempToken };
+      }
+
       // success
       const loggedUser = data.user || data;
       setUser(loggedUser);
@@ -91,7 +97,7 @@ export function AuthProvider({ children }) {
   };
 
   // REGISTER (POST /api/v1/register)
-  const register = async (name, email, password) => {
+  const register = async (email, name, password, referralCode) => {
     setIsLoading(true);
 
     try {
@@ -101,7 +107,7 @@ export function AuthProvider({ children }) {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: JSON.stringify({ name, email, password }),
+          body: JSON.stringify({ name, email, password, referralCode }),
         }
       );
 

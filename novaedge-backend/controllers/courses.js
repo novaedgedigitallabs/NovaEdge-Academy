@@ -252,16 +252,20 @@ exports.updateCourse = async (req, res) => {
           : req.body.lectures;
 
         if (Array.isArray(parsed)) {
-          course.lectures = parsed.map(l => ({
-            title: l.title,
-            description: l.description,
-            video: {
-              url: l.videoUrl || (l.video && l.video.url),
-              public_id: (l.video && l.video.public_id) || "youtube"
-            },
-            duration: Number(l.duration) || 0,
-            _id: l._id // Keep existing ID if present
-          }));
+          course.lectures = parsed.map(l => {
+            const existingLec = course.lectures.id(l._id);
+            return {
+              title: l.title,
+              description: l.description,
+              video: {
+                url: l.videoUrl || (l.video && l.video.url),
+                public_id: (l.video && l.video.public_id) || "youtube"
+              },
+              duration: Number(l.duration) || 0,
+              _id: l._id, // Keep existing ID if present
+              currentVersion: existingLec ? existingLec.currentVersion : 1 // Preserve version
+            };
+          });
           course.numOfVideos = course.lectures.length;
           course.duration = calculateTotalDuration(course.lectures);
         }

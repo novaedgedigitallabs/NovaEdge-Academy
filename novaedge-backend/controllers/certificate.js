@@ -9,8 +9,8 @@ const cloudinary = require("cloudinary").v2;
 const fs = require("fs");
 const crypto = require("crypto");
 
-// --- 1. GET MY CERTIFICATE (Student Trigger) ---
-exports.getCertificate = async (req, res) => {
+// --- 1. GENERATE CERTIFICATE (Student Trigger) ---
+exports.generateCertificate = async (req, res) => {
   try {
     const { courseId } = req.params;
     const userId = req.user.id;
@@ -32,7 +32,7 @@ exports.getCertificate = async (req, res) => {
     // B. Check if the user has actually finished the course (Anti-Cheat)
     const progress = await Progress.findOne({ user: userId, course: courseId });
 
-    if (!progress || progress.completionPercentage < 100) {
+    if (!progress || progress.percentComplete < 100) {
       return res.status(400).json({
         success: false,
         message: "You have not completed this course yet.",
@@ -84,6 +84,25 @@ exports.getCertificate = async (req, res) => {
     res.status(201).json({
       success: true,
       certificate,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// --- 2. GET MY CERTIFICATES ---
+exports.getMyCertificates = async (req, res) => {
+  try {
+    const certificates = await Certificate.findOne({ user: req.user.id })
+      .populate("course", "title");
+
+    // Wait, findOne returns only one. We need find.
+    const allCertificates = await Certificate.find({ user: req.user.id })
+      .populate("course", "title");
+
+    res.status(200).json({
+      success: true,
+      certificates: allCertificates,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

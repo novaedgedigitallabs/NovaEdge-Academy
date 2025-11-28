@@ -1,11 +1,24 @@
 const User = require("../models/User");
 const sendEmail = require("../utils/sendEmail");
 const crypto = require("crypto");
+const sendToken = require("../utils/jwtToken");
+const jwt = require("jsonwebtoken");
 
 // --- 1. REGISTER USER ---
 exports.registerUser = async (req, res, next) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, referralCode } = req.body;
+
+    let referredBy = null;
+    if (referralCode) {
+      const referrer = await User.findOne({ referralCode });
+      if (referrer) {
+        referredBy = referrer._id;
+      }
+    }
+
+    // Generate unique referral code for new user
+    const newReferralCode = crypto.randomBytes(4).toString("hex").toUpperCase();
 
     // Create the user in the database
     const user = await User.create({
@@ -16,10 +29,22 @@ exports.registerUser = async (req, res, next) => {
         public_id: "avatars/default_avatar_id", // Default placeholder
         url: "https://res.cloudinary.com/demo/image/upload/v123456/avatar.jpg",
       },
+      referralCode: newReferralCode,
+      referredBy,
     });
 
+    // If referred, create Referral record
+    if (referredBy) {
+      const Referral = require("../models/Referral");
+      await Referral.create({
+        referrer: referredBy,
+        referee: user._id,
+        status: "pending",
+      });
+    }
+
     // Send the token (Log them in immediately)
-    sendToken(user, 201, res);
+    await sendToken(user, 201, res, req);
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -55,8 +80,19 @@ exports.loginUser = async (req, res, next) => {
         .json({ success: false, message: "Invalid email or password" });
     }
 
+    // 2FA Check
+    if (user.twoFactor && user.twoFactor.enabled) {
+      const tempToken = jwt.sign({ id: user._id, temp: true }, process.env.JWT_SECRET, { expiresIn: "10m" });
+
+      return res.status(200).json({
+        success: true,
+        require2fa: true,
+        tempToken
+      });
+    }
+
     // Send Token
-    sendToken(user, 200, res);
+    await sendToken(user, 200, res, req);
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -89,24 +125,4 @@ exports.getUserProfile = async (req, res, next) => {
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
-};
-
-// --- HELPER: SEND TOKEN ---
-// This creates the JWT and stores it in a Cookie
-const sendToken = (user, statusCode, res) => {
-  const token = user.getSignedJwtToken();
-
-  // Options for cookie
-  const options = {
-    expires: new Date(
-      Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
-    ),
-    httpOnly: true, // Secure: Prevents client-side JS from reading the cookie
-  };
-
-  res.status(statusCode).cookie("token", token, options).json({
-    success: true,
-    user,
-    token,
-  });
 };

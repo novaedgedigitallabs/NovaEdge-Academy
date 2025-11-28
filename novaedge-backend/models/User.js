@@ -45,11 +45,47 @@ const userSchema = new mongoose.Schema({
       ref: "Course",
     },
   ],
+  wishlist: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Course",
+    },
+  ],
+  notificationPreferences: {
+    email: { type: Boolean, default: true },
+    sms: { type: Boolean, default: false },
+    push: { type: Boolean, default: true },
+  },
+  referralCode: {
+    type: String,
+    unique: true,
+    sparse: true, // Allows null/undefined to be duplicated (though we'll generate unique ones)
+  },
+  referredBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
+  walletBalance: {
+    type: Number,
+    default: 0,
+  },
   resetPasswordToken: String,
   resetPasswordExpire: Date,
   createdAt: {
     type: Date,
     default: Date.now,
+  },
+  twoFactor: {
+    enabled: { type: Boolean, default: false },
+    secret: { type: String, select: false }, // Encrypted
+    backupCodes: [
+      {
+        code: { type: String, required: true }, // Hashed
+        used: { type: Boolean, default: false },
+      },
+    ],
+    tempSecret: { type: String, select: false },
+    tempSecretExpires: Date,
   },
 });
 

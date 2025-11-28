@@ -32,4 +32,11 @@ const mentorSchema = new mongoose.Schema({
     }
 });
 
+mentorSchema.index({
+    name: "text",
+    bio: "text",
+    skills: "text",
+    expertise: "text"
+});
+
 module.exports = mongoose.model('Mentor', mentorSchema);

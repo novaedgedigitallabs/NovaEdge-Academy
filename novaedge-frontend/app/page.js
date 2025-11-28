@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import CourseCard from "@/components/course/CourseCard";
+import RecommendedCourses from "@/components/course/RecommendedCourses";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, CheckCircle2, PlayCircle } from "lucide-react";
 import Image from "next/image";
@@ -147,6 +148,9 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* Recommended Courses (Personalized) */}
+        <RecommendedCourses />
 
         {/* Featured Courses */}
         <section className="py-20 bg-muted/30 border-y border-border/40">

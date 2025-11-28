@@ -7,15 +7,19 @@ import { useState } from "react";
 import { useAuth } from "@/context/auth-context";
 import { Loader2 } from "lucide-react";
 
+import { useSearchParams } from "next/navigation";
+
 export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { register, isLoading } = useAuth();
+  const searchParams = useSearchParams();
+  const referralCode = searchParams.get("ref");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await register(email, name);
+    await register(email, name, password, referralCode);
   };
 
   return (

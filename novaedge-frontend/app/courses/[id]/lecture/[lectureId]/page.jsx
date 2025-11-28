@@ -8,6 +8,10 @@ import Header from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, List } from "lucide-react";
 import Link from "next/link";
+import LecturePlayer from "@/components/course/LecturePlayer";
+import LectureDiscussionPanel from "@/components/discussion/LectureDiscussionPanel";
+import LectureNotes from "@/components/course/LectureNotes";
+import ChatWidget from "@/components/course/ChatWidget";
 
 // Hook to disable right-click and dev tools
 function useProtection() {
@@ -121,29 +125,15 @@ export default function LecturePage() {
                 <div className="grid lg:grid-cols-3 gap-8">
                     {/* Main Content: Video Player */}
                     <div className="lg:col-span-2 space-y-6">
-                        <div className="aspect-video bg-black rounded-xl overflow-hidden shadow-2xl relative group">
-                            {youtubeId ? (
-                                <iframe
-                                    className="w-full h-full"
-                                    src={`https://www.youtube.com/embed/${youtubeId}?rel=0&modestbranding=1&showinfo=0&controls=1&autoplay=1`}
-                                    title={currentLecture.title}
-                                    frameBorder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowFullScreen
-                                ></iframe>
-                            ) : (
-                                <div className="flex items-center justify-center h-full text-white">
-                                    {currentLecture.video?.url ? (
-                                        <video src={currentLecture.video.url} controls className="w-full h-full" />
-                                    ) : (
-                                        <p>Video source not available</p>
-                                    )}
-                                </div>
-                            )}
-
-                            {/* Overlay to prevent direct interaction if needed, but might block controls */}
-                            {/* <div className="absolute inset-0 bg-transparent" onContextMenu={(e) => e.preventDefault()} /> */}
-                        </div>
+                        <LecturePlayer
+                            courseId={courseId}
+                            lectureId={lectureId}
+                            videoUrl={currentLecture.video?.url}
+                            initialPosition={0} // TODO: Fetch from resume API if needed
+                            onComplete={() => {
+                                // Optional: Auto-advance or show notification
+                            }}
+                        />
 
                         <div className="flex items-center justify-between">
                             <Button
@@ -206,6 +196,13 @@ export default function LecturePage() {
                     </div>
                 </div>
             </main>
+
+
+            <div className="mt-8 container mx-auto px-4 py-8 max-w-6xl">
+                <LectureNotes courseId={courseId} lectureId={lectureId} />
+                <LectureDiscussionPanel courseId={courseId} lectureId={lectureId} />
+            </div>
+            <ChatWidget courseId={courseId} lectureId={lectureId} />
         </div>
     );
 }

@@ -12,9 +12,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { User, LogOut, LayoutDashboard } from "lucide-react"
+import { User, LogOut, LayoutDashboard, Settings } from "lucide-react"
 
 import { ModeToggle } from "@/components/ui/mode-toggle"
+import NotificationCenter from "@/components/notification/NotificationCenter"
+import GlobalSearchBar from "@/components/layout/GlobalSearchBar"
 
 export default function Header() {
   const { user, logout } = useAuth()
@@ -41,7 +43,13 @@ export default function Header() {
             </Link>
           </nav>
         </div>
+
+        <div className="flex-1 max-w-md mx-4 hidden md:block">
+          <GlobalSearchBar />
+        </div>
+
         <div className="flex items-center gap-4">
+          <NotificationCenter />
           <ModeToggle />
           {user ? (
             <DropdownMenu>
@@ -75,6 +83,12 @@ export default function Header() {
                     </Link>
                   </DropdownMenuItem>
                 )}
+                <DropdownMenuItem asChild>
+                  <Link href="/settings">
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Settings</span>
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={logout}>
                   <LogOut className="mr-2 h-4 w-4" />

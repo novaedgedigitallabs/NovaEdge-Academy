@@ -17,6 +17,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import CourseProgressBar from "@/components/course/CourseProgressBar";
+import ReviewList from "@/components/review/ReviewList";
+import LiveSchedule from "@/components/live/LiveSchedule";
 
 /**
  * Normalize various shapes of image data to a usable string.
@@ -247,6 +250,16 @@ export default function CourseDetailPageClient() {
                 </div>
               </div>
             </div>
+
+            {/* REVIEWS SECTION */}
+            <div className="mt-12">
+              <ReviewList courseId={courseId} />
+            </div>
+
+            {/* LIVE SCHEDULE SECTION */}
+            <div className="mt-12">
+              <LiveSchedule courseId={courseId} isEnrolled={isEnrolled} />
+            </div>
           </div>
 
           {/* RIGHT SIDEBAR */}
@@ -273,6 +286,10 @@ export default function CourseDetailPageClient() {
                 <div className="bg-green-100 text-green-700 p-3 rounded text-center font-semibold">
                   You are enrolled!
                 </div>
+
+                {/* Progress Bar */}
+                <CourseProgressBar percentComplete={0} />
+
                 {displayLectures.length > 0 && (
                   <button
                     onClick={() => router.push(`/courses/${courseId}/lecture/${displayLectures[0]._id || displayLectures[0].id}`)}

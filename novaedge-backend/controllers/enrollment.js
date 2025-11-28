@@ -34,8 +34,16 @@ exports.checkEnrollment = async (req, res) => {
       course: courseId,
     });
 
-    // If enrollment exists, accessGranted is true
-    const accessGranted = enrollment ? true : false;
+    // Check for Active Subscription
+    const Subscription = require("../models/Subscription");
+    const subscription = await Subscription.findOne({
+      user: req.user.id,
+      status: "active",
+      current_end: { $gt: new Date() } // Ensure not expired
+    });
+
+    // If enrollment exists OR active subscription exists, accessGranted is true
+    const accessGranted = !!enrollment || !!subscription;
 
     res.status(200).json({
       success: true,

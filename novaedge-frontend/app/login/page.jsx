@@ -11,11 +11,15 @@ import { useAuth } from "@/context/auth-context";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
 
+import TwoFactorVerify from "@/components/auth/TwoFactorVerify";
+
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { login, isLoading } = useAuth();
   const [error, setError] = useState(null);
+  const [show2FA, setShow2FA] = useState(false);
+  const [tempToken, setTempToken] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,9 +28,25 @@ export default function LoginPage() {
     const result = await login(email.trim(), password);
     if (!result.ok) {
       setError(result.message || "Login failed");
+    } else if (result.require2fa) {
+      setTempToken(result.tempToken);
+      setShow2FA(true);
     }
-    // on success, auth-context redirects user
+    // on success (no 2fa), auth-context redirects user
   };
+
+  const handle2FASuccess = () => {
+    // Force reload to pick up the new cookie and update auth context
+    window.location.href = "/courses";
+  };
+
+  if (show2FA) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <TwoFactorVerify tempToken={tempToken} onSuccess={handle2FASuccess} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2">

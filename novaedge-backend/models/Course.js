@@ -107,6 +107,10 @@ const courseSchema = new mongoose.Schema({
         public_id: String,
         url: String,
       },
+      currentVersion: {
+        type: Number,
+        default: 1,
+      },
     },
   ],
 
@@ -116,6 +120,14 @@ const courseSchema = new mongoose.Schema({
     default: 0,
   },
   numOfVideos: {
+    type: Number,
+    default: 0,
+  },
+  rating: {
+    type: Number,
+    default: 0,
+  },
+  numOfReviews: {
     type: Number,
     default: 0,
   },
@@ -130,6 +142,15 @@ const courseSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+});
+
+courseSchema.index({
+  title: "text",
+  description: "text",
+  category: "text",
+  tags: "text",
+  "lectures.title": "text",
+  "lectures.description": "text"
 });
 
 module.exports = mongoose.model("Course", courseSchema);

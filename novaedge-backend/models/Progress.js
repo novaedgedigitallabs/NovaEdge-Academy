@@ -15,16 +15,19 @@ const progressSchema = new mongoose.Schema({
     required: true,
   },
 
-  // 3. List of Lesson IDs that are finished
-  // We store IDs like ["lesson_1", "lesson_2"]
-  completedLessons: [
+  // 3. Detailed Progress for each lecture
+  lectureProgress: [
     {
-      type: String,
+      lectureId: { type: String, required: true },
+      completed: { type: Boolean, default: false },
+      lastPositionSec: { type: Number, default: 0 },
+      watchedDurationSec: { type: Number, default: 0 },
+      updatedAt: { type: Date, default: Date.now },
     },
   ],
 
   // 4. The Progress Bar number (0 to 100)
-  completionPercentage: {
+  percentComplete: {
     type: Number,
     default: 0,
     min: 0,

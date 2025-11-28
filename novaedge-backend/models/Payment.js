@@ -44,6 +44,15 @@ const paymentSchema = new mongoose.Schema({
     default: "pending",
   },
 
+  coupon: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Coupon",
+  },
+  discountAmount: {
+    type: Number,
+    default: 0,
+  },
+
   createdAt: {
     type: Date,
     default: Date.now,

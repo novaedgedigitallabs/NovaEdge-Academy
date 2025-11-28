@@ -68,6 +68,27 @@ app.use("/api/v1", contact);
 app.use("/api/v1/careers", career);
 app.use("/api/v1/blogs", blog);
 app.use("/api/v1/mentors", mentor);
+app.use("/api/v1", require("./routes/quiz"));
+app.use("/api/v1", require("./routes/assignment"));
+app.use("/api/v1", require("./routes/certificate"));
+app.use("/api/v1", require("./routes/wishlist"));
+app.use("/api/v1", require("./routes/review"));
+app.use("/api/v1", require("./routes/discussion"));
+app.use("/api/v1", require("./routes/liveClass"));
+app.use("/api/v1", require("./routes/notification"));
+app.use("/api/v1", require("./routes/coupon"));
+app.use("/api/v1", require("./routes/subscription"));
+app.use("/api/v1", require("./routes/referral"));
+app.use("/api/v1", require("./routes/analytics"));
+app.use("/api/v1", require("./routes/analytics"));
+app.use("/api/v1", require("./routes/lectureVersion"));
+app.use("/api/v1", require("./routes/recommendation"));
+app.use("/api/v1", require("./routes/notes"));
+app.use("/api/v1", require("./routes/chat"));
+app.use("/api/v1", require("./routes/transcript"));
+app.use("/api/v1", require("./routes/search"));
+app.use("/api/v1", require("./routes/twoFactor"));
+app.use("/api/v1", require("./routes/session"));
 
 // 6. Health Check (Simple test route)
 app.get("/", (req, res) => {
