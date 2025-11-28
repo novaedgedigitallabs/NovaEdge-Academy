@@ -1,36 +1,93 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# NovaEdge Frontend
 
-## Getting Started
+The frontend application for the NovaEdge Academy LMS. Built with Next.js 14, Tailwind CSS, and Shadcn UI, it delivers a modern, responsive, and immersive learning experience.
 
-First, run the development server:
+## 🚀 Tech Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Framework:** Next.js 14 (App Router)
+- **Language:** JavaScript / React
+- **Styling:** Tailwind CSS
+- **UI Components:** Shadcn UI, Radix UI
+- **Icons:** Lucide React
+- **State Management:** React Context / Hooks
+- **Form Handling:** React Hook Form + Zod
+- **HTTP Client:** Axios (via custom API wrapper)
+- **Theming:** next-themes (Dark/Light mode)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ✨ Features
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+- **Modern UI/UX:**
+  - Dark/Light Mode Toggle
+  - Responsive Design for all devices
+  - Glassmorphism and premium aesthetics
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Student Portal:**
+  - Course Catalog with Search & Filtering
+  - Detailed Course Landing Pages
+  - "My Learning" Dashboard
+  - Interactive Video Player
+  - Profile Management
 
-## Learn More
+- **Mentor Dashboard:**
+  - Course Creation & Management
+  - Student Progress Views
+  - Assignment Grading
+  - Q&A Management
 
-To learn more about Next.js, take a look at the following resources:
+- **Admin Panel:**
+  - User & Mentor Management
+  - Course Approval & Editing
+  - System-wide Settings
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Authentication:**
+  - Secure Login & Registration
+  - Protected Routes
+  - Session Management
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🛠️ Installation & Setup
 
-## Deploy on Vercel
+1.  **Clone the repository:**
+    ```bash
+    git clone <repository-url>
+    cd novaedge-frontend
+    ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+3.  **Environment Variables:**
+    Create a `.env.local` file in the root directory and add the following:
+
+    ```env
+    NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1
+    ```
+
+4.  **Run the development server:**
+    ```bash
+    npm run dev
+    ```
+
+    Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## 📂 Project Structure
+
+- `app/`: Next.js App Router pages and layouts.
+  - `(auth)/`: Authentication routes (login, register).
+  - `admin/`: Admin dashboard routes.
+  - `mentor/`: Mentor dashboard routes.
+  - `courses/`: Course browsing and viewing routes.
+- `components/`: Reusable UI components (buttons, inputs, cards).
+- `lib/`: Utility functions and API configuration (`api.js`).
+- `services/`: API service functions organized by feature (auth, courses, etc.).
+- `hooks/`: Custom React hooks.
+- `context/`: Global state providers.
+
+## 🤝 Contributing
+
+1.  Fork the repository.
+2.  Create a new branch (`git checkout -b feature/amazing-feature`).
+3.  Commit your changes (`git commit -m 'Add some amazing feature'`).
+4.  Push to the branch (`git push origin feature/amazing-feature`).
+5.  Open a Pull Request.
