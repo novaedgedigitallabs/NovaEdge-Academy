@@ -1,0 +1,3 @@
+Roles: ["agent","admin"] (object)
+User Role: admin (string)
+Match: true

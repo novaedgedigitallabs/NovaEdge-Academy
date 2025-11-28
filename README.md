@@ -33,6 +33,9 @@ NovaEdge Academy is a comprehensive Learning Management System (LMS) designed to
 - **Course Catalog:** Browse and search for courses with advanced filtering.
 - **Student Dashboard:** Track progress, view enrolled courses, and manage profile.
 - **Learning Experience:** Watch video lectures, read materials, and track completion.
+- **Gamification:** Earn badges for course completion and streaks. View achievements on profile.
+- **Testimonials:** Submit video and text testimonials for courses.
+- **Support:** Submit support tickets and track their status.
 - **Assessments:** Take quizzes and assessments to test knowledge.
 - **Certificates:** Auto-generate PDF certificates upon course completion.
 - **Blog & Careers:** Read educational articles and explore career opportunities.
@@ -44,6 +47,10 @@ NovaEdge Academy is a comprehensive Learning Management System (LMS) designed to
 - **User Management:** Manage student and instructor accounts.
 - **Enrollment Management:** View and manage student enrollments.
 - **Content Management:** Manage blogs, career listings, and mentors.
+- **Gamification Management:** Create and manage badges and rules.
+- **Testimonial Moderation:** Review, approve, reject, and feature user testimonials.
+- **Support Desk:** Manage support tickets, queues, and SLAs.
+- **Audit Logs:** View immutable logs of all admin actions for security and compliance.
 
 ---
 
@@ -178,6 +185,10 @@ Base URL: `/api/v1`
 - **Blogs:** `/blogs` (GET, POST, PUT, DELETE)
 - **Careers:** `/careers` (GET, POST, PUT, DELETE)
 - **Mentors:** `/mentors` (GET, POST, PUT, DELETE)
+- **Badges:** `/badges` (GET, POST, PUT)
+- **Testimonials:** `/testimonials` (GET, POST, PUT, DELETE)
+- **Support:** `/support` (Tickets, Queues, SLAs)
+- **Audit:** `/admin/audit` (GET, POST)
 - **Contact:** `/contact` (POST)
 - **Upload:** `/upload` (POST - for file uploads)
 
@@ -205,6 +216,10 @@ Base URL: `/api/v1`
     - Manage Courses
     - Manage Users
     - Manage Content (Blogs, Careers, Mentors)
+    - Gamification (Badges)
+    - Testimonials
+    - Support Desk
+    - Audit Logs
     - View Analytics
 
 ---

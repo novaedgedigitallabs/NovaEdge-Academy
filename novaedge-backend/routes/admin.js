@@ -20,18 +20,18 @@ router.use(isAuthenticatedUser, authorizeRoles("admin"));
 
 // --- DASHBOARD ---
 // URL: /api/v1/admin/stats
-router.route("/admin/stats").get(getDashboardStats);
+router.route("/stats").get(getDashboardStats);
 
 // --- USER MANAGEMENT ---
 
 // Get list of all users
 // URL: /api/v1/admin/users
-router.route("/admin/users").get(getAllUsers);
+router.route("/users").get(getAllUsers);
 
 // Manage specific user (Promote/Demote/Ban)
 // URL: /api/v1/admin/user/:id
 router
-  .route("/admin/user/:id")
+  .route("/user/:id")
   .put(updateUserRole) // PUT = Update data (Role)
   .delete(deleteUser); // DELETE = Remove user
 

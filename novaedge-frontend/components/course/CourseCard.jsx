@@ -60,7 +60,13 @@ export default function CourseCard({ course }) {
       <Card className="h-full flex flex-col overflow-hidden border-border/50 bg-card transition-all duration-300 hover:shadow-lg hover:border-primary/50 group-hover:-translate-y-1">
         <div className="relative aspect-video w-full overflow-hidden">
           <Image
-            src={course.poster?.url || course.image || "/placeholder.svg"}
+            src={
+              (course.poster?.url && (course.poster.url.startsWith('/') || course.poster.url.startsWith('http')))
+                ? course.poster.url
+                : (course.image && (course.image.startsWith('/') || course.image.startsWith('http')))
+                  ? course.image
+                  : "/placeholder.svg"
+            }
             alt={course.title}
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-105"

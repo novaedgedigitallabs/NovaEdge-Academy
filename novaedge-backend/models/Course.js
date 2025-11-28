@@ -20,6 +20,12 @@ const courseSchema = new mongoose.Schema({
     type: String,
     required: [true, "Enter creator name"],
   },
+  mentors: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
 
   // 3. The Course Category (Strict list from your requirements)
   category: {

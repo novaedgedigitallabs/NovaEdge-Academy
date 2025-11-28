@@ -20,6 +20,18 @@ exports.submitContact = async (req, res) => {
             message,
         });
 
+        // Create a support ticket
+        const Ticket = require("../models/Ticket");
+        await Ticket.create({
+            subject,
+            description: message,
+            source: "web",
+            requesterName: name,
+            requesterEmail: email,
+            priority: "medium",
+            status: "open"
+        });
+
         res.status(201).json({
             success: true,
             message: "Message sent successfully",

@@ -79,6 +79,9 @@ exports.updateLectureProgress = async (req, res) => {
       // E. Check for Completion
       if (progress.percentComplete === 100) {
         progress.isCompleted = true;
+        // Trigger Badge Evaluation
+        const BadgeService = require("../utils/badgeService");
+        await BadgeService.evaluateBadge(userId, "COURSE_COMPLETED", { courseId });
       }
 
       // F. Unlock Quizzes (Threshold check)

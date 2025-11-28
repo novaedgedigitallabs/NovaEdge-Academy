@@ -2,8 +2,14 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
 exports.isAuthenticatedUser = async (req, res, next) => {
-  // 1. Try to grab the token from the cookies
-  const { token } = req.cookies;
+  console.log("Auth Middleware hit for:", req.originalUrl);
+  // 1. Try to grab the token from the cookies or headers
+  let token;
+  if (req.cookies.token) {
+    token = req.cookies.token;
+  } else if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
+    token = req.headers.authorization.split(" ")[1];
+  }
 
   // 2. If no token is found, kick them out
   if (!token) {
@@ -49,10 +55,15 @@ exports.isAuthenticatedUser = async (req, res, next) => {
 
 exports.authorizeRoles = (...roles) => {
   return (req, res, next) => {
+    const fs = require('fs');
+    try {
+      fs.writeFileSync('auth_debug.txt', `Roles: ${JSON.stringify(roles)} (${typeof roles})\nUser Role: ${req.user.role} (${typeof req.user.role})\nMatch: ${roles.includes(req.user.role)}\n`);
+    } catch (e) { }
+
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({
         success: false,
-        message: `Role (${req.user.role}) is not allowed to access this resource`,
+        message: `Role (${req.user.role}) is SUPER FORBIDDEN`,
       });
     }
     next();

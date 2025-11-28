@@ -31,7 +31,12 @@ app.use(
 // CORS Configuration (Allow Frontend to talk to Backend)
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      // In development, allow any origin to facilitate testing from network IPs
+      return callback(null, true);
+    },
     credentials: true, // Allow sending cookies
     methods: ["GET", "POST", "PUT", "DELETE"],
   })
@@ -62,12 +67,15 @@ app.use("/api/v1", enrollment);
 app.use("/api/v1", progress);
 app.use("/api/v1", certificate);
 app.use("/api/v1", assessment);
-app.use("/api/v1", admin);
+app.use("/api/v1/admin", admin);
+app.use("/api/v1/admin/audit", require("./routes/audit"));
+app.use("/api/v1/testimonials", require("./routes/testimonials"));
+app.use("/api/v1/badges", require("./routes/badges"));
 app.use("/api/v1", upload);
 app.use("/api/v1", contact);
 app.use("/api/v1/careers", career);
 app.use("/api/v1/blogs", blog);
-app.use("/api/v1/mentors", mentor);
+app.use("/api/v1/mentor", mentor);
 app.use("/api/v1", require("./routes/quiz"));
 app.use("/api/v1", require("./routes/assignment"));
 app.use("/api/v1", require("./routes/certificate"));
@@ -87,8 +95,11 @@ app.use("/api/v1", require("./routes/notes"));
 app.use("/api/v1", require("./routes/chat"));
 app.use("/api/v1", require("./routes/transcript"));
 app.use("/api/v1", require("./routes/search"));
-app.use("/api/v1", require("./routes/twoFactor"));
-app.use("/api/v1", require("./routes/session"));
+app.use("/api/v1/support", require("./routes/support"));
+
+// Error Handler Middleware
+app.use(require("./middleware/error"));
+
 
 // 6. Health Check (Simple test route)
 app.get("/", (req, res) => {

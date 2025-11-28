@@ -66,6 +66,30 @@ export default function AdminLayout({ children }) {
           >
             Mentors
           </Link>
+          <Link
+            href="/admin/support"
+            className="px-3 py-2 rounded hover:bg-muted"
+          >
+            Support
+          </Link>
+          <Link
+            href="/admin/audit"
+            className="px-3 py-2 rounded hover:bg-muted"
+          >
+            Audit Logs
+          </Link>
+          <Link
+            href="/admin/testimonials"
+            className="px-3 py-2 rounded hover:bg-muted"
+          >
+            Testimonials
+          </Link>
+          <Link
+            href="/admin/badges"
+            className="px-3 py-2 rounded hover:bg-muted"
+          >
+            Badges
+          </Link>
         </nav>
 
         <div className="mt-6 pt-4 border-t">
