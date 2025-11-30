@@ -26,6 +26,7 @@ The frontend application for the NovaEdge Academy LMS. Built with Next.js 14, Ta
   - Detailed Course Landing Pages
   - "My Learning" Dashboard
   - Interactive Video Player
+  - **AI Assistant:** Smart Summaries, Practice Quizzes, and Chat
   - Profile Management
 
 - **Mentor Dashboard:**

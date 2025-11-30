@@ -40,6 +40,7 @@ NovaEdge Academy is a comprehensive Learning Management System (LMS) designed to
 - **Certificates:** Auto-generate PDF certificates upon course completion.
 - **Blog & Careers:** Read educational articles and explore career opportunities.
 - **Mentorship:** Connect with mentors (view mentor profiles).
+- **AI Assistant:** Smart lecture summaries, interactive quizzes, and a 24/7 AI Chat Assistant (powered by Gemini) to answer questions in simple language.
 
 ### Admin Features
 - **Dashboard:** Overview of platform statistics (users, sales, courses).
@@ -120,6 +121,9 @@ novaedge/
    SMTP_PASSWORD=your_email_password
    SMTP_FROM_EMAIL=noreply@novaedge.com
    SMTP_FROM_NAME=NovaEdge
+
+   # AI (Google Gemini)
+   GEMINI_API_KEY=your_gemini_api_key
    ```
 
 4. Start the server:

@@ -11,6 +11,7 @@ The backend API for the NovaEdge Academy Learning Management System (LMS). Built
 - **File Storage:** Cloudinary
 - **Payments:** Razorpay
 - **Email:** Nodemailer
+- **AI:** Google Gemini (Generative AI)
 - **Validation:** Joi / Custom Middleware
 
 ## ✨ Features
@@ -49,12 +50,18 @@ The backend API for the NovaEdge Academy Learning Management System (LMS). Built
   - Discussion Forums
   - Real-time Chat
   - Badges & Gamification
+  - Badges & Gamification
   - Wishlist
+
+- **AI Integration:**
+  - Automated Lecture Summaries
+  - AI-Generated Practice Quizzes
+  - Context-Aware Chat Assistant (RAG)
 
 - **Support:**
   - Helpdesk / Support Ticket System
 
-## �️ Installation & Setup
+## ️ Installation & Setup
 
 1.  **Clone the repository:**
     ```bash
@@ -94,6 +101,9 @@ The backend API for the NovaEdge Academy Learning Management System (LMS). Built
     SMTP_PORT=<smtp_port>
     SMTP_EMAIL=<your_email>
     SMTP_PASSWORD=<your_password>
+
+    # AI (Google Gemini)
+    GEMINI_API_KEY=<your_gemini_api_key>
     ```
 
 4.  **Run the server:**
