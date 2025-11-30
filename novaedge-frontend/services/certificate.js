@@ -13,3 +13,11 @@ export async function verifyCertificate(certId) {
     // It shouldn't hurt.
     return apiGet(`/api/v1/certificate/${certId}`);
 }
+
+export async function adminGenerateCertificate(userId, courseId) {
+    return apiPost(`/api/v1/admin/certificate/generate`, { userId, courseId });
+}
+
+export async function getUserCertificates(userId) {
+    return apiGet(`/api/v1/certificates/user/${userId}`);
+}

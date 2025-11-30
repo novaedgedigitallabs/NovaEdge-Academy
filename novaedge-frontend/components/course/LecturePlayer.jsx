@@ -13,6 +13,10 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+import AIResourcesPanel from "@/components/course/AIResourcesPanel";
 
 export default function LecturePlayer({
     courseId,
@@ -20,6 +24,10 @@ export default function LecturePlayer({
     videoUrl,
     initialPosition = 0,
     onComplete,
+    aiSummary,
+    quiz,
+    onGenerateAI,
+    isGeneratingAI,
 }) {
     const videoRef = useRef(null);
     const [duration, setDuration] = useState(0);
@@ -99,8 +107,15 @@ export default function LecturePlayer({
                 watchedDurationSec: curr,
                 completed: completed || isCompleted,
             });
+
+            if (completed) {
+                setIsCompleted(true);
+                toast.success("Lecture completed!");
+                if (onComplete) onComplete();
+            }
         } catch (err) {
             console.error("Failed to save progress", err);
+            toast.error("Failed to save progress");
         }
     };
 
@@ -110,6 +125,10 @@ export default function LecturePlayer({
             recordEvent({ type: "lecture_seek", courseId, lectureId, meta: { time } });
         }
     };
+
+
+
+
 
     if (youtubeId) {
         return (
@@ -124,14 +143,43 @@ export default function LecturePlayer({
                         allowFullScreen
                     ></iframe>
                 </div>
-                {/* YouTube doesn't support our custom transcript sync easily without API */}
-                <div className="flex justify-end">
+
+                <div className="flex justify-between items-center">
+                    <div className="text-sm text-muted-foreground">
+                        Switch tabs below for Transcript & AI
+                    </div>
                     <button
                         onClick={() => saveProgress(duration, true)}
                         className="text-sm text-primary underline"
                     >
                         Mark as Completed
                     </button>
+                </div>
+
+                <div className="h-[500px] border rounded-xl bg-card overflow-hidden">
+                    <Tabs defaultValue="transcript" className="h-full flex flex-col">
+                        <div className="p-3 border-b bg-muted/30">
+                            <TabsList className="grid w-full grid-cols-2">
+                                <TabsTrigger value="transcript">Transcript</TabsTrigger>
+                                <TabsTrigger value="ai">AI Assistant</TabsTrigger>
+                            </TabsList>
+                        </div>
+                        <TabsContent value="transcript" className="flex-1 min-h-0 p-0 m-0 h-full">
+                            <TranscriptPanel
+                                segments={transcript}
+                                currentTime={currentTime}
+                                onSeek={handleSeek}
+                            />
+                        </TabsContent>
+                        <TabsContent value="ai" className="flex-1 min-h-0 p-0 m-0 h-full overflow-y-auto">
+                            <AIResourcesPanel
+                                summary={aiSummary}
+                                quiz={quiz}
+                                onGenerate={onGenerateAI}
+                                isGenerating={isGeneratingAI}
+                            />
+                        </TabsContent>
+                    </Tabs>
                 </div>
             </div>
         );
@@ -152,7 +200,6 @@ export default function LecturePlayer({
                                 onPlay={handlePlay}
                                 controls
                             />
-                            {/* Custom Controls Overlay (Optional, sticking to native controls + external speed for reliability) */}
                         </>
                     ) : (
                         <div className="flex items-center justify-center h-full text-white">
@@ -185,12 +232,30 @@ export default function LecturePlayer({
                 </div>
             </div>
 
-            <div className="lg:col-span-1 h-[400px] lg:h-auto">
-                <TranscriptPanel
-                    segments={transcript}
-                    currentTime={currentTime}
-                    onSeek={handleSeek}
-                />
+            <div className="lg:col-span-1 h-[600px] border rounded-xl bg-card overflow-hidden">
+                <Tabs defaultValue="transcript" className="h-full flex flex-col">
+                    <div className="p-3 border-b bg-muted/30">
+                        <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="transcript">Transcript</TabsTrigger>
+                            <TabsTrigger value="ai">AI Assistant</TabsTrigger>
+                        </TabsList>
+                    </div>
+                    <TabsContent value="transcript" className="flex-1 min-h-0 p-0 m-0 h-full">
+                        <TranscriptPanel
+                            segments={transcript}
+                            currentTime={currentTime}
+                            onSeek={handleSeek}
+                        />
+                    </TabsContent>
+                    <TabsContent value="ai" className="flex-1 min-h-0 p-0 m-0 h-full overflow-y-auto">
+                        <AIResourcesPanel
+                            summary={aiSummary}
+                            quiz={quiz}
+                            onGenerate={onGenerateAI}
+                            isGenerating={isGeneratingAI}
+                        />
+                    </TabsContent>
+                </Tabs>
             </div>
         </div>
     );

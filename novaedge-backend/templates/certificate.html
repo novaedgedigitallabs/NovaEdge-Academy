@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate of Completion</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Lato:wght@300;400;700&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Lato', sans-serif;
+            background-color: #ffffff;
+            width: 1123px;
+            height: 794px;
+        }
+
+        .certificate-container {
+            width: 1123px;
+            /* A4 Landscape width in px (approx) */
+            height: 794px;
+            /* A4 Landscape height in px (approx) */
+            background-color: #ffffff;
+            padding: 40px;
+            box-sizing: border-box;
+            position: relative;
+            border: 20px solid #1a237e;
+            /* Deep Blue Border */
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .inner-border {
+            width: 100%;
+            height: 100%;
+            border: 2px solid #ffd700;
+            /* Gold Inner Border */
+            padding: 40px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            font-family: 'Cinzel', serif;
+            font-size: 48px;
+            font-weight: 700;
+            color: #1a237e;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        .title {
+            font-family: 'Cinzel', serif;
+            font-size: 36px;
+            color: #ffd700;
+            /* Gold */
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: #555;
+            margin-top: 30px;
+            font-style: italic;
+        }
+
+        .recipient-name {
+            font-family: 'Cinzel', serif;
+            font-size: 56px;
+            font-weight: 700;
+            color: #1a237e;
+            margin: 20px 0;
+            border-bottom: 2px solid #ffd700;
+            padding-bottom: 10px;
+            min-width: 400px;
+            text-align: center;
+        }
+
+        .course-text {
+            font-size: 20px;
+            color: #333;
+            margin-top: 10px;
+        }
+
+        .course-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a237e;
+            margin: 15px 0 40px 0;
+        }
+
+        .footer {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: auto;
+            padding-top: 40px;
+        }
+
+        .footer-left {
+            text-align: left;
+        }
+
+        .footer-right {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .info-item {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-weight: 700;
+            color: #333;
+        }
+
+        .qr-code {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            padding: 5px;
+            background: white;
+        }
+
+        .signature-area {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+        }
+
+        .signature-line {
+            width: 250px;
+            border-top: 1px solid #333;
+            margin-top: 10px;
+        }
+
+        .signature-text {
+            font-size: 16px;
+            font-weight: 700;
+            margin-top: 5px;
+            color: #1a237e;
+        }
+
+        .signature-role {
+            font-size: 12px;
+            color: #777;
+        }
+
+        .seal {
+            position: absolute;
+            bottom: 60px;
+            right: 250px;
+            /* Adjust based on layout */
+            width: 120px;
+            height: 120px;
+            opacity: 0.1;
+        }
+
+        /* Watermark */
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 150px;
+            color: rgba(26, 35, 126, 0.03);
+            font-family: 'Cinzel', serif;
+            z-index: 0;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="certificate-container">
+        <div class="inner-border">
+            <div class="watermark">NOVAEDGE</div>
+
+            <div class="header">
+                <div class="logo">NOVAEDGE ACADEMY</div>
+                <div class="title">Certificate of Completion</div>
+            </div>
+
+            <div class="subtitle">This is to certify that</div>
+
+            <div class="recipient-name">{{userName}}</div>
+
+            <div class="course-text">has successfully completed the course</div>
+
+            <div class="course-title">{{courseTitle}}</div>
+
+            <div class="signature-area">
+                <!-- <img src="{{signatureImageUrl}}" alt="Signature" width="150" /> -->
+                <div style="font-family: 'Great Vibes', cursive; font-size: 30px; color: #333; margin-bottom: 5px;">Amit
+                    Kumar</div>
+                <div class="signature-line"></div>
+                <div class="signature-text">Amit Kumar Raikwar</div>
+                <div class="signature-role">Founder, NovaEdge Academy</div>
+            </div>
+
+            <div class="footer">
+                <div class="footer-left">
+                    <div class="info-item">Date Issued: <span class="info-value">{{issuedAt}}</span></div>
+                    <div class="info-item">Certificate ID: <span class="info-value">{{certNumber}}</span></div>
+                </div>
+
+                <div class="footer-right">
+                    <img src="{{qrDataUri}}" alt="Verification QR Code" class="qr-code" />
+                    <div class="info-item" style="font-size: 10px;">Scan to Verify</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -50,10 +50,38 @@ export default function GlobalSearchBar() {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    const handleSearch = (e) => {
+    const handleSearch = async (e) => {
         e.preventDefault();
         if (query.trim()) {
             setIsOpen(false);
+
+            // Check if it looks like a certificate ID
+            if (query.trim().toUpperCase().startsWith("CERT-")) {
+                try {
+                    const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || ""}/api/v1/certificate/${query.trim()}`;
+                    console.log("Checking certificate at:", apiUrl);
+
+                    const res = await fetch(apiUrl);
+                    console.log("Certificate check status:", res.status);
+
+                    const data = await res.json();
+                    console.log("Certificate check data:", data);
+
+                    if (data.success && data.certificate && data.certificate.user) {
+                        // Redirect to user profile
+                        // The user object in certificate might be populated with just name/email or full object depending on controller
+                        // Let's check the controller: .populate("user", "name email")
+                        // We need the ID. .populate usually returns the object with _id.
+                        const userId = data.certificate.user._id || data.certificate.user;
+                        router.push(`/user/${userId}`);
+                        return;
+                    }
+                } catch (err) {
+                    console.error("Certificate check failed", err);
+                    // Fall through to normal search
+                }
+            }
+
             router.push(`/search?q=${encodeURIComponent(query)}`);
         }
     };

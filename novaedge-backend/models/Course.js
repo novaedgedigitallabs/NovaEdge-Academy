@@ -117,6 +117,17 @@ const courseSchema = new mongoose.Schema({
         type: Number,
         default: 1,
       },
+      // AI Generated Content
+      aiSummary: {
+        type: String,
+      },
+      quiz: [
+        {
+          question: String,
+          options: [String],
+          correctAnswer: Number, // Index of the correct option
+        },
+      ],
     },
   ],
 

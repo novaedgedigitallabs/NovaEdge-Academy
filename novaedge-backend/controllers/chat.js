@@ -29,35 +29,43 @@ exports.sendMessage = async (req, res) => {
         const session = await ChatSession.findById(sessionId);
         if (!session) return res.status(404).json({ success: false, message: "Session not found" });
 
-        // 1. Retrieve Context (Mock RAG)
-        // Find notes for this course
-        const notes = await LectureNote.find({ courseId: session.course });
+        // 1. Retrieve Context (Real RAG)
+        const course = await Course.findById(session.course);
+        if (!course) return res.status(404).json({ success: false, message: "Course not found" });
 
-        // Simple Keyword Search
-        const keywords = message.toLowerCase().split(" ").filter(w => w.length > 3);
-        let relevantNotes = notes.filter(n =>
-            keywords.some(k => n.summary.toLowerCase().includes(k) || n.keyPoints.some(kp => kp.toLowerCase().includes(k)))
-        );
+        let contextData = [];
 
         // If current lecture is provided, prioritize it
         if (currentLectureId) {
-            const currentNote = notes.find(n => n.lectureId === currentLectureId);
-            if (currentNote) {
-                relevantNotes = [currentNote, ...relevantNotes.filter(n => n.lectureId !== currentLectureId)];
+            const lecture = course.lectures.id(currentLectureId);
+            if (lecture) {
+                contextData.push({
+                    type: "Current Lecture",
+                    title: lecture.title,
+                    content: lecture.aiSummary || lecture.description,
+                    lectureId: lecture._id
+                });
+
+                // Try to fetch transcript
+                // const transcript = await Transcript.findOne({ lectureId: currentLectureId });
+                // if (transcript) {
+                //    contextData.push({ type: "Transcript", content: transcript.segments.map(s => s.text).join(" ") });
+                // }
             }
         }
 
-        // Fetch Lecture Titles for citations
-        const course = await Course.findById(session.course);
-        const context = relevantNotes.slice(0, 3).map(n => {
-            const lec = course.lectures.id(n.lectureId);
-            return {
-                lectureId: n.lectureId,
-                title: lec ? lec.title : "Unknown Lecture",
-                summary: n.summary,
-                keyPoints: n.keyPoints
-            };
+        // Also add other lectures summaries if needed (simplified for now to just current lecture + course info)
+        contextData.push({
+            type: "Course Info",
+            title: course.title,
+            content: course.description
         });
+
+        const context = contextData.map(c => ({
+            title: c.title,
+            text: c.content,
+            lectureId: c.lectureId
+        }));
 
         // 2. Generate Response
         const response = await generateChatResponse(message, context);

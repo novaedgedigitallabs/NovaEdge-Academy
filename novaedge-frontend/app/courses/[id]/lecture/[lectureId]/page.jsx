@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { apiGet } from "@/lib/api";
+import { getCourseProgress } from "@/services/progress";
 import { useAuth } from "@/context/auth-context";
 import Header from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,8 @@ import LecturePlayer from "@/components/course/LecturePlayer";
 import LectureDiscussionPanel from "@/components/discussion/LectureDiscussionPanel";
 import LectureNotes from "@/components/course/LectureNotes";
 import ChatWidget from "@/components/course/ChatWidget";
+import { generateLectureResources } from "@/services/ai";
+import { toast } from "sonner";
 
 // Hook to disable right-click and dev tools
 function useProtection() {
@@ -51,6 +54,7 @@ export default function LecturePage() {
     const [loading, setLoading] = useState(true);
     const [lectures, setLectures] = useState([]);
     const [currentLecture, setCurrentLecture] = useState(null);
+    const [progress, setProgress] = useState(null);
     const [error, setError] = useState(null);
 
     useEffect(() => {
@@ -81,6 +85,10 @@ export default function LecturePage() {
                 } else {
                     setError("Lecture not found");
                 }
+
+                // 4. Fetch Progress
+                const progressData = await getCourseProgress(courseId);
+                setProgress(progressData.progress);
             } catch (err) {
                 setError(err.message || "Failed to load lecture");
             } finally {
@@ -102,6 +110,28 @@ export default function LecturePage() {
         const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
         const match = url.match(regExp);
         return (match && match[2].length === 11) ? match[2] : null;
+    };
+
+    const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+
+    const handleGenerateAI = async () => {
+        setIsGeneratingAI(true);
+        try {
+            const data = await generateLectureResources(courseId, lectureId);
+            if (data.success) {
+                // Update local state
+                setCurrentLecture(prev => ({
+                    ...prev,
+                    aiSummary: data.aiSummary,
+                    quiz: data.quiz
+                }));
+                toast.success("AI resources generated successfully!");
+            }
+        } catch (err) {
+            toast.error("Failed to generate AI resources");
+        } finally {
+            setIsGeneratingAI(false);
+        }
     };
 
     if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
@@ -129,10 +159,14 @@ export default function LecturePage() {
                             courseId={courseId}
                             lectureId={lectureId}
                             videoUrl={currentLecture.video?.url}
-                            initialPosition={0} // TODO: Fetch from resume API if needed
+                            initialPosition={0}
                             onComplete={() => {
-                                // Optional: Auto-advance or show notification
+                                getCourseProgress(courseId).then(data => setProgress(data.progress));
                             }}
+                            aiSummary={currentLecture.aiSummary}
+                            quiz={currentLecture.quiz}
+                            onGenerateAI={handleGenerateAI}
+                            isGeneratingAI={isGeneratingAI}
                         />
 
                         <div className="flex items-center justify-between">
@@ -143,12 +177,20 @@ export default function LecturePage() {
                             >
                                 <ChevronLeft className="w-4 h-4 mr-2" /> Previous
                             </Button>
-                            <Button
-                                disabled={!nextLecture}
-                                onClick={() => router.push(`/courses/${courseId}/lecture/${nextLecture._id || nextLecture.id}`)}
-                            >
-                                Next <ChevronRight className="w-4 h-4 ml-2" />
-                            </Button>
+                            {nextLecture ? (
+                                <Button
+                                    onClick={() => router.push(`/courses/${courseId}/lecture/${nextLecture._id || nextLecture.id}`)}
+                                >
+                                    Next <ChevronRight className="w-4 h-4 ml-2" />
+                                </Button>
+                            ) : (
+                                <Button
+                                    onClick={() => router.push(`/courses/${courseId}`)}
+                                    className="bg-green-600 hover:bg-green-700 text-white"
+                                >
+                                    Finish Course <ChevronRight className="w-4 h-4 ml-2" />
+                                </Button>
+                            )}
                         </div>
 
                         <div className="bg-muted/30 p-6 rounded-xl border">
@@ -169,6 +211,8 @@ export default function LecturePage() {
                             <div className="max-h-[600px] overflow-y-auto">
                                 {lectures.map((lec, idx) => {
                                     const isActive = (lec._id || lec.id) === lectureId;
+                                    const isCompleted = progress?.lectureProgress?.find(lp => lp.lectureId === (lec._id || lec.id) && lp.completed);
+
                                     return (
                                         <Link
                                             key={lec._id || lec.id}
@@ -176,9 +220,14 @@ export default function LecturePage() {
                                             className={`block p-4 border-b last:border-0 hover:bg-muted/50 transition-colors ${isActive ? "bg-primary/5 border-l-4 border-l-primary" : ""}`}
                                         >
                                             <div className="flex gap-3">
-                                                <span className={`text-sm font-medium ${isActive ? "text-primary" : "text-muted-foreground"}`}>
-                                                    {idx + 1}.
-                                                </span>
+                                                <div className="flex flex-col items-center">
+                                                    <span className={`text-sm font-medium ${isActive ? "text-primary" : "text-muted-foreground"}`}>
+                                                        {idx + 1}.
+                                                    </span>
+                                                    {isCompleted && (
+                                                        <div className="h-2 w-2 rounded-full bg-green-500 mt-1" />
+                                                    )}
+                                                </div>
                                                 <div>
                                                     <p className={`text-sm font-medium mb-1 ${isActive ? "text-primary" : ""}`}>
                                                         {lec.title}

@@ -23,7 +23,52 @@ export default function ProfilePage() {
 
   const [loading, setLoading] = useState(true);
   const [courses, setCourses] = useState([]); // array of course objects
+  const [certificates, setCertificates] = useState([]);
   const [error, setError] = useState(null);
+  const [avatar, setAvatar] = useState("");
+  const [avatarPreview, setAvatarPreview] = useState("/placeholder.svg");
+
+  const updateProfileDataChange = (e) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      if (reader.readyState === 2) {
+        setAvatarPreview(reader.result);
+        setAvatar(reader.result);
+        handleUpdateProfile(reader.result);
+      }
+    };
+
+    reader.readAsDataURL(e.target.files[0]);
+  };
+
+  const handleUpdateProfile = async (newAvatar) => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ""}/api/v1/me/update`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: user.name,
+          email: user.email,
+          avatar: newAvatar
+        }),
+        credentials: "include"
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        window.location.reload();
+      } else {
+        alert(data.message || "Update failed");
+      }
+    } catch (error) {
+      console.error("Update failed", error);
+      alert("Update failed");
+    }
+  };
 
   // redirect to login if not authenticated
   useEffect(() => {
@@ -32,15 +77,16 @@ export default function ProfilePage() {
     }
   }, [authLoading, user, router]);
 
-  // Fetch enrolled courses once user is available
+  // Fetch enrolled courses and certificates once user is available
   useEffect(() => {
     if (!user) return;
 
-    const fetchEnrollments = async () => {
+    const fetchData = async () => {
       setLoading(true);
       setError(null);
 
       try {
+        // Fetch Enrollments
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL || ""}/api/v1/enrollments/me`,
           {
@@ -49,10 +95,7 @@ export default function ProfilePage() {
         );
 
         if (!res.ok) {
-          // if unauthorized, force logout or redirect
           if (res.status === 401 || res.status === 403) {
-            // optional: logout user if token invalid
-            // logout();
             router.push("/login");
             return;
           }
@@ -62,23 +105,29 @@ export default function ProfilePage() {
 
         const data = await res.json();
 
-        // Support multiple response shapes:
-        // 1) { courses: [ ... ] }
-        // 2) { enrollments: [ { course: {...} }, ... ] }
-        // 3) direct array
         let fetchedCourses = [];
         if (Array.isArray(data.courses)) {
           fetchedCourses = data.courses;
         } else if (Array.isArray(data.enrollments)) {
-          // extract course object from enrollment entries if present
           fetchedCourses = data.enrollments.map((e) => e.course || e);
         } else if (Array.isArray(data)) {
           fetchedCourses = data;
         } else if (Array.isArray(data?.enrolledCourses)) {
           fetchedCourses = data.enrolledCourses;
         }
-
         setCourses(fetchedCourses);
+
+        // Fetch Certificates (using fetch directly to keep it simple within this effect, or import service)
+        // Let's use fetch directly to match existing style in this file
+        const certRes = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL || ""}/api/v1/my/certificates`,
+          { credentials: "include" }
+        );
+        if (certRes.ok) {
+          const certData = await certRes.json();
+          setCertificates(certData.certificates || []);
+        }
+
       } catch (err) {
         setError(err.message || "Something went wrong");
         setCourses([]);
@@ -87,7 +136,7 @@ export default function ProfilePage() {
       }
     };
 
-    fetchEnrollments();
+    fetchData();
   }, [user, router]);
 
   // show nothing until auth resolved or redirect runs
@@ -102,16 +151,26 @@ export default function ProfilePage() {
           <aside className="w-full md:w-64 space-y-4">
             <Card>
               <CardContent className="pt-6 text-center">
-                <div className="mb-4 relative mx-auto w-24 h-24">
+                <div className="mb-4 relative mx-auto w-24 h-24 group cursor-pointer">
                   <Avatar className="w-24 h-24">
                     <AvatarImage
-                      src={user.avatar || "/placeholder.svg"}
+                      src={avatarPreview === "/placeholder.svg" ? (user.avatar?.url || "/placeholder.svg") : avatarPreview}
                       alt={user.name}
                     />
                     <AvatarFallback>
                       {user.name?.charAt(0) || "U"}
                     </AvatarFallback>
                   </Avatar>
+                  <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <label htmlFor="avatar-upload" className="text-white text-xs cursor-pointer">Edit</label>
+                  </div>
+                  <input
+                    type="file"
+                    id="avatar-upload"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={updateProfileDataChange}
+                  />
                 </div>
                 <h2 className="text-xl font-bold">{user.name}</h2>
                 <p className="text-sm text-muted-foreground">{user.email}</p>
@@ -121,6 +180,18 @@ export default function ProfilePage() {
                     className="w-full justify-start bg-transparent"
                   >
                     Edit Profile
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start bg-transparent"
+                    onClick={() => {
+                      const url = `${window.location.origin}/user/${user._id}`;
+                      navigator.clipboard.writeText(url);
+                      // You might want to add a toast here
+                      alert("Profile link copied to clipboard!");
+                    }}
+                  >
+                    Share Profile
                   </Button>
                   <Button
                     variant="destructive"
@@ -210,31 +281,58 @@ export default function ProfilePage() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
-                      <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-4">
-                        <svg
-                          className="w-6 h-6"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
+                    {loading ? (
+                      <div className="py-8 text-center text-muted-foreground">Loading certificates...</div>
+                    ) : certificates.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
+                        <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-4">
+                          <svg
+                            className="w-6 h-6"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                        </div>
+                        <p>You haven&apos;t earned any certificates yet.</p>
+                        <Button
+                          variant="link"
+                          className="mt-2"
+                          onClick={() => router.push("/courses")}
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
+                          Browse Courses
+                        </Button>
                       </div>
-                      <p>You haven&apos;t earned any certificates yet.</p>
-                      <Button
-                        variant="link"
-                        className="mt-2"
-                        onClick={() => router.push("/courses")}
-                      >
-                        Browse Courses
-                      </Button>
-                    </div>
+                    ) : (
+                      <div className="grid gap-4 md:grid-cols-2">
+                        {certificates.map((cert) => (
+                          <div
+                            key={cert._id}
+                            className="flex items-start space-x-4 rounded-lg border p-4"
+                          >
+                            <div className="flex-1 space-y-1">
+                              <p className="font-medium leading-none">
+                                {cert.course?.title || "Course Certificate"}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                Issued on {new Date(cert.issueDate).toLocaleDateString()}
+                              </p>
+                            </div>
+                            <Button variant="outline" size="sm" asChild>
+                              <a href={`${process.env.NEXT_PUBLIC_API_URL || ""}/api/v1/certificate/${cert.certificateId}/download`} target="_blank" rel="noopener noreferrer">
+                                Download
+                              </a>
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </TabsContent>

@@ -7,6 +7,7 @@ const {
   getAllUsers,
   updateUserRole,
   deleteUser,
+  getCoursePerformance,
 } = require("../controllers/admin");
 
 // Import Guards
@@ -34,5 +35,16 @@ router
   .route("/user/:id")
   .put(updateUserRole) // PUT = Update data (Role)
   .delete(deleteUser); // DELETE = Remove user
+
+// --- CERTIFICATE MANAGEMENT ---
+const { adminGenerateCertificate } = require("../controllers/certificate");
+
+// Generate Certificate for a user
+// URL: /api/v1/admin/certificate/generate
+router.route("/certificate/generate").post(adminGenerateCertificate);
+
+// --- COURSE PERFORMANCE ---
+// URL: /api/v1/admin/course-performance
+router.route("/course-performance").get(getCoursePerformance);
 
 module.exports = router;

@@ -67,14 +67,21 @@ exports.updateLectureProgress = async (req, res) => {
     const course = await Course.findById(courseId);
     if (course) {
       const totalLectures = course.lectures.length;
-      const completedCount = progress.lectureProgress.filter(
-        (lp) => lp.completed
-      ).length;
+      // Filter for unique completed lectures that actually exist in the course
+      const uniqueCompletedLectures = new Set(
+        progress.lectureProgress
+          .filter(lp => lp.completed)
+          .map(lp => lp.lectureId)
+      );
+
+      // Only count if the lecture ID is in the course's lecture list (optional but safer)
+      // For now, just count unique IDs to avoid duplicates
+      const completedCount = uniqueCompletedLectures.size;
 
       const percentage =
         totalLectures === 0 ? 0 : (completedCount / totalLectures) * 100;
 
-      progress.percentComplete = Math.round(percentage);
+      progress.percentComplete = Math.min(Math.round(percentage), 100);
 
       // E. Check for Completion
       if (progress.percentComplete === 100) {

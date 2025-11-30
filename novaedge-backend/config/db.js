@@ -2,6 +2,9 @@ const mongoose = require("mongoose");
 
 const connectDB = async () => {
   try {
+    if (mongoose.connection.readyState >= 1) {
+      return;
+    }
     // 1. Try to connect using the URL from your .env file
     const conn = await mongoose.connect(process.env.MONGO_URI);
 

@@ -29,7 +29,7 @@ export default function Header() {
             <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
               L
             </div>
-            <span>LearnPlate</span>
+            <span>NovaEdge Academy</span>
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
             <Link href="/courses" className="hover:text-foreground transition-colors">

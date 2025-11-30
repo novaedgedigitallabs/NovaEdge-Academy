@@ -53,23 +53,55 @@ exports.generateLectureContent = async (lectureTitle, lectureDescription) => {
     };
 };
 
-exports.generateChatResponse = async (query, context) => {
-    await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate latency
+const geminiModel = require("./gemini");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-    if (!context || context.length === 0) {
+// ... (generateLectureContent remains mock or can be updated later)
+
+exports.generateChatResponse = async (query, context) => {
+    try {
+        if (!context || context.length === 0) {
+            return {
+                text: "I couldn't find specific information about that in the course materials. You might want to ask the instructor directly.",
+                citations: []
+            };
+        }
+
+        const contextText = context.map(c => `Title: ${c.title}\nContent: ${c.text}`).join("\n\n");
+
+        const prompt = `
+        You are a helpful and friendly AI teaching assistant for a course.
+        Your goal is to answer the student's question based on the provided course context.
+        
+        IMPORTANT: 
+        1. Explain the answer in simple, human language (ELI5 style). Avoid complex jargon unless necessary, and if you use it, explain it simply.
+        2. Use Markdown formatting (bold, lists, code blocks) to make the answer easy to read.
+        3. Be concise and encouraging.
+
+        Context:
+        ${contextText}
+
+        Student Question: ${query}
+
+        Answer:
+        `;
+
+        const result = await geminiModel.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+
         return {
-            text: "I couldn't find specific information about that in the course materials. You might want to ask the instructor directly.",
+            text: text,
+            citations: context.filter(c => c.lectureId).map(c => ({
+                lectureId: c.lectureId,
+                title: c.title
+            }))
+        };
+    } catch (error) {
+        console.error("Gemini Chat Error:", error);
+        return {
+            text: "I'm sorry, I'm having trouble thinking right now. Please try again later.",
             citations: []
         };
     }
-
-    // Mock response based on context
-    const mainContext = context[0];
-    return {
-        text: `Based on the lecture "${mainContext.title}", ${query.includes("what") ? "this concept refers to" : "the key idea is"} ${mainContext.summary.substring(0, 50)}... The lecture explains that ${mainContext.keyPoints[0]}.`,
-        citations: context.map(c => ({
-            lectureId: c.lectureId,
-            title: c.title
-        }))
-    };
 };

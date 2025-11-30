@@ -96,6 +96,8 @@ app.use("/api/v1", require("./routes/chat"));
 app.use("/api/v1", require("./routes/transcript"));
 app.use("/api/v1", require("./routes/search"));
 app.use("/api/v1/support", require("./routes/support"));
+app.use("/api/v1", require("./routes/twoFactor"));
+app.use("/api/v1/ai", require("./routes/ai"));
 
 // Error Handler Middleware
 app.use(require("./middleware/error"));
@@ -111,9 +113,11 @@ app.get("/", (req, res) => {
 // 7. Start the Server
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+module.exports = app;
 
 // --- ERROR HANDLING FOR CRASHES ---
 // If backend crashes due to unhandled error, shut down gracefully

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import AdminGuard from "@/components/admin/AdminGuard";
 import { apiGet, apiPost, apiPut, apiDelete } from "@/lib/api";
+import VersionHistory from "@/components/admin/VersionHistory";
 
 export default function AdminCourseEditPage() {
   const params = useParams();
@@ -300,48 +301,46 @@ export default function AdminCourseEditPage() {
 
           <div className="space-y-4 mb-6">
             {lectures.map((lec, idx) => (
-import VersionHistory from "@/components/admin/VersionHistory";
 
-            // ... inside component ...
 
-            <div key={idx} className="p-4 border rounded bg-muted/20 relative">
-              <div className="absolute top-2 right-2 flex gap-2">
-                {lec._id && (
-                  <VersionHistory
-                    courseId={courseId}
-                    lectureId={lec._id}
-                    onRollback={() => {
-                      // Reload course data to reflect rollback
-                      apiGet(`/api/v1/course/${courseId}`).then(data => {
-                        const fetched = data.course || data;
-                        setCourse(fetched);
-                        setLectures(fetched.lectures || []);
-                      });
-                    }}
-                  />
-                )}
-                <button
-                  type="button"
-                  onClick={() => removeLecture(idx)}
-                  className="text-red-500 hover:text-red-700 text-sm"
-                >
-                  Remove
-                </button>
+              <div key={idx} className="p-4 border rounded bg-muted/20 relative">
+                <div className="absolute top-2 right-2 flex gap-2">
+                  {lec._id && (
+                    <VersionHistory
+                      courseId={courseId}
+                      lectureId={lec._id}
+                      onRollback={() => {
+                        // Reload course data to reflect rollback
+                        apiGet(`/api/v1/course/${courseId}`).then(data => {
+                          const fetched = data.course || data;
+                          setCourse(fetched);
+                          setLectures(fetched.lectures || []);
+                        });
+                      }}
+                    />
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => removeLecture(idx)}
+                    className="text-red-500 hover:text-red-700 text-sm"
+                  >
+                    Remove
+                  </button>
+                </div>
+                <h3 className="font-semibold">Lecture {idx + 1}: {lec.title}</h3>
+                <p className="text-sm text-muted-foreground truncate">{lec.description}</p>
+                <div className="flex gap-4 text-xs mt-1">
+                  <span className="text-blue-500 truncate max-w-[200px]">
+                    {lec.videoUrl || (lec.video && lec.video.url)}
+                  </span>
+                  <span className="text-green-600 font-medium">
+                    {lec.duration ? `${lec.duration} min` : "0 min"}
+                  </span>
+                  {lec.currentVersion && (
+                    <span className="bg-blue-100 text-blue-800 px-1 rounded">v{lec.currentVersion}</span>
+                  )}
+                </div>
               </div>
-              <h3 className="font-semibold">Lecture {idx + 1}: {lec.title}</h3>
-              <p className="text-sm text-muted-foreground truncate">{lec.description}</p>
-              <div className="flex gap-4 text-xs mt-1">
-                <span className="text-blue-500 truncate max-w-[200px]">
-                  {lec.videoUrl || (lec.video && lec.video.url)}
-                </span>
-                <span className="text-green-600 font-medium">
-                  {lec.duration ? `${lec.duration} min` : "0 min"}
-                </span>
-                {lec.currentVersion && (
-                  <span className="bg-blue-100 text-blue-800 px-1 rounded">v{lec.currentVersion}</span>
-                )}
-              </div>
-            </div>
             ))}
           </div>
 

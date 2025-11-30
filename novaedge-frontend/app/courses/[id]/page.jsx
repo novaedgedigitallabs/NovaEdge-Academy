@@ -7,7 +7,9 @@ import Footer from "@/components/layout/Footer";
 import { Play, Star, Globe, Clock, Award, BarChart, Lock, Unlock } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { apiGet } from "@/lib/api";
+
+import { apiGet, apiPost } from "@/lib/api";
+import { getCourseProgress } from "@/services/progress";
 import { useAuth } from "@/context/auth-context";
 import {
   Table,
@@ -54,7 +56,8 @@ export default function CourseDetailPageClient() {
   // Enrollment & Playback
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [fullLectures, setFullLectures] = useState([]);
-  // const [currentLecture, setCurrentLecture] = useState(null); // Removed inline player state
+  const [progress, setProgress] = useState(null);
+  const [generatingCert, setGeneratingCert] = useState(false);
 
   // 1. Fetch Public Course Details
   useEffect(() => {
@@ -100,16 +103,34 @@ export default function CourseDetailPageClient() {
       try {
         const data = await apiGet(`/api/v1/course/${id}/lectures`);
         setFullLectures(data.lectures || []);
-        // Auto-select first lecture if none selected
-        if (data.lectures && data.lectures.length > 0) {
-          // Optional: don't auto-play, just have data ready
-        }
+
+        // Fetch Progress
+        const progressData = await getCourseProgress(id);
+        setProgress(progressData.progress);
       } catch (e) {
         console.error("Failed to fetch lectures", e);
       }
     };
     fetchLectures();
   }, [id, isEnrolled]);
+
+  const handleGetCertificate = async () => {
+    setGeneratingCert(true);
+    try {
+      // 1. Generate (or get existing)
+      const res = await apiPost(`/api/v1/certificate/generate/${courseId}`);
+      if (res.success && res.certificate) {
+        // 2. Redirect to certificate view
+        router.push(`/certificate/${res.certificate.certificateId}`);
+      } else {
+        alert(res.message || "Failed to generate certificate");
+      }
+    } catch (e) {
+      alert(e.message || "Error generating certificate");
+    } finally {
+      setGeneratingCert(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -288,15 +309,29 @@ export default function CourseDetailPageClient() {
                 </div>
 
                 {/* Progress Bar */}
-                <CourseProgressBar percentComplete={0} />
+                <CourseProgressBar percentComplete={progress?.percentComplete || 0} />
 
-                {displayLectures.length > 0 && (
+                {progress?.percentComplete === 100 ? (
                   <button
-                    onClick={() => router.push(`/courses/${courseId}/lecture/${displayLectures[0]._id || displayLectures[0].id}`)}
-                    className="w-full bg-primary text-primary-foreground py-2 rounded hover:bg-primary/90 transition-colors"
+                    onClick={handleGetCertificate}
+                    disabled={generatingCert}
+                    className="w-full bg-yellow-500 text-black font-bold py-2 rounded hover:bg-yellow-400 transition-colors flex items-center justify-center gap-2"
                   >
-                    Start Watching
+                    {generatingCert ? "Generating..." : (
+                      <>
+                        <Award className="w-4 h-4" /> Get Certificate
+                      </>
+                    )}
                   </button>
+                ) : (
+                  displayLectures.length > 0 && (
+                    <button
+                      onClick={() => router.push(`/courses/${courseId}/lecture/${displayLectures[0]._id || displayLectures[0].id}`)}
+                      className="w-full bg-primary text-primary-foreground py-2 rounded hover:bg-primary/90 transition-colors"
+                    >
+                      {progress?.percentComplete > 0 ? "Continue Watching" : "Start Watching"}
+                    </button>
+                  )
                 )}
               </div>
             ) : (

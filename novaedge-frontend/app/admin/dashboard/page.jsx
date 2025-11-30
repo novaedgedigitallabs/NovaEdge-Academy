@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import AdminGuard from "@/components/admin/AdminGuard";
 import { apiGet } from "@/lib/api";
+import CoursePerformanceTable from "@/components/admin/CoursePerformanceTable";
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState(null);
@@ -60,6 +61,8 @@ export default function AdminDashboardPage() {
             </div>
           </div>
         )}
+
+        <CoursePerformanceTable />
       </div>
     </AdminGuard>
   );

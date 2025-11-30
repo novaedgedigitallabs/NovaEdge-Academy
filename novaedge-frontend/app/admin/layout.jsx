@@ -90,6 +90,12 @@ export default function AdminLayout({ children }) {
           >
             Badges
           </Link>
+          <Link
+            href="/admin/certificates"
+            className="px-3 py-2 rounded hover:bg-muted"
+          >
+            Certificates
+          </Link>
         </nav>
 
         <div className="mt-6 pt-4 border-t">

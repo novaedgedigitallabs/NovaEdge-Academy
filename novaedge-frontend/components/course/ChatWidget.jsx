@@ -5,12 +5,15 @@ import { getChatSession, sendChatMessage } from "@/services/chat";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MessageSquare, Send, X, Loader2, Bot } from "lucide-react";
+import { MessageSquare, Send, X, Loader2, Bot, Maximize2, Minimize2 } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export default function ChatWidget({ courseId, lectureId }) {
     const { user } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(false);
     const [session, setSession] = useState(null);
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState("");
@@ -30,7 +33,7 @@ export default function ChatWidget({ courseId, lectureId }) {
         if (scrollRef.current) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
-    }, [messages, isOpen]);
+    }, [messages, isOpen, isExpanded]);
 
     const handleSend = async (e) => {
         e.preventDefault();
@@ -56,20 +59,48 @@ export default function ChatWidget({ courseId, lectureId }) {
     return (
         <>
             {/* Floating Button */}
-            <Button
-                className="fixed bottom-6 right-6 rounded-full w-14 h-14 shadow-lg z-50"
-                onClick={() => setIsOpen(!isOpen)}
-            >
-                {isOpen ? <X /> : <MessageSquare />}
-            </Button>
+            {!isExpanded && (
+                <Button
+                    className="fixed bottom-6 right-6 rounded-full w-14 h-14 shadow-lg z-50"
+                    onClick={() => setIsOpen(!isOpen)}
+                >
+                    {isOpen ? <X /> : <MessageSquare />}
+                </Button>
+            )}
 
             {/* Chat Window */}
             {isOpen && (
-                <Card className="fixed bottom-24 right-6 w-80 md:w-96 h-[500px] shadow-xl z-50 flex flex-col">
-                    <CardHeader className="p-4 border-b bg-primary text-primary-foreground rounded-t-lg">
+                <Card className={`fixed shadow-xl z-50 flex flex-col transition-all duration-300 ${isExpanded
+                    ? "inset-4 w-auto h-auto"
+                    : "bottom-24 right-6 w-80 md:w-96 h-[500px]"
+                    }`}>
+                    <CardHeader className="p-4 border-b bg-primary text-primary-foreground rounded-t-lg flex flex-row items-center justify-between space-y-0">
                         <CardTitle className="flex items-center gap-2 text-lg">
                             <Bot className="w-5 h-5" /> Course Assistant
                         </CardTitle>
+                        <div className="flex items-center gap-1">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-primary-foreground hover:bg-primary-foreground/20"
+                                onClick={() => setIsExpanded(!isExpanded)}
+                            >
+                                {isExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                            </Button>
+                            {isExpanded && (
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-primary-foreground hover:bg-primary-foreground/20"
+                                    onClick={() => {
+                                        setIsOpen(false);
+                                        setIsExpanded(false);
+                                    }}
+                                >
+                                    <X className="w-4 h-4" />
+                                </Button>
+                            )}
+                        </div>
                     </CardHeader>
 
                     <CardContent className="flex-grow overflow-y-auto p-4 space-y-4" ref={scrollRef}>
@@ -87,11 +118,29 @@ export default function ChatWidget({ courseId, lectureId }) {
                             >
                                 <div
                                     className={`max-w-[85%] p-3 rounded-lg text-sm ${msg.role === "user"
-                                            ? "bg-primary text-primary-foreground rounded-br-none"
-                                            : "bg-muted rounded-bl-none"
+                                        ? "bg-primary text-primary-foreground rounded-br-none"
+                                        : "bg-muted rounded-bl-none"
                                         }`}
                                 >
-                                    <p>{msg.content}</p>
+                                    <div className="prose dark:prose-invert max-w-none prose-sm prose-p:leading-relaxed prose-pre:bg-black/10 prose-pre:p-2 prose-pre:rounded">
+                                        <ReactMarkdown
+                                            remarkPlugins={[remarkGfm]}
+                                            components={{
+                                                p: ({ node, ...props }) => <p className="mb-1 last:mb-0" {...props} />,
+                                                a: ({ node, ...props }) => <a className="underline font-medium" target="_blank" rel="noopener noreferrer" {...props} />,
+                                                code: ({ node, inline, className, children, ...props }) => {
+                                                    return inline ? (
+                                                        <code className="bg-black/10 px-1 py-0.5 rounded font-mono text-xs" {...props}>{children}</code>
+                                                    ) : (
+                                                        <code className="block bg-black/10 p-2 rounded font-mono text-xs overflow-x-auto my-2" {...props}>{children}</code>
+                                                    )
+                                                }
+                                            }}
+                                        >
+                                            {msg.content}
+                                        </ReactMarkdown>
+                                    </div>
+
                                     {msg.citations && msg.citations.length > 0 && (
                                         <div className="mt-2 pt-2 border-t border-primary/20 text-xs opacity-80">
                                             Sources:

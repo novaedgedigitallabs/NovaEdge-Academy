@@ -22,7 +22,7 @@ exports.getDashboardStats = async (req, res) => {
     // We use .reduce() to sum up the amounts
     // Note: Payment.amount is in Paise, so we divide by 100 to get Rupees
     const totalRevenue = payments.reduce((total, payment) => {
-      return total + payment.amount / 100;
+      return total + payment.amount;
     }, 0);
 
     // E. Send it all back
@@ -95,6 +95,61 @@ exports.deleteUser = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "User Deleted Successfully",
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+// --- 5. GET COURSE PERFORMANCE (Table Data) ---
+exports.getCoursePerformance = async (req, res) => {
+  try {
+    const coursePerformance = await Course.aggregate([
+      {
+        $lookup: {
+          from: "enrollments",
+          localField: "_id",
+          foreignField: "course",
+          as: "enrollments",
+        },
+      },
+      {
+        $lookup: {
+          from: "payments",
+          localField: "_id",
+          foreignField: "course",
+          as: "payments",
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          title: 1,
+          image: "$poster.url",
+          price: 1,
+          enrollmentCount: { $size: "$enrollments" },
+          totalRevenue: {
+            $sum: {
+              $map: {
+                input: {
+                  $filter: {
+                    input: "$payments",
+                    as: "p",
+                    cond: { $eq: ["$$p.status", "completed"] },
+                  },
+                },
+                as: "paid",
+                in: "$$paid.amount",
+              },
+            },
+          },
+        },
+      },
+      { $sort: { totalRevenue: -1 } }, // Sort by revenue descending
+    ]);
+
+    res.status(200).json({
+      success: true,
+      data: coursePerformance,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
