@@ -31,6 +31,7 @@ export default function SearchPage() {
         switch (type) {
             case "course": return <BookOpen className="w-4 h-4" />;
             case "mentor": return <User className="w-4 h-4" />;
+            case "user": return <User className="w-4 h-4" />;
             case "blog": return <FileText className="w-4 h-4" />;
             default: return <BookOpen className="w-4 h-4" />;
         }
@@ -40,6 +41,7 @@ export default function SearchPage() {
         switch (item.type) {
             case "course": return `/courses/${item.slug || item._id}`; // Fallback if slug missing
             case "mentor": return `/mentors/${item._id}`;
+            case "user": return `/user/${item._id}`;
             case "blog": return `/blogs/${item.slug || item._id}`;
             default: return "#";
         }
@@ -53,7 +55,7 @@ export default function SearchPage() {
 
             {/* Filters */}
             <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
-                {["all", "course", "blog", "mentor"].map((f) => (
+                {["all", "course", "blog", "mentor", "user"].map((f) => (
                     <Button
                         key={f}
                         variant={filter === f ? "default" : "outline"}
@@ -78,10 +80,10 @@ export default function SearchPage() {
                     {results.map((item, idx) => (
                         <Link key={idx} href={getLink(item)} className="block group">
                             <Card className="h-full hover:border-primary transition-colors overflow-hidden">
-                                {item.image || item.poster?.url ? (
+                                {item.image || item.poster?.url || item.avatar?.url ? (
                                     <div className="aspect-video w-full overflow-hidden bg-muted">
                                         <img
-                                            src={item.image || item.poster?.url}
+                                            src={item.image || item.poster?.url || item.avatar?.url}
                                             alt={item.title || item.name}
                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                         />
@@ -100,7 +102,7 @@ export default function SearchPage() {
                                 </CardHeader>
                                 <CardContent>
                                     <p className="text-sm text-muted-foreground line-clamp-3">
-                                        {item.description || item.bio || item.content?.substring(0, 150)}...
+                                        {item.description || item.bio || (item.username ? `@${item.username}` : "") || item.content?.substring(0, 150)}...
                                     </p>
                                     {item.skills && (
                                         <div className="flex flex-wrap gap-1 mt-3">

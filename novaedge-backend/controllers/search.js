@@ -1,6 +1,7 @@
 const Course = require("../models/Course");
 const Blog = require("../models/Blog");
 const Mentor = require("../models/Mentor");
+const User = require("../models/User");
 
 // 1. Global Search
 exports.globalSearch = async (req, res) => {
@@ -59,6 +60,26 @@ exports.globalSearch = async (req, res) => {
             );
         }
 
+        // Search Users (by username or name)
+        if (!type || type === "user") {
+            // Users might not have text index, so we use regex for username/name
+            // Or we can rely on text index if we add one. Let's assume regex for now as it's safer without migration
+            // But to match the Promise.all structure with scoring, we'll fake the score or use a different query structure.
+            // Actually, let's just use regex find and map to same structure.
+            searchPromises.push(
+                User.find({
+                    $or: [
+                        { name: regex },
+                        { username: regex }
+                    ]
+                })
+                    .select("name username avatar role bio") // Added bio if it exists, or we use something else
+                    .limit(limit)
+                    .lean()
+                    .then(results => results.map(r => ({ ...r, type: "user", score: 1 }))) // Give default score
+            );
+        }
+
         const resultsArray = await Promise.all(searchPromises);
         let allResults = resultsArray.flat();
 
@@ -90,16 +111,18 @@ exports.autocomplete = async (req, res) => {
         const regex = new RegExp(q, "i");
         const limit = 5;
 
-        const [courses, blogs, mentors] = await Promise.all([
+        const [courses, blogs, mentors, users] = await Promise.all([
             Course.find({ title: regex }).select("title slug").limit(limit).lean(),
             Blog.find({ title: regex }).select("title slug").limit(limit).lean(),
             Mentor.find({ name: regex }).select("name _id").limit(limit).lean(),
+            User.find({ $or: [{ name: regex }, { username: regex }] }).select("name username _id").limit(limit).lean(),
         ]);
 
         const suggestions = [
             ...courses.map(c => ({ text: c.title, type: "course", id: c.slug })),
             ...blogs.map(b => ({ text: b.title, type: "blog", id: b.slug })),
             ...mentors.map(m => ({ text: m.name, type: "mentor", id: m._id })),
+            ...users.map(u => ({ text: u.username ? `@${u.username} (${u.name})` : u.name, type: "user", id: u._id })),
         ].slice(0, 10); // Limit total suggestions
 
         res.status(200).json({ success: true, suggestions });

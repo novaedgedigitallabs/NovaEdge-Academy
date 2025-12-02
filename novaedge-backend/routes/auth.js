@@ -9,6 +9,7 @@ const {
   getUserProfile,
   getPublicProfile,
   updateProfile,
+  lookupUser,
 } = require("../controllers/auth");
 
 // Import the Security Guard (Middleware)
@@ -24,6 +25,9 @@ router.route("/login").post(loginUser);
 
 // Path: /api/v1/logout
 router.route("/logout").get(logout);
+
+// Path: /api/v1/user/lookup
+router.route("/user/lookup").get(lookupUser);
 
 // Path: /api/v1/user/:id (Public Profile)
 router.route("/user/:id").get(getPublicProfile);

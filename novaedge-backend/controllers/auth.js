@@ -7,7 +7,7 @@ const jwt = require("jsonwebtoken");
 // --- 1. REGISTER USER ---
 exports.registerUser = async (req, res, next) => {
   try {
-    const { name, email, password, referralCode } = req.body;
+    const { name, email, password, referralCode, username, phoneNumber } = req.body;
 
     let referredBy = null;
     if (referralCode) {
@@ -25,6 +25,8 @@ exports.registerUser = async (req, res, next) => {
       name,
       email,
       password,
+      username,
+      phoneNumber,
       avatar: {
         public_id: "avatars/default_avatar_id", // Default placeholder
         url: "https://res.cloudinary.com/demo/image/upload/v123456/avatar.jpg",
@@ -157,6 +159,8 @@ exports.updateProfile = async (req, res) => {
     const newUserData = {
       name: req.body.name,
       email: req.body.email,
+      username: req.body.username,
+      phoneNumber: req.body.phoneNumber,
     };
 
     // Update Avatar
@@ -188,6 +192,35 @@ exports.updateProfile = async (req, res) => {
       runValidators: true,
       useFindAndModify: false,
     });
+
+    res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// --- 7. LOOKUP USER (By Username or Phone) ---
+exports.lookupUser = async (req, res) => {
+  try {
+    const { username, phone } = req.query;
+    let query = {};
+
+    if (username) {
+      query.username = username;
+    } else if (phone) {
+      query.phoneNumber = phone;
+    } else {
+      return res.status(400).json({ success: false, message: "Please provide username or phone" });
+    }
+
+    const user = await User.findOne(query).select("_id name username avatar");
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
 
     res.status(200).json({
       success: true,

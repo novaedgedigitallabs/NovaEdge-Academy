@@ -12,6 +12,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import CourseCard from "@/components/course/CourseCard";
 import { useRouter } from "next/navigation";
@@ -27,6 +29,20 @@ export default function ProfilePage() {
   const [error, setError] = useState(null);
   const [avatar, setAvatar] = useState("");
   const [avatarPreview, setAvatarPreview] = useState("/placeholder.svg");
+
+  const [editName, setEditName] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [editUsername, setEditUsername] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+
+  useEffect(() => {
+    if (user) {
+      setEditName(user.name || "");
+      setEditEmail(user.email || "");
+      setEditUsername(user.username || "");
+      setEditPhone(user.phoneNumber || "");
+    }
+  }, [user]);
 
   const updateProfileDataChange = (e) => {
     const reader = new FileReader();
@@ -59,6 +75,33 @@ export default function ProfilePage() {
 
       const data = await res.json();
 
+      if (data.success) {
+        window.location.reload();
+      } else {
+        alert(data.message || "Update failed");
+      }
+    } catch (error) {
+      console.error("Update failed", error);
+      alert("Update failed");
+    }
+  };
+
+  const handleUpdateProfileDetails = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ""}/api/v1/me/update`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: editName,
+          email: editEmail,
+          username: editUsername,
+          phoneNumber: editPhone,
+        }),
+        credentials: "include"
+      });
+
+      const data = await res.json();
       if (data.success) {
         window.location.reload();
       } else {
@@ -342,27 +385,29 @@ export default function ProfilePage() {
                   <CardHeader>
                     <CardTitle>Account Settings</CardTitle>
                     <CardDescription>
-                      Manage your account preferences.
+                      Update your personal information.
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">
-                        Email Notifications
-                      </label>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          id="notify"
-                          className="rounded border-gray-300"
-                          defaultChecked
-                        />
-                        <label htmlFor="notify" className="text-sm">
-                          Receive updates about new courses
-                        </label>
+                  <CardContent>
+                    <form onSubmit={handleUpdateProfileDetails} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="name">Full Name</Label>
+                        <Input id="name" value={editName} onChange={(e) => setEditName(e.target.value)} />
                       </div>
-                    </div>
-                    <Button>Save Changes</Button>
+                      <div className="space-y-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input id="email" type="email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="username">Username</Label>
+                        <Input id="username" value={editUsername} onChange={(e) => setEditUsername(e.target.value)} placeholder="@username" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="phone">Phone Number</Label>
+                        <Input id="phone" value={editPhone} onChange={(e) => setEditPhone(e.target.value)} placeholder="+1234567890" />
+                      </div>
+                      <Button type="submit">Save Changes</Button>
+                    </form>
                   </CardContent>
                 </Card>
               </TabsContent>

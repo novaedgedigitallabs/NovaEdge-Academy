@@ -82,6 +82,39 @@ export default function GlobalSearchBar() {
                 }
             }
 
+            // Check if it looks like a username (starts with @)
+            if (query.trim().startsWith("@")) {
+                try {
+                    const username = query.trim().substring(1);
+                    const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || ""}/api/v1/user/lookup?username=${encodeURIComponent(username)}`;
+                    const res = await fetch(apiUrl);
+                    const data = await res.json();
+
+                    if (data.success && data.user) {
+                        router.push(`/user/${data.user._id}`);
+                        return;
+                    }
+                } catch (err) {
+                    console.error("Username lookup failed", err);
+                }
+            }
+
+            // Check if it looks like a phone number (10+ digits, optional +)
+            if (/^\+?\d{10,}$/.test(query.trim())) {
+                try {
+                    const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || ""}/api/v1/user/lookup?phone=${encodeURIComponent(query.trim())}`;
+                    const res = await fetch(apiUrl);
+                    const data = await res.json();
+
+                    if (data.success && data.user) {
+                        router.push(`/user/${data.user._id}`);
+                        return;
+                    }
+                } catch (err) {
+                    console.error("Phone lookup failed", err);
+                }
+            }
+
             router.push(`/search?q=${encodeURIComponent(query)}`);
         }
     };

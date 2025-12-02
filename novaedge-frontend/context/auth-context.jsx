@@ -97,7 +97,7 @@ export function AuthProvider({ children }) {
   };
 
   // REGISTER (POST /api/v1/register)
-  const register = async (email, name, password, referralCode) => {
+  const register = async (email, name, password, referralCode, username, phoneNumber) => {
     setIsLoading(true);
 
     try {
@@ -107,7 +107,7 @@ export function AuthProvider({ children }) {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: JSON.stringify({ name, email, password, referralCode }),
+          body: JSON.stringify({ name, email, password, referralCode, username, phoneNumber }),
         }
       );
 
