@@ -133,8 +133,17 @@ exports.getUserProfile = async (req, res, next) => {
 exports.getPublicProfile = async (req, res) => {
   try {
     const { id } = req.params;
+    let query = {};
+    const mongoose = require("mongoose");
+
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      query = { _id: id };
+    } else {
+      query = { username: id };
+    }
+
     // Select all fields except password, twoFactor secret, and reset token
-    const user = await User.findById(id).select("-password -twoFactor.secret -twoFactor.tempSecret -resetPasswordToken -resetPasswordExpire");
+    const user = await User.findOne(query).select("-password -twoFactor.secret -twoFactor.tempSecret -resetPasswordToken -resetPasswordExpire");
 
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
@@ -142,7 +151,7 @@ exports.getPublicProfile = async (req, res) => {
 
     // Fetch Certificates
     const Certificate = require("../models/Certificate");
-    const certificates = await Certificate.find({ user: id }).populate("course", "title poster");
+    const certificates = await Certificate.find({ user: user._id }).populate("course", "title poster");
 
     res.status(200).json({
       success: true,

@@ -98,8 +98,10 @@ app.use("/api/v1", require("./routes/search"));
 app.use("/api/v1/support", require("./routes/support"));
 app.use("/api/v1", require("./routes/twoFactor"));
 app.use("/api/v1/ai", require("./routes/ai"));
-
-// Error Handler Middleware
+app.use("/api/v1/friends", require("./routes/friend"));
+app.use("/api/v1/messages", require("./routes/message"));
+app.use("/api/v1/posts", require("./routes/post"));
+app.use("/api/v1/comments", require("./routes/comment"));
 app.use(require("./middleware/error"));
 
 

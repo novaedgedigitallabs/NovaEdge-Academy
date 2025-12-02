@@ -46,6 +46,12 @@ export default function Header() {
             <Link href="/mentors" className="hover:text-foreground transition-colors">
               Mentors
             </Link>
+            <Link href="/network" className="hover:text-foreground transition-colors">
+              Network
+            </Link>
+            <Link href="/messages" className="hover:text-foreground transition-colors">
+              Messages
+            </Link>
           </nav>
         </div>
 

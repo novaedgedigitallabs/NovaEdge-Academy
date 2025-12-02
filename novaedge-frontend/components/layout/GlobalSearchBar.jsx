@@ -72,8 +72,9 @@ export default function GlobalSearchBar() {
                         // The user object in certificate might be populated with just name/email or full object depending on controller
                         // Let's check the controller: .populate("user", "name email")
                         // We need the ID. .populate usually returns the object with _id.
-                        const userId = data.certificate.user._id || data.certificate.user;
-                        router.push(`/user/${userId}`);
+                        const user = data.certificate.user;
+                        const target = user.username ? `/${user.username}` : `/user/${user._id || user}`;
+                        router.push(target);
                         return;
                     }
                 } catch (err) {
@@ -91,7 +92,8 @@ export default function GlobalSearchBar() {
                     const data = await res.json();
 
                     if (data.success && data.user) {
-                        router.push(`/user/${data.user._id}`);
+                        const target = data.user.username ? `/${data.user.username}` : `/user/${data.user._id}`;
+                        router.push(target);
                         return;
                     }
                 } catch (err) {
@@ -107,7 +109,8 @@ export default function GlobalSearchBar() {
                     const data = await res.json();
 
                     if (data.success && data.user) {
-                        router.push(`/user/${data.user._id}`);
+                        const target = data.user.username ? `/${data.user.username}` : `/user/${data.user._id}`;
+                        router.push(target);
                         return;
                     }
                 } catch (err) {
@@ -140,9 +143,8 @@ export default function GlobalSearchBar() {
                             <Link
                                 key={idx}
                                 href={
-                                    item.type === "course" ? `/courses/${item.id}` :
-                                        item.type === "blog" ? `/blogs/${item.id}` :
-                                            item.type === "mentor" ? `/mentors/${item.id}` : "#"
+                                    item.type === "mentor" ? `/mentors/${item.id}` :
+                                        item.type === "user" ? `/user/${item.id}` : "#" // Autocomplete returns ID for users, we can fix this later or let it redirect
                                 }
                                 className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted rounded-sm cursor-pointer"
                                 onClick={() => setIsOpen(false)}
@@ -161,7 +163,8 @@ export default function GlobalSearchBar() {
                         </div>
                     </div>
                 </div>
-            )}
-        </div>
+            )
+            }
+        </div >
     );
 }

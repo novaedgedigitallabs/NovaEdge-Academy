@@ -3,15 +3,21 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { apiGet } from "@/lib/api";
+import { getUserPosts } from "@/services/post";
+import PostCard from "@/components/post/PostCard";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Calendar } from "lucide-react";
+import FriendActionButton from "@/components/friend/FriendActionButton";
+import { useAuth } from "@/context/auth-context";
 
 export default function PublicProfilePage() {
     const { id } = useParams();
+    const { user: currentUser } = useAuth();
     const [user, setUser] = useState(null);
+    const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -24,6 +30,14 @@ export default function PublicProfilePage() {
                     setUser({ ...res.user, certificates: res.certificates });
                 } else {
                     setError(res.message || "User not found");
+                }
+
+                // Fetch posts if user found
+                if (res.success && res.user) {
+                    const postsRes = await getUserPosts(res.user._id);
+                    if (postsRes.success) {
+                        setPosts(postsRes.posts);
+                    }
                 }
             } catch (err) {
                 setError(err.message || "Failed to load profile");
@@ -79,6 +93,12 @@ export default function PublicProfilePage() {
                                 </Avatar>
                                 <h1 className="text-2xl font-bold mb-1">{user.name}</h1>
                                 <p className="text-muted-foreground capitalize mb-4">{user.role}</p>
+
+                                {currentUser && currentUser._id !== user._id && (
+                                    <div className="mb-6">
+                                        <FriendActionButton otherUserId={user._id} />
+                                    </div>
+                                )}
 
                                 <div className="w-full space-y-3 text-left">
                                     <div className="flex items-center text-sm text-muted-foreground">
@@ -136,6 +156,27 @@ export default function PublicProfilePage() {
                                 )}
                             </CardContent>
                         </Card>
+
+
+                        {/* User Posts */}
+                        <div className="space-y-4">
+                            <h2 className="text-xl font-bold">Posts</h2>
+                            {posts.length > 0 ? (
+                                posts.map(post => (
+                                    <PostCard
+                                        key={post._id}
+                                        post={post}
+                                        onDelete={(id) => setPosts(prev => prev.filter(p => p._id !== id))}
+                                    />
+                                ))
+                            ) : (
+                                <Card>
+                                    <CardContent className="p-8 text-center text-muted-foreground">
+                                        No posts yet.
+                                    </CardContent>
+                                </Card>
+                            )}
+                        </div>
                     </div>
                 </div>
             </main>

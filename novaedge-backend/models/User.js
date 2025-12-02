@@ -58,6 +58,12 @@ const userSchema = new mongoose.Schema({
       ref: "Course",
     },
   ],
+  friends: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
   wishlist: [
     {
       type: mongoose.Schema.Types.ObjectId,

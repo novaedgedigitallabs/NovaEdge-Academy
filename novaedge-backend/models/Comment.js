@@ -1,40 +1,33 @@
 const mongoose = require("mongoose");
 
 const commentSchema = new mongoose.Schema({
-    discussion: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Discussion",
-        required: true,
-    },
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
         required: true,
     },
-    content: {
-        type: String,
+    post: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Post",
         required: true,
     },
-    parentComment: {
+    content: {
+        type: String,
+        required: [true, "Please enter comment content"],
+        trim: true,
+        maxLength: [1000, "Comment cannot exceed 1000 characters"],
+    },
+    parent: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Comment",
         default: null,
     },
-    upvotes: [
+    likes: [
         {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
         },
     ],
-    isSolution: {
-        type: Boolean,
-        default: false,
-    },
-    status: {
-        type: String,
-        enum: ["active", "deleted"],
-        default: "active",
-    },
     createdAt: {
         type: Date,
         default: Date.now,

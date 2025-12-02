@@ -9,31 +9,38 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, CheckCircle2, PlayCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import CreatePost from "@/components/post/CreatePost";
+import PostCard from "@/components/post/PostCard";
+import { getAllPosts } from "@/services/post";
 
 export default function Home() {
   const [courses, setCourses] = useState([]);
+  const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     let ignore = false;
-    const fetchCourses = async () => {
+    const fetchData = async () => {
       setLoading(true);
       setError(null);
       try {
         const base = process.env.NEXT_PUBLIC_API_URL || "";
-        const res = await fetch(`${base}/api/v1/courses`, {
-          credentials: "include",
-        });
 
-        if (!res.ok) {
-          const errBody = await res.json().catch(() => ({}));
+        // Parallel fetch for courses and posts
+        const [coursesRes, postsRes] = await Promise.all([
+          fetch(`${base}/api/v1/courses`, { credentials: "include" }),
+          getAllPosts()
+        ]);
+
+        // Handle Courses
+        if (!coursesRes.ok) {
+          const errBody = await coursesRes.json().catch(() => ({}));
           throw new Error(errBody.message || "Failed to load courses");
         }
 
-        const data = await res.json();
-        // support shapes: { courses: [...] } or direct array
-        const fetched = Array.isArray(data.courses)
+        const data = await coursesRes.json();
+        const fetchedCourses = Array.isArray(data.courses)
           ? data.courses
           : Array.isArray(data)
             ? data
@@ -41,7 +48,13 @@ export default function Home() {
               ? data.data
               : [];
 
-        if (!ignore) setCourses(fetched);
+        if (!ignore) setCourses(fetchedCourses);
+
+        // Handle Posts
+        if (postsRes.success) {
+          if (!ignore) setPosts(postsRes.posts);
+        }
+
       } catch (err) {
         if (!ignore) {
           setError(err.message || "Something went wrong");
@@ -52,7 +65,7 @@ export default function Home() {
       }
     };
 
-    fetchCourses();
+    fetchData();
     return () => {
       ignore = true;
     };
@@ -145,6 +158,28 @@ export default function Home() {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Community Feed Section */}
+        <section className="py-12 bg-muted/20">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
+            <h2 className="text-3xl font-bold tracking-tight mb-8 text-center">Community Feed</h2>
+
+            <CreatePost onPostCreated={(newPost) => setPosts(prev => [newPost, ...prev])} />
+
+            <div className="space-y-4">
+              {posts.map(post => (
+                <PostCard
+                  key={post._id}
+                  post={post}
+                  onDelete={(id) => setPosts(prev => prev.filter(p => p._id !== id))}
+                />
+              ))}
+              {posts.length === 0 && (
+                <p className="text-center text-muted-foreground py-8">No posts yet. Be the first to share something!</p>
+              )}
             </div>
           </div>
         </section>
