@@ -29,6 +29,12 @@ The frontend application for the NovaEdge Academy LMS. Built with Next.js 14, Ta
   - **AI Assistant:** Smart Summaries, Practice Quizzes, and Chat
   - Profile Management
 
+- **Social Community:**
+  - **Network:** Manage friends and connection requests.
+  - **Chat:** Real-time messaging with friends and AI integration.
+  - **Feed:** Create and view posts, comments, and reposts.
+  - **Public Profiles:** View user achievements, certificates, and posts.
+
 - **Mentor Dashboard:**
   - Course Creation & Management
   - Student Progress Views

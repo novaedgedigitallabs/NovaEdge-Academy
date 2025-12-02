@@ -41,6 +41,9 @@ NovaEdge Academy is a comprehensive Learning Management System (LMS) designed to
 - **Blog & Careers:** Read educational articles and explore career opportunities.
 - **Mentorship:** Connect with mentors (view mentor profiles).
 - **AI Assistant:** Smart lecture summaries, interactive quizzes, and a 24/7 AI Chat Assistant (powered by Gemini) to answer questions in simple language.
+- **Social Network:** Connect with other learners, send friend requests, and manage your network.
+- **Community Feed:** Create posts, share thoughts, comment, like, and repost content.
+- **Real-time Chat:** Message friends directly and interact with the AI assistant in the same interface.
 
 ### Admin Features
 - **Dashboard:** Overview of platform statistics (users, sales, courses).
@@ -195,6 +198,10 @@ Base URL: `/api/v1`
 - **Audit:** `/admin/audit` (GET, POST)
 - **Contact:** `/contact` (POST)
 - **Upload:** `/upload` (POST - for file uploads)
+- **Friends:** `/friends` (Request, Accept, Reject, List)
+- **Messages:** `/messages` (Send, Get History)
+- **Posts:** `/posts` (Create, Feed, Like, Delete)
+- **Comments:** `/comments` (Add, Reply, Like, Delete)
 
 ---
 
@@ -213,7 +220,11 @@ Base URL: `/api/v1`
 - **Authentication**: Login (`/login`) and Register (`/register`) pages.
 - **Dashboard (`/profile`)**: User profile management.
 - **My Learning (`/enrollments`)**: Access to purchased courses.
+- **My Learning (`/enrollments`)**: Access to purchased courses.
 - **Checkout (`/checkout`)**: Secure checkout page for purchasing courses.
+- **Network (`/network`)**: Manage friends and requests.
+- **Messages (`/messages`)**: Chat with friends and AI.
+- **Public Profile (`/user/[id]` or `/@username`)**: View user profiles, certificates, and posts.
 
 ### Admin Flow
 - **Admin Panel (`/admin`)**: Protected route for administrators.

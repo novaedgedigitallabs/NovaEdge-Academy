@@ -45,11 +45,13 @@ The backend API for the NovaEdge Academy Learning Management System (LMS). Built
   - Content Moderation
   - System Analytics
 
-- **Engagement:**
+- **Engagement & Social:**
   - Reviews & Ratings
   - Discussion Forums
-  - Real-time Chat
-  - Badges & Gamification
+  - Real-time Chat (Socket.io/Polling)
+  - Friend System (Requests, Connections)
+  - User Posts & Feed
+  - Comments & Reposts
   - Badges & Gamification
   - Wishlist
 
@@ -126,6 +128,7 @@ The API is prefixed with `/api/v1`. Key endpoints include:
 - **Payments:** `/api/v1/payment`
 - **Enrollment:** `/api/v1/enrollment`
 - **Support:** `/api/v1/support`
+- **Social:** `/api/v1/friends`, `/api/v1/messages`, `/api/v1/posts`, `/api/v1/comments`
 
 ## 🤝 Contributing
 
