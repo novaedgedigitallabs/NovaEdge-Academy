@@ -21,12 +21,17 @@ connectCloudinary();
 app.use(express.json({ limit: "50mb" })); // Parse JSON bodies (limit increased for big data)
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(cookieParser()); // Parse cookies (for Auth)
-app.use(
-  fileUpload({
-    limits: { fileSize: 50 * 1024 * 1024 }, // 50MB Limit
-    useTempFiles: true, // Important for Cloudinary upload
-  })
-);
+app.use((req, res, next) => {
+  // Skip express-fileupload for Drive uploads (uses multer)
+  if (req.path === "/api/v1/uploads/drive") {
+    next();
+  } else {
+    fileUpload({
+      limits: { fileSize: 50 * 1024 * 1024 }, // 50MB Limit
+      useTempFiles: true, // Important for Cloudinary upload
+    })(req, res, next);
+  }
+});
 
 // CORS Configuration (Allow Frontend to talk to Backend)
 app.use(
@@ -56,6 +61,7 @@ const contact = require("./routes/contact");
 const career = require("./routes/career");
 const blog = require("./routes/blog");
 const mentor = require("./routes/mentor");
+const hashtag = require("./routes/hashtag"); // Added by instruction
 
 // 5. Mount Routes
 // All URLs will start with /api/v1
@@ -102,6 +108,8 @@ app.use("/api/v1/friends", require("./routes/friend"));
 app.use("/api/v1/messages", require("./routes/message"));
 app.use("/api/v1/posts", require("./routes/post"));
 app.use("/api/v1/comments", require("./routes/comment"));
+app.use("/api/v1", require("./routes/driveUpload"));
+app.use("/api/v1/hashtag", hashtag);
 app.use(require("./middleware/error"));
 
 

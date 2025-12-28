@@ -1,117 +1,24 @@
 "use client";
 
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
 import { useAuth } from "@/context/auth-context";
+import AppLayout from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import CourseCard from "@/components/course/CourseCard";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Calendar, MapPin, Link as LinkIcon, ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 export default function ProfilePage() {
-  const { user, isLoading: authLoading, logout } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
 
   const [loading, setLoading] = useState(true);
-  const [courses, setCourses] = useState([]); // array of course objects
+  const [courses, setCourses] = useState([]);
   const [certificates, setCertificates] = useState([]);
   const [error, setError] = useState(null);
-  const [avatar, setAvatar] = useState("");
-  const [avatarPreview, setAvatarPreview] = useState("/placeholder.svg");
-
-  const [editName, setEditName] = useState("");
-  const [editEmail, setEditEmail] = useState("");
-  const [editUsername, setEditUsername] = useState("");
-  const [editPhone, setEditPhone] = useState("");
-
-  useEffect(() => {
-    if (user) {
-      setEditName(user.name || "");
-      setEditEmail(user.email || "");
-      setEditUsername(user.username || "");
-      setEditPhone(user.phoneNumber || "");
-    }
-  }, [user]);
-
-  const updateProfileDataChange = (e) => {
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      if (reader.readyState === 2) {
-        setAvatarPreview(reader.result);
-        setAvatar(reader.result);
-        handleUpdateProfile(reader.result);
-      }
-    };
-
-    reader.readAsDataURL(e.target.files[0]);
-  };
-
-  const handleUpdateProfile = async (newAvatar) => {
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ""}/api/v1/me/update`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: user.name,
-          email: user.email,
-          avatar: newAvatar
-        }),
-        credentials: "include"
-      });
-
-      const data = await res.json();
-
-      if (data.success) {
-        window.location.reload();
-      } else {
-        alert(data.message || "Update failed");
-      }
-    } catch (error) {
-      console.error("Update failed", error);
-      alert("Update failed");
-    }
-  };
-
-  const handleUpdateProfileDetails = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ""}/api/v1/me/update`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: editName,
-          email: editEmail,
-          username: editUsername,
-          phoneNumber: editPhone,
-        }),
-        credentials: "include"
-      });
-
-      const data = await res.json();
-      if (data.success) {
-        window.location.reload();
-      } else {
-        alert(data.message || "Update failed");
-      }
-    } catch (error) {
-      console.error("Update failed", error);
-      alert("Update failed");
-    }
-  };
 
   // redirect to login if not authenticated
   useEffect(() => {
@@ -120,7 +27,7 @@ export default function ProfilePage() {
     }
   }, [authLoading, user, router]);
 
-  // Fetch enrolled courses and certificates once user is available
+  // Fetch enrolled courses and certificates
   useEffect(() => {
     if (!user) return;
 
@@ -132,9 +39,7 @@ export default function ProfilePage() {
         // Fetch Enrollments
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL || ""}/api/v1/enrollments/me`,
-          {
-            credentials: "include",
-          }
+          { credentials: "include" }
         );
 
         if (!res.ok) {
@@ -160,8 +65,7 @@ export default function ProfilePage() {
         }
         setCourses(fetchedCourses);
 
-        // Fetch Certificates (using fetch directly to keep it simple within this effect, or import service)
-        // Let's use fetch directly to match existing style in this file
+        // Fetch Certificates
         const certRes = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL || ""}/api/v1/my/certificates`,
           { credentials: "include" }
@@ -182,240 +86,133 @@ export default function ProfilePage() {
     fetchData();
   }, [user, router]);
 
-  // show nothing until auth resolved or redirect runs
   if (authLoading || !user) return null;
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      <main className="flex-1 container mx-auto px-4 py-8 max-w-7xl">
-        <div className="flex flex-col md:flex-row gap-8">
-          {/* Sidebar */}
-          <aside className="w-full md:w-64 space-y-4">
-            <Card>
-              <CardContent className="pt-6 text-center">
-                <div className="mb-4 relative mx-auto w-24 h-24 group cursor-pointer">
-                  <Avatar className="w-24 h-24">
-                    <AvatarImage
-                      src={avatarPreview === "/placeholder.svg" ? (user.avatar?.url || "/placeholder.svg") : avatarPreview}
-                      alt={user.name}
-                    />
-                    <AvatarFallback>
-                      {user.name?.charAt(0) || "U"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <label htmlFor="avatar-upload" className="text-white text-xs cursor-pointer">Edit</label>
-                  </div>
-                  <input
-                    type="file"
-                    id="avatar-upload"
-                    className="hidden"
-                    accept="image/*"
-                    onChange={updateProfileDataChange}
-                  />
-                </div>
-                <h2 className="text-xl font-bold">{user.name}</h2>
-                <p className="text-sm text-muted-foreground">{user.email}</p>
-                <div className="mt-4 flex flex-col gap-2">
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start bg-transparent"
-                  >
-                    Edit Profile
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start bg-transparent"
-                    onClick={() => {
-                      const url = `${window.location.origin}/user/${user._id}`;
-                      navigator.clipboard.writeText(url);
-                      // You might want to add a toast here
-                      alert("Profile link copied to clipboard!");
-                    }}
-                  >
-                    Share Profile
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    className="w-full justify-start"
-                    onClick={logout}
-                  >
-                    Log Out
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </aside>
+    <AppLayout className="max-w-2xl xl:max-w-3xl border-r border-border p-0 sm:pb-0">
+      {/* Header / Back button */}
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md px-4 py-2 flex items-center gap-4 border-b border-border">
+        <Button variant="ghost" size="icon" className="rounded-full" onClick={() => router.back()}>
+          <ArrowLeft className="w-5 h-5" />
+        </Button>
+        <div>
+          <h1 className="text-lg font-bold leading-5">{user.name}</h1>
+          <p className="text-xs text-muted-foreground">{courses.length} Courses</p>
+        </div>
+      </div>
 
-          {/* Main Content */}
-          <div className="flex-1">
-            <Tabs defaultValue="enrolled" className="w-full">
-              <TabsList className="mb-6">
-                <TabsTrigger value="enrolled">Enrolled Courses</TabsTrigger>
-                <TabsTrigger value="certificates">Certificates</TabsTrigger>
-                <TabsTrigger value="settings">Settings</TabsTrigger>
-              </TabsList>
+      {/* Cover Image */}
+      <div className="h-48 bg-muted relative">
+        {/* Placeholder for cover image */}
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20" />
+      </div>
 
-              <TabsContent value="enrolled">
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-2xl font-bold tracking-tight mb-2">
-                      My Courses
-                    </h3>
-                    <p className="text-muted-foreground">
-                      Continue learning where you left off.
-                    </p>
-                  </div>
-
-                  {/* Loading state */}
-                  {loading && (
-                    <div className="py-8 text-center text-muted-foreground">
-                      Loading your courses...
-                    </div>
-                  )}
-
-                  {/* Error state */}
-                  {error && (
-                    <div className="py-4 text-center text-destructive">
-                      <p className="mb-2">Error: {error}</p>
-                      <Button onClick={() => window.location.reload()}>
-                        Retry
-                      </Button>
-                    </div>
-                  )}
-
-                  {/* Empty state */}
-                  {!loading && !error && courses.length === 0 && (
-                    <div className="py-8 text-center text-muted-foreground">
-                      <p className="mb-4">
-                        You are not enrolled in any courses yet.
-                      </p>
-                      <Button onClick={() => router.push("/courses")}>
-                        Browse Courses
-                      </Button>
-                    </div>
-                  )}
-
-                  {/* Courses grid */}
-                  {!loading && !error && courses.length > 0 && (
-                    <div className="grid sm:grid-cols-2 gap-6">
-                      {courses.map((course) => {
-                        // CourseCard expects "course" prop; adapt if your shape differs
-                        // if course has ._id use it as key, else .id
-                        const key =
-                          course._id ||
-                          course.id ||
-                          course.slug ||
-                          Math.random();
-                        return <CourseCard key={key} course={course} />;
-                      })}
-                    </div>
-                  )}
-                </div>
-              </TabsContent>
-
-              <TabsContent value="certificates">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>My Certificates</CardTitle>
-                    <CardDescription>
-                      View and download your earned certificates.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {loading ? (
-                      <div className="py-8 text-center text-muted-foreground">Loading certificates...</div>
-                    ) : certificates.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
-                        <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-4">
-                          <svg
-                            className="w-6 h-6"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                            />
-                          </svg>
-                        </div>
-                        <p>You haven&apos;t earned any certificates yet.</p>
-                        <Button
-                          variant="link"
-                          className="mt-2"
-                          onClick={() => router.push("/courses")}
-                        >
-                          Browse Courses
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="grid gap-4 md:grid-cols-2">
-                        {certificates.map((cert) => (
-                          <div
-                            key={cert._id}
-                            className="flex items-start space-x-4 rounded-lg border p-4"
-                          >
-                            <div className="flex-1 space-y-1">
-                              <p className="font-medium leading-none">
-                                {cert.course?.title || "Course Certificate"}
-                              </p>
-                              <p className="text-sm text-muted-foreground">
-                                Issued on {new Date(cert.issueDate).toLocaleDateString()}
-                              </p>
-                            </div>
-                            <Button variant="outline" size="sm" asChild>
-                              <a href={`${process.env.NEXT_PUBLIC_API_URL || ""}/api/v1/certificate/${cert.certificateId}/download`} target="_blank" rel="noopener noreferrer">
-                                Download
-                              </a>
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="settings">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Account Settings</CardTitle>
-                    <CardDescription>
-                      Update your personal information.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <form onSubmit={handleUpdateProfileDetails} className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="name">Full Name</Label>
-                        <Input id="name" value={editName} onChange={(e) => setEditName(e.target.value)} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="email">Email</Label>
-                        <Input id="email" type="email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="username">Username</Label>
-                        <Input id="username" value={editUsername} onChange={(e) => setEditUsername(e.target.value)} placeholder="@username" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="phone">Phone Number</Label>
-                        <Input id="phone" value={editPhone} onChange={(e) => setEditPhone(e.target.value)} placeholder="+1234567890" />
-                      </div>
-                      <Button type="submit">Save Changes</Button>
-                    </form>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
+      {/* Profile Info */}
+      <div className="px-4 pb-4 relative">
+        <div className="flex justify-between items-start">
+          <div className="-mt-16 mb-3">
+            <Avatar className="w-32 h-32 border-4 border-background">
+              <AvatarImage src={user.avatar?.url} alt={user.name} />
+              <AvatarFallback className="text-4xl">{user.name?.charAt(0)}</AvatarFallback>
+            </Avatar>
+          </div>
+          <div className="mt-3">
+            <Button variant="outline" className="rounded-full font-bold" onClick={() => router.push("/settings")}>
+              Edit profile
+            </Button>
           </div>
         </div>
-      </main>
-      <Footer />
-    </div>
+
+        <div className="mb-4">
+          <h2 className="text-xl font-bold leading-6">{user.name}</h2>
+          <p className="text-muted-foreground">@{user.username || user.email.split('@')[0]}</p>
+        </div>
+
+        <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground mb-4">
+          {user.role === "admin" && (
+            <span className="bg-primary/10 text-primary px-2 py-0.5 rounded text-xs font-bold">Admin</span>
+          )}
+          <div className="flex items-center gap-1">
+            <Calendar className="w-4 h-4" />
+            <span>Joined {new Date(user.createdAt || Date.now()).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}</span>
+          </div>
+        </div>
+
+        <div className="flex gap-4 text-sm mb-4">
+          <div className="hover:underline cursor-pointer">
+            <span className="font-bold text-foreground">{courses.length}</span> <span className="text-muted-foreground">Enrolled</span>
+          </div>
+          <div className="hover:underline cursor-pointer">
+            <span className="font-bold text-foreground">{certificates.length}</span> <span className="text-muted-foreground">Certificates</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <Tabs defaultValue="courses" className="w-full">
+        <TabsList className="w-full justify-start bg-transparent border-b rounded-none h-auto p-0">
+          <TabsTrigger
+            value="courses"
+            className="flex-1 rounded-none border-b-4 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-3 font-bold text-muted-foreground data-[state=active]:text-foreground hover:bg-muted/50 transition-colors"
+          >
+            Courses
+          </TabsTrigger>
+          <TabsTrigger
+            value="certificates"
+            className="flex-1 rounded-none border-b-4 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-3 font-bold text-muted-foreground data-[state=active]:text-foreground hover:bg-muted/50 transition-colors"
+          >
+            Certificates
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="courses" className="p-4">
+          {loading && <div className="text-center py-8 text-muted-foreground">Loading...</div>}
+
+          {!loading && courses.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground mb-4">You haven't enrolled in any courses yet.</p>
+              <Button onClick={() => router.push("/courses")}>Browse Courses</Button>
+            </div>
+          )}
+
+          {!loading && courses.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {courses.map((course) => {
+                const key = course._id || course.id || Math.random();
+                return <CourseCard key={key} course={course} />;
+              })}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="certificates" className="p-4">
+          {loading && <div className="text-center py-8 text-muted-foreground">Loading...</div>}
+
+          {!loading && certificates.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No certificates earned yet.</p>
+            </div>
+          )}
+
+          {!loading && certificates.length > 0 && (
+            <div className="space-y-4">
+              {certificates.map((cert) => (
+                <div key={cert._id} className="flex items-center justify-between p-4 border rounded-xl hover:bg-muted/50 transition-colors">
+                  <div>
+                    <p className="font-bold">{cert.course?.title || "Course Certificate"}</p>
+                    <p className="text-sm text-muted-foreground">Issued on {new Date(cert.issueDate).toLocaleDateString()}</p>
+                  </div>
+                  <Button variant="outline" size="sm" asChild>
+                    <a href={`${process.env.NEXT_PUBLIC_API_URL || ""}/api/v1/certificate/${cert.certificateId}/download`} target="_blank" rel="noopener noreferrer">
+                      Download
+                    </a>
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
+    </AppLayout>
   );
 }

@@ -64,13 +64,38 @@ exports.generateCertificate = async (req, res) => {
       qrCodeBuffer
     );
 
-    // G. Upload to Cloudinary
-    const myCloud = await cloudinary.uploader.upload(filePath, {
-      folder: "lms_certificates",
-      resource_type: "raw", // Important for PDFs to be downloadable
+    // G. Upload to Google Drive (Structured)
+    const { ensureUserFolder, uploadFileToFolder } = require("../utils/googleDrive");
+    const DriveFile = require("../models/DriveFile");
+
+    // 1. Get/Create User Folder
+    const userFolderId = await ensureUserFolder(userId, user.username);
+
+    // 2. Read file buffer
+    const fileBuffer = fs.readFileSync(filePath);
+
+    // 3. Upload
+    const driveFile = await uploadFileToFolder(
+      fileBuffer,
+      `Certificate-${uniqueId}.pdf`,
+      "application/pdf",
+      userFolderId
+    );
+
+    // 4. Save DriveFile Metadata
+    await DriveFile.create({
+      filename: `Certificate-${uniqueId}.pdf`,
+      mimeType: "application/pdf",
+      size: driveFile.size, // API returns size
+      uploader: userId,
+      driveFileId: driveFile.id,
+      folderId: userFolderId,
+      webViewLink: driveFile.webViewLink,
+      webContentLink: driveFile.webContentLink,
+      storage: "drive",
     });
 
-    // H. Delete the local temp file (Cleanup server)
+    // H. Delete the local temp file
     fs.unlinkSync(filePath);
 
     // I. Save to Database
@@ -78,7 +103,7 @@ exports.generateCertificate = async (req, res) => {
       user: userId,
       course: courseId,
       certificateId: uniqueId,
-      pdfUrl: myCloud.secure_url,
+      pdfUrl: driveFile.webViewLink, // Use Drive Link
     });
 
     res.status(201).json({
@@ -185,10 +210,35 @@ exports.adminGenerateCertificate = async (req, res) => {
       qrCodeBuffer
     );
 
-    // F. Upload to Cloudinary
-    const myCloud = await cloudinary.uploader.upload(filePath, {
-      folder: "lms_certificates",
-      resource_type: "raw",
+    // F. Upload to Google Drive (Structured)
+    const { ensureUserFolder, uploadFileToFolder } = require("../utils/googleDrive");
+    const DriveFile = require("../models/DriveFile");
+
+    // 1. Get/Create User Folder
+    const userFolderId = await ensureUserFolder(userId, user.username);
+
+    // 2. Read file buffer
+    const fileBuffer = fs.readFileSync(filePath);
+
+    // 3. Upload
+    const driveFile = await uploadFileToFolder(
+      fileBuffer,
+      `Certificate-${uniqueId}.pdf`,
+      "application/pdf",
+      userFolderId
+    );
+
+    // 4. Save DriveFile Metadata
+    await DriveFile.create({
+      filename: `Certificate-${uniqueId}.pdf`,
+      mimeType: "application/pdf",
+      size: driveFile.size,
+      uploader: userId,
+      driveFileId: driveFile.id,
+      folderId: userFolderId,
+      webViewLink: driveFile.webViewLink,
+      webContentLink: driveFile.webContentLink,
+      storage: "drive",
     });
 
     // G. Delete local file
@@ -199,7 +249,7 @@ exports.adminGenerateCertificate = async (req, res) => {
       user: userId,
       course: courseId,
       certificateId: uniqueId,
-      pdfUrl: myCloud.secure_url,
+      pdfUrl: driveFile.webViewLink,
     });
 
     res.status(201).json({

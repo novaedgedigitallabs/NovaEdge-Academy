@@ -23,10 +23,15 @@ const postSchema = new mongoose.Schema({
         ref: "Post",
         default: null,
     },
+    hashtags: [String],
     createdAt: {
         type: Date,
         default: Date.now,
     },
+    views: {
+        type: Number,
+        default: 0,
+    }
 });
 
 module.exports = mongoose.model("Post", postSchema);

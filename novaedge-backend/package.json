@@ -22,6 +22,7 @@
     "express": "^5.1.0",
     "express-fileupload": "^1.5.2",
     "geoip-lite": "^1.4.10",
+    "googleapis": "^166.0.0",
     "handlebars": "^4.7.8",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^7.0.0",

@@ -127,6 +127,22 @@ novaedge/
 
    # AI (Google Gemini)
    GEMINI_API_KEY=your_gemini_api_key
+
+   # Google Drive Upload (Option 1: OAuth2 - Recommended for Personal Accounts)
+   # 1. Create OAuth2 Credentials in Google Cloud Console (Web Application).
+   # 2. Add "https://developers.google.com/oauthplayground" to Authorized Redirect URIs.
+   # 3. Run: node scripts/getRefreshToken.js <CLIENT_ID> <CLIENT_SECRET>
+   # 4. Follow instructions to get Refresh Token.
+   GOOGLE_CLIENT_ID=your_client_id
+   GOOGLE_CLIENT_SECRET=your_client_secret
+   GOOGLE_REFRESH_TOKEN=your_refresh_token
+   GOOGLE_REDIRECT_URI=https://developers.google.com/oauthplayground
+   
+   # Google Drive Upload (Option 2: Service Account - For Workspace/Shared Drives)
+   # GOOGLE_APPLICATION_CREDENTIALS=./path/to/service-account.json
+   
+   DRIVE_FOLDER_ID=your_drive_folder_id
+   MAX_UPLOAD_BYTES=52428800 # 50MB
    ```
 
 4. Start the server:

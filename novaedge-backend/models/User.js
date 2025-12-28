@@ -106,6 +106,9 @@ const userSchema = new mongoose.Schema({
     tempSecret: { type: String, select: false },
     tempSecretExpires: Date,
   },
+  driveFolderId: {
+    type: String, // Google Drive Folder ID for this user
+  },
 });
 
 // --- SMART METHODS (The Brains) ---

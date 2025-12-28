@@ -1,16 +1,45 @@
 const Post = require("../models/Post");
 const User = require("../models/User");
+const Hashtag = require("../models/Hashtag");
 
 // 1. Create a Post
 exports.createPost = async (req, res) => {
     try {
         const { content, repostOf } = req.body;
 
+        // Extract hashtags
+        const hashtags = content.match(/#[a-z0-9_]+/gi);
+        const uniqueHashtags = hashtags ? [...new Set(hashtags.map(tag => tag.toLowerCase().replace('#', '')))] : [];
+
+        if (uniqueHashtags.length > 10) {
+            return res.status(400).json({
+                success: false,
+                message: "You can only add up to 10 hashtags per post"
+            });
+        }
+
         const post = await Post.create({
             content,
             user: req.user.id,
             repostOf: repostOf || null,
+            hashtags: uniqueHashtags,
         });
+
+        // Update Hashtag Stats
+        if (uniqueHashtags.length > 0) {
+            const bulkOps = uniqueHashtags.map(tag => ({
+                updateOne: {
+                    filter: { tag },
+                    update: {
+                        $inc: { postsCount: 1 },
+                        $addToSet: { users: req.user.id },
+                        $set: { lastUsed: Date.now() }
+                    },
+                    upsert: true
+                }
+            }));
+            await Hashtag.bulkWrite(bulkOps);
+        }
 
         // Populate user details for immediate display
         await post.populate("user", "name avatar username");
