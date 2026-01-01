@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { getMentorProfile } from "@/services/mentor";
 import Link from "next/link";
-import { Users, Video, FileText, ArrowRight } from "lucide-react";
+import { Users, Video, FileText } from "lucide-react";
 
 export default function MentorCoursesPage() {
     const [courses, setCourses] = useState([]);

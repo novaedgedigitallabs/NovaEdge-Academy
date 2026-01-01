@@ -1,56 +1,46 @@
-import api from "@/lib/api";
+import { apiGet, apiPost, apiPut } from "@/lib/api";
 
 export const getMentorProfile = async () => {
-    const response = await api.get("/mentor/me");
-    return response.data;
+    return await apiGet("/mentor/me");
 };
 
 export const getMentorAnalytics = async () => {
-    const response = await api.get("/mentor/analytics/overview");
-    return response.data;
+    return await apiGet("/mentor/analytics/overview");
 };
 
 export const uploadLecture = async (courseId, data) => {
-    const response = await api.post(`/mentor/course/${courseId}/lecture`, data);
-    return response.data;
+    return await apiPost(`/mentor/course/${courseId}/lecture`, data);
 };
 
 export const editLecture = async (courseId, lectureId, data) => {
-    const response = await api.put(`/mentor/course/${courseId}/lecture/${lectureId}`, data);
-    return response.data;
+    return await apiPut(`/mentor/course/${courseId}/lecture/${lectureId}`, data);
 };
 
 export const createAssignment = async (courseId, data) => {
-    const response = await api.post(`/mentor/course/${courseId}/assignment`, data);
-    return response.data;
+    return await apiPost(`/mentor/course/${courseId}/assignment`, data);
 };
 
 export const getCourseAssignments = async (courseId) => {
-    const response = await api.get(`/mentor/course/${courseId}/assignments`);
-    return response.data;
+    return await apiGet(`/mentor/course/${courseId}/assignments`);
 };
 
 export const getCourseStudents = async (courseId) => {
-    const response = await api.get(`/mentor/course/${courseId}/students`);
-    return response.data;
+    return await apiGet(`/mentor/course/${courseId}/students`);
 };
 
 export const getStudentPerformance = async (courseId, studentId) => {
-    const response = await api.get(`/mentor/course/${courseId}/student/${studentId}/performance`);
-    return response.data;
+    return await apiGet(`/mentor/course/${courseId}/student/${studentId}/performance`);
 };
 
 export const getCourseQuestions = async (courseId, params) => {
-    const response = await api.get(`/mentor/course/${courseId}/questions`, { params });
-    return response.data;
+    return await apiGet(`/mentor/course/${courseId}/questions`, { params });
 };
 
 export const replyToQuestion = async (questionId, content) => {
-    const response = await api.post(`/question/${questionId}/reply`, { content });
-    return response.data;
+    return await apiPost(`/question/${questionId}/reply`, { content });
 };
 
 export const gradeSubmission = async (submissionId, data) => {
-    const response = await api.put(`/mentor/assignment/${submissionId}/grade`, data);
-    return response.data;
+    return await apiPut(`/mentor/assignment/${submissionId}/grade`, data);
 };
+
