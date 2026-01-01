@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { uploadLecture } from "@/services/mentor";
-import { getCourseDetails } from "@/services/api"; // Reuse existing public API to get course details including lectures
+import { apiGet } from "@/lib/api";
 import { useParams } from "next/navigation";
 import { Plus, Play, FileText, Loader2 } from "lucide-react";
 
@@ -20,7 +20,7 @@ export default function MentorLecturesPage() {
 
     const fetchCourse = async () => {
         try {
-            const data = await getCourseDetails(courseId);
+            const data = await apiGet(`/api/v1/course/${courseId}`);
             setCourse(data.course);
         } catch (error) {
             console.error("Failed to fetch course", error);
