@@ -95,7 +95,6 @@ export default function LandingPage() {
 
     return (
         <div className="min-h-screen flex flex-col font-sans">
-            <Header />
             {/* ... rest of the existing static layout ... */}
 
             <main className="flex-grow">

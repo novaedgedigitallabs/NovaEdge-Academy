@@ -18,7 +18,7 @@ const sidebarLinks = [
     {
         icon: Home,
         route: "/",
-        label: "Home",
+        label: "Dashboard",
     },
     {
         icon: BookOpen,
@@ -27,8 +27,13 @@ const sidebarLinks = [
     },
     {
         icon: Map,
-        route: "/learning-paths",
-        label: "Learning Paths",
+        route: "/enrollments",
+        label: "My Learning",
+    },
+    {
+        icon: User, // Using User for Certificates for now, or find a better icon
+        route: "/certificate",
+        label: "Certificates",
     },
     {
         icon: Users,
@@ -37,8 +42,8 @@ const sidebarLinks = [
     },
     {
         icon: Network,
-        route: "/network",
-        label: "Network",
+        route: "/community",
+        label: "Community",
     },
     {
         icon: Mail,

@@ -7,7 +7,6 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import Scene from "./three/Scene";
 import Overlay from "./three/Overlay";
-import Header from "@/components/layout/Header";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -34,8 +33,6 @@ export default function ThreeLandingPage() {
     return (
         <div ref={containerRef} className="relative h-[500vh] bg-background">
             <div className="sticky top-0 h-screen w-full overflow-hidden">
-                <Header />
-
                 <Canvas
                     shadows
                     camera={{ position: [0, 0, 5], fov: 30 }}

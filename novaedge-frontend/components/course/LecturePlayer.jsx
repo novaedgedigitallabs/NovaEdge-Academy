@@ -28,6 +28,7 @@ export default function LecturePlayer({
     quiz,
     onGenerateAI,
     isGeneratingAI,
+    minimalist = false,
 }) {
     const videoRef = useRef(null);
     const [duration, setDuration] = useState(0);
@@ -35,6 +36,7 @@ export default function LecturePlayer({
     const [isCompleted, setIsCompleted] = useState(false);
     const [transcript, setTranscript] = useState([]);
     const [playbackRate, setPlaybackRate] = useState(1);
+    const [isPlaying, setIsPlaying] = useState(false);
     const lastUpdateRef = useRef(0);
 
     // Fetch Transcript
@@ -46,19 +48,21 @@ export default function LecturePlayer({
         }
     }, [courseId, lectureId]);
 
-    // Analytics: Play
     const handlePlay = () => {
+        setIsPlaying(true);
         recordEvent({ type: "lecture_view", courseId, lectureId });
     };
 
-    // Analytics: Speed Change
+    const handlePause = () => {
+        setIsPlaying(false);
+    };
+
     const handleSpeedChange = (rate) => {
         setPlaybackRate(rate);
         if (videoRef.current) videoRef.current.playbackRate = rate;
         recordEvent({ type: "lecture_speed_change", courseId, lectureId, meta: { rate } });
     };
 
-    // Helper to extract YouTube ID
     const getYouTubeId = (url) => {
         if (!url) return null;
         const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
@@ -68,21 +72,18 @@ export default function LecturePlayer({
 
     const youtubeId = getYouTubeId(videoUrl);
 
-    // --- NATIVE VIDEO HANDLERS ---
     const handleTimeUpdate = () => {
         if (!videoRef.current) return;
         const curr = videoRef.current.currentTime;
         setCurrentTime(curr);
         const now = Date.now();
 
-        // Debounce updates (every 10s)
         if (now - lastUpdateRef.current > 10000) {
             saveProgress(curr);
             lastUpdateRef.current = now;
             recordEvent({ type: "lecture_progress", courseId, lectureId, meta: { progress: (curr / duration) * 100 } });
         }
 
-        // Check completion (90%)
         if (!isCompleted && duration > 0 && curr / duration >= 0.9) {
             setIsCompleted(true);
             saveProgress(curr, true);
@@ -115,7 +116,6 @@ export default function LecturePlayer({
             }
         } catch (err) {
             console.error("Failed to save progress", err);
-            toast.error("Failed to save progress");
         }
     };
 
@@ -126,9 +126,82 @@ export default function LecturePlayer({
         }
     };
 
+    const togglePlay = () => {
+        if (videoRef.current) {
+            if (isPlaying) {
+                videoRef.current.pause();
+            } else {
+                videoRef.current.play();
+            }
+        }
+    };
 
-
-
+    if (minimalist) {
+        return (
+            <div className="relative w-full h-full group">
+                {youtubeId ? (
+                    <iframe
+                        className="w-full h-full"
+                        src={`https://www.youtube.com/embed/${youtubeId}?rel=0&modestbranding=1&showinfo=0&controls=1`}
+                        title="YouTube video player"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                    ></iframe>
+                ) : videoUrl ? (
+                    <>
+                        <video
+                            ref={videoRef}
+                            src={videoUrl}
+                            className="w-full h-full object-cover"
+                            onTimeUpdate={handleTimeUpdate}
+                            onLoadedMetadata={handleLoadedMetadata}
+                            onPlay={handlePlay}
+                            onPause={handlePause}
+                        />
+                        {/* Custom Minimalist Controls */}
+                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-6">
+                            <div className="flex items-center gap-4 text-white">
+                                <button onClick={togglePlay} className="hover:scale-110 transition-transform">
+                                    {isPlaying ? <Pause className="h-8 w-8 fill-current" /> : <Play className="h-8 w-8 fill-current" />}
+                                </button>
+                                <div className="flex-1 h-1.5 bg-white/30 rounded-full overflow-hidden cursor-pointer relative">
+                                    <div
+                                        className="h-full bg-blue-500"
+                                        style={{ width: `${(currentTime / duration) * 100}%` }}
+                                    />
+                                </div>
+                                <div className="text-sm font-bold tabular-nums">
+                                    {formatTime(currentTime)} / {formatTime(duration)}
+                                </div>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="sm" className="h-8 text-white hover:bg-white/20 font-bold">
+                                            {playbackRate}x
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" className="bg-black/90 border-white/10 text-white">
+                                        {[0.5, 0.75, 1, 1.25, 1.5, 2].map(rate => (
+                                            <DropdownMenuItem key={rate} onClick={() => handleSpeedChange(rate)} className="hover:bg-white/20">
+                                                {rate}x
+                                            </DropdownMenuItem>
+                                        ))}
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                                <button onClick={() => videoRef.current?.requestFullscreen()} className="hover:scale-110 transition-transform">
+                                    <Maximize className="h-6 w-6" />
+                                </button>
+                            </div>
+                        </div>
+                    </>
+                ) : (
+                    <div className="flex items-center justify-center h-full text-white bg-gray-900">
+                        <p className="font-bold">Video source not available</p>
+                    </div>
+                )}
+            </div>
+        );
+    }
 
     if (youtubeId) {
         return (
