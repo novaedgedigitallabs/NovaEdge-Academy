@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { getMentorProfile } from "@/services/mentor";
 import Link from "next/link";
-import { Users, Video, FileText } from "lucide-react";
+import { Users, Video } from "lucide-react";
 
 export default function MentorCoursesPage() {
     const [courses, setCourses] = useState([]);
@@ -13,7 +13,7 @@ export default function MentorCoursesPage() {
         const fetchCourses = async () => {
             try {
                 const data = await getMentorProfile();
-                setCourses(data.assignedCourses);
+                setCourses(data.assignedCourses || []);
             } catch (error) {
                 console.error("Failed to fetch courses", error);
             } finally {
@@ -95,3 +95,4 @@ export default function MentorCoursesPage() {
         </div>
     );
 }
+
