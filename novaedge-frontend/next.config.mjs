@@ -14,11 +14,7 @@ const nextConfig = {
       },
     ],
   },
-  experimental: {
-    turbopack: {
-      root: path.join(__dirname, ".."),
-    },
-  },
+
   async rewrites() {
     return [
       {
