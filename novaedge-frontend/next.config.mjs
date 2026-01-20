@@ -18,15 +18,6 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react'],
   },
-
-  async rewrites() {
-    return [
-      {
-        source: "/api/v1/:path*",
-        destination: "https://novaedge-academy.onrender.com/api/v1/:path*",
-      },
-    ];
-  },
 };
 
 export default nextConfig;
