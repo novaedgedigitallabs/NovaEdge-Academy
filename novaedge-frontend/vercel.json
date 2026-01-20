@@ -1,0 +1,8 @@
+{
+    "buildCommand": "next build",
+    "framework": "nextjs",
+    "installCommand": "npm install",
+    "env": {
+        "NEXT_TELEMETRY_DISABLED": "1"
+    }
+}
