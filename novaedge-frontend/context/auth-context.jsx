@@ -22,9 +22,14 @@ export function AuthProvider({ children }) {
           }
         );
 
+        console.log("Auth check response:", res.status);
+
         if (res.ok) {
           const data = await res.json();
+          console.log("User authenticated:", data.user?.email);
           setUser(data.user);
+        } else {
+          console.log("Auth check failed with status:", res.status);
         }
       } catch (err) {
         console.log("Auth check failed", err);
