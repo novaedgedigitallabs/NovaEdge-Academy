@@ -31,7 +31,7 @@ export default function ThreeLandingPage() {
     }, []);
 
     return (
-        <div ref={containerRef} className="relative h-[500vh] bg-background">
+        <div ref={containerRef} className="relative h-[500vh] bg-background no-glow-bg">
             <div className="sticky top-0 h-screen w-full overflow-hidden">
                 <Canvas
                     shadows

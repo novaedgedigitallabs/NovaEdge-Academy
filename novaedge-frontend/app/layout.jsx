@@ -23,7 +23,7 @@ export default function RootLayout({ children }) {
     <html lang="en" className="dark" style={{ colorScheme: "dark" }} suppressHydrationWarning>
       <body
         cz-shortcut-listen="true"
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased app-glow-bg`}
       >
         <Providers>{children}</Providers>
         <Toaster />

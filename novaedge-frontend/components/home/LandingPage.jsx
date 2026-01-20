@@ -12,6 +12,7 @@ import Link from "next/link";
 import CreatePost from "@/components/post/CreatePost";
 import PostCard from "@/components/post/PostCard";
 import { getAllPosts } from "@/services/post";
+import CoursesOfferedSection from "./CoursesOfferedSection";
 
 import ThreeLandingPage from "./ThreeLandingPage";
 
@@ -94,7 +95,7 @@ export default function LandingPage() {
     }
 
     return (
-        <div className="min-h-screen flex flex-col font-sans">
+        <div className="min-h-screen flex flex-col font-sans no-glow-bg">
             {/* ... rest of the existing static layout ... */}
 
             <main className="flex-grow">
@@ -206,6 +207,9 @@ export default function LandingPage() {
 
                 {/* Recommended Courses (Personalized) */}
                 <RecommendedCourses />
+
+                {/* Courses Offered Section */}
+                <CoursesOfferedSection />
 
                 {/* Featured Courses */}
                 <section className="py-20 bg-muted/30 border-y border-border/40">

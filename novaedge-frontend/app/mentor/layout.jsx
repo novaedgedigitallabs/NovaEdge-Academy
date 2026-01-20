@@ -65,8 +65,8 @@ export default function MentorLayout({ children }) {
                                 key={item.href}
                                 href={item.href}
                                 className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${isActive
-                                        ? "bg-blue-600/10 text-blue-400"
-                                        : "text-zinc-400 hover:bg-white/5 hover:text-white"
+                                    ? "bg-blue-600/10 text-blue-400"
+                                    : "text-zinc-400 hover:bg-white/5 hover:text-white"
                                     }`}
                             >
                                 <item.icon className="h-5 w-5" />
