@@ -18,6 +18,9 @@ export const metadata = {
   description: "Learn Cloud Computing, DevOps, and more with NovaEdge Academy.",
 };
 
+export const dynamic = 'force-dynamic';
+
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className="dark" style={{ colorScheme: "dark" }} suppressHydrationWarning>
