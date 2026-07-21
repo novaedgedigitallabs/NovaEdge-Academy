@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function SupportPage() {
     return (
-        <div className="container mx-auto py-8">
+        <div className="glass-card bg-white/30 backdrop-blur-sm p-6 space-y-6">
             <div className="flex justify-between items-center mb-8">
                 <h1 className="text-3xl font-bold">Support Dashboard</h1>
             </div>

@@ -18,10 +18,10 @@ import { Suspense, useEffect, useState } from "react";
 function VerifyContent() {
   const searchParams = useSearchParams();
 
-  const razorpay_payment_id = searchParams.get("razorpay_payment_id");
-  const razorpay_order_id = searchParams.get("razorpay_order_id");
-  const razorpay_signature = searchParams.get("razorpay_signature");
-  const courseId = searchParams.get("courseId");
+  const razorpay_payment_id = searchParams?.get ? searchParams.get("razorpay_payment_id") : null;
+  const razorpay_order_id = searchParams?.get ? searchParams.get("razorpay_order_id") : null;
+  const razorpay_signature = searchParams?.get ? searchParams.get("razorpay_signature") : null;
+  const courseId = searchParams?.get ? searchParams.get("courseId") : null;
 
   const [status, setStatus] = useState(null); // success / failed
   const [loading, setLoading] = useState(true);

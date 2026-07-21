@@ -2,7 +2,20 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, BookOpen, Map, Users, Network, Mail, User, Settings, MoreHorizontal, PenSquare, LogOut } from "lucide-react";
+import { 
+    LayoutDashboard, 
+    BookOpen, 
+    GraduationCap, 
+    Award, 
+    Users, 
+    Globe, 
+    MessageSquare, 
+    User, 
+    Settings, 
+    MoreHorizontal, 
+    PenSquare, 
+    LogOut 
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/context/auth-context";
@@ -16,7 +29,7 @@ import {
 
 const sidebarLinks = [
     {
-        icon: Home,
+        icon: LayoutDashboard,
         route: "/",
         label: "Dashboard",
     },
@@ -26,13 +39,13 @@ const sidebarLinks = [
         label: "Courses",
     },
     {
-        icon: Map,
+        icon: GraduationCap,
         route: "/enrollments",
         label: "My Learning",
     },
     {
-        icon: User, // Using User for Certificates for now, or find a better icon
-        route: "/certificate",
+        icon: Award,
+        route: "/certificates",
         label: "Certificates",
     },
     {
@@ -41,12 +54,12 @@ const sidebarLinks = [
         label: "Mentors",
     },
     {
-        icon: Network,
+        icon: Globe,
         route: "/community",
         label: "Community",
     },
     {
-        icon: Mail,
+        icon: MessageSquare,
         route: "/messages",
         label: "Messages",
     },
@@ -69,59 +82,69 @@ export default function LeftSidebar() {
     return (
         <section className="custom-scrollbar sticky left-0 top-0 z-20 flex h-screen w-fit flex-col justify-between overflow-y-auto border-r border-border bg-background pb-6 pt-8 max-md:hidden lg:w-[266px]">
             <div className="flex w-full flex-1 flex-col gap-6 px-6">
-                <Link href="/" className="flex items-center gap-4 px-4">
-                    {/* <div className="text-2xl font-bold">NovaEdge</div> */}
-                    <span className="text-2xl font-bold tracking-tight">NovaEdge</span>
+                <Link href="/" className="flex items-center gap-4 px-3">
+                    <span className="text-2xl font-black tracking-tight text-foreground">NovaEdge</span>
                 </Link>
 
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-1.5">
                     {sidebarLinks.map((link) => {
-                        const isActive = (pathname.includes(link.route) && link.route.length > 1) || pathname === link.route;
+                        const isActive = link.route === "/" 
+                            ? pathname === "/" 
+                            : pathname.startsWith(link.route);
+
+                        const IconComponent = link.icon;
 
                         return (
                             <Link
                                 href={link.route}
                                 key={link.label}
                                 className={cn(
-                                    "flex items-center justify-start gap-4 rounded-full p-4 transition-colors hover:bg-secondary/50",
-                                    isActive && "font-bold"
+                                    "flex items-center justify-start gap-4 rounded-full px-4 py-3 transition-all font-medium text-muted-foreground hover:bg-secondary/60 hover:text-foreground group",
+                                    isActive && "bg-primary/15 text-primary font-bold hover:bg-primary/20 hover:text-primary shadow-xs"
                                 )}
                             >
-                                <link.icon className={cn("h-7 w-7", isActive ? "fill-current" : "")} />
-                                <p className="text-xl max-lg:hidden">{link.label}</p>
+                                <IconComponent 
+                                    className={cn(
+                                        "h-6 w-6 shrink-0 transition-transform group-hover:scale-105", 
+                                        isActive ? "text-primary stroke-[2.5]" : "stroke-[1.75]"
+                                    )} 
+                                />
+                                <p className="text-base max-lg:hidden">{link.label}</p>
                             </Link>
                         );
                     })}
                 </div>
 
-                <Button className="mt-4 w-full rounded-full text-lg font-bold h-12 lg:h-14">
+                <Button className="mt-2 w-full rounded-full text-base font-bold h-12 lg:h-13 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md shadow-primary/20">
                     <span className="max-lg:hidden">Post</span>
-                    <PenSquare className="lg:hidden h-6 w-6" />
+                    <PenSquare className="lg:hidden h-5 w-5" />
                 </Button>
             </div>
 
             {user && (
-                <div className="mt-10 px-6">
+                <div className="mt-6 px-6">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <div className="flex cursor-pointer items-center justify-between gap-4 rounded-full p-3 hover:bg-secondary/50 transition-colors">
-                                <div className="flex items-center gap-3">
-                                    <Avatar className="h-10 w-10">
-                                        <AvatarImage src={user.avatar?.url} alt={user.name} />
-                                        <AvatarFallback>{user.name?.[0]}</AvatarFallback>
+                            <div className="flex cursor-pointer items-center justify-between gap-3 rounded-full p-2.5 hover:bg-secondary/50 transition-colors border border-transparent hover:border-border/50">
+                                <div className="flex items-center gap-3 min-w-0">
+                                    <Avatar className="h-9 w-9 border border-primary/20 flex-shrink-0 overflow-hidden">
+                                        <AvatarImage src={user.avatar?.url} alt={user.name} className="object-cover object-center w-full h-full" />
+                                        <AvatarFallback className="bg-primary/10 text-primary text-sm font-bold">
+                                            {user.name?.[0] || "U"}
+                                        </AvatarFallback>
                                     </Avatar>
-                                    <div className="flex flex-col max-lg:hidden">
-                                        <p className="text-sm font-bold line-clamp-1">{user.name}</p>
-                                        <p className="text-sm text-muted-foreground line-clamp-1">@{user.username || user.email.split('@')[0]}</p>
+                                    <div className="flex flex-col max-lg:hidden min-w-0">
+                                        <p className="text-sm font-bold line-clamp-1 text-foreground leading-tight">{user.name}</p>
+                                        <p className="text-xs text-muted-foreground line-clamp-1">@{user.username || user.email?.split('@')[0]}</p>
                                     </div>
                                 </div>
-                                <MoreHorizontal className="h-5 w-5 max-lg:hidden" />
+                                <MoreHorizontal className="h-4 w-4 text-muted-foreground max-lg:hidden flex-shrink-0" />
                             </div>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-56" align="end" forceMount>
-                            <DropdownMenuItem onClick={logout}>
+                            <DropdownMenuItem onClick={logout} className="text-destructive focus:text-destructive cursor-pointer">
                                 <LogOut className="mr-2 h-4 w-4" />
-                                <span>Log out @{user.username || user.email.split('@')[0]}</span>
+                                <span>Log out @{user.username || user.email?.split('@')[0]}</span>
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>

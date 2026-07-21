@@ -133,7 +133,30 @@ exports.deletePost = async (req, res) => {
     }
 };
 
-// 5. Like/Unlike Post
+// 5. Get Single Post
+exports.getPostById = async (req, res) => {
+    try {
+        const post = await Post.findById(req.params.id)
+            .populate("user", "name avatar username email")
+            .populate({
+                path: "repostOf",
+                populate: {
+                    path: "user",
+                    select: "name avatar username"
+                }
+            });
+
+        if (!post) {
+            return res.status(404).json({ success: false, message: "Post not found" });
+        }
+
+        res.status(200).json({ success: true, post });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// 6. Like/Unlike Post
 exports.likePost = async (req, res) => {
     try {
         const post = await Post.findById(req.params.id);
@@ -154,6 +177,44 @@ exports.likePost = async (req, res) => {
             await post.save();
             return res.status(200).json({ success: true, message: "Post liked", likes: post.likes });
         }
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// 7. Update Post
+exports.updatePost = async (req, res) => {
+    try {
+        const { content } = req.body;
+        const post = await Post.findById(req.params.id);
+
+        if (!post) {
+            return res.status(404).json({ success: false, message: "Post not found" });
+        }
+
+        if (post.user.toString() !== req.user.id && req.user.role !== "admin") {
+            return res.status(403).json({ success: false, message: "Unauthorized to edit this post" });
+        }
+
+        if (!content || !content.trim()) {
+            return res.status(400).json({ success: false, message: "Post content cannot be empty" });
+        }
+
+        // Re-extract hashtags
+        const hashtags = content.match(/#[a-z0-9_]+/gi);
+        const uniqueHashtags = hashtags ? [...new Set(hashtags.map(tag => tag.toLowerCase().replace('#', '')))] : [];
+
+        post.content = content.trim();
+        post.hashtags = uniqueHashtags;
+        await post.save();
+
+        await post.populate("user", "name avatar username");
+
+        res.status(200).json({
+            success: true,
+            message: "Post updated successfully",
+            post
+        });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }

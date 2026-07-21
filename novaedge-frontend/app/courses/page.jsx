@@ -153,10 +153,10 @@ export default function CoursesPage() {
 
           <div className="flex items-center gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search courses..."
-                className="pl-10 rounded-full bg-secondary/50 border-none h-12"
+                className="pl-11 rounded-full bg-secondary/50 border border-border/50 h-12 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-primary focus-visible:ring-offset-0"
                 value={query}
                 onChange={(e) => {
                   setQuery(e.target.value);
@@ -165,41 +165,42 @@ export default function CoursesPage() {
                 }}
               />
             </div>
-            {/* <Button
-              variant="outline"
-              size="icon"
-              title="Filters (not implemented)"
-              className="rounded-full h-12 w-12"
-            >
-              <SlidersHorizontal className="h-4 w-4" />
-            </Button> */}
           </div>
         </div>
 
-        <div className="flex gap-2 overflow-x-auto pb-4 mb-4 no-scrollbar">
-          {CATEGORIES.map((cat, i) => (
-            <Badge
-              key={cat}
-              variant={cat === category ? "default" : "secondary"}
-              className="px-4 py-2 text-sm cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors whitespace-nowrap rounded-full"
-              onClick={() => onSelectCategory(cat)}
-            >
-              {cat}
-            </Badge>
-          ))}
+        <div className="flex gap-2 overflow-x-auto pb-3 mb-6 no-scrollbar">
+          {CATEGORIES.map((cat) => {
+            const isSelected = cat === category;
+            return (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => onSelectCategory(cat)}
+                className={cn(
+                  "px-5 py-2 text-xs font-semibold rounded-full whitespace-nowrap transition-all duration-200 cursor-pointer border",
+                  isSelected
+                    ? "bg-primary text-primary-foreground border-primary shadow-md shadow-primary/25"
+                    : "bg-card/50 text-muted-foreground border-border/50 hover:bg-secondary/80 hover:text-foreground hover:border-border"
+                )}
+              >
+                {cat}
+              </button>
+            );
+          })}
         </div>
 
         {/* states */}
         {loading && courses.length === 0 && (
-          <div className="py-12 text-center text-muted-foreground">
+          <div className="py-20 text-center text-muted-foreground">
             Loading courses...
           </div>
         )}
 
         {error && (
-          <div className="py-8 text-center text-destructive">
-            <p className="mb-4">Error: {error}</p>
+          <div className="py-12 text-center text-destructive">
+            <p className="mb-4 text-sm font-semibold">Error: {error}</p>
             <Button
+              className="rounded-full px-6"
               onClick={() => {
                 setPage(1);
                 setDebouncedQuery(query);
@@ -211,15 +212,16 @@ export default function CoursesPage() {
         )}
 
         {!loading && !error && courses.length === 0 && (
-          <div className="text-center py-20 bg-muted/30 rounded-xl border border-dashed">
-            <div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-              <Search className="w-8 h-8 text-muted-foreground" />
+          <div className="text-center py-20 bg-card/40 backdrop-blur-md rounded-2xl border border-border/50 shadow-xl my-6">
+            <div className="h-16 w-16 bg-primary/10 border border-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Search className="w-8 h-8 text-primary" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">No courses found</h3>
-            <p className="text-muted-foreground max-w-sm mx-auto mb-6">
-              Try a different search or category.
+            <h3 className="text-xl font-bold tracking-tight text-foreground mb-2">No courses found</h3>
+            <p className="text-muted-foreground text-sm max-w-sm mx-auto mb-6">
+              We couldn&apos;t find any courses matching your search. Try resetting your filters.
             </p>
             <Button
+              className="rounded-full px-6 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-md shadow-primary/20"
               onClick={() => {
                 setQuery("");
                 setDebouncedQuery("");

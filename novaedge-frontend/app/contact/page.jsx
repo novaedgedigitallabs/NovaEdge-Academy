@@ -15,26 +15,42 @@ export default function ContactPage() {
     const [submitted, setSubmitted] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [firstName, setFirstName] = useState("");
+    const [lastName, setLastName] = useState("");
+    const [email, setEmail] = useState("");
+    const [subject, setSubject] = useState("");
+    const [message, setMessage] = useState("");
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const isFormValid = firstName && lastName && email && subject && message;
+
+    const handleSubmit = async () => {
+        if (!isFormValid || loading) return;
         setLoading(true);
         setError(null);
 
-        const formData = {
-            name: `${e.target.firstName.value} ${e.target.lastName.value}`,
-            email: e.target.email.value,
-            subject: e.target.subject.value,
-            message: e.target.message.value,
-        };
-
         try {
-            await apiPost("/api/v1/contact", formData);
+            await apiPost("/api/v1/contact", {
+                name: `${firstName.trim()} ${lastName.trim()}`,
+                email: email.trim(),
+                subject,
+                message: message.trim(),
+            });
             setSubmitted(true);
+            setFirstName("");
+            setLastName("");
+            setEmail("");
+            setSubject("");
+            setMessage("");
         } catch (err) {
             setError(err.message || "Failed to send message");
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.key === "Enter" && !e.shiftKey && isFormValid && !loading) {
+            handleSubmit();
         }
     };
 
@@ -91,7 +107,7 @@ export default function ContactPage() {
                         </div>
                     </div>
 
-                    {/* Right Column: Form */}
+                    {/* Right Column: Contact Form */}
                     <Card className="border-border/50 shadow-lg">
                         <CardHeader>
                             <CardTitle>Send us a message</CardTitle>
@@ -114,7 +130,7 @@ export default function ContactPage() {
                                     </Button>
                                 </div>
                             ) : (
-                                <form onSubmit={handleSubmit} className="space-y-4">
+                                <div className="space-y-4">
                                     {error && (
                                         <div className="bg-destructive/10 text-destructive p-3 rounded text-sm">
                                             {error}
@@ -123,17 +139,36 @@ export default function ContactPage() {
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-2">
                                             <label htmlFor="firstName" className="text-sm font-medium">First name</label>
-                                            <Input id="firstName" placeholder="John" required />
+                                            <Input
+                                                id="firstName"
+                                                placeholder="John"
+                                                value={firstName}
+                                                onChange={(e) => setFirstName(e.target.value)}
+                                                onKeyDown={handleKeyDown}
+                                            />
                                         </div>
                                         <div className="space-y-2">
                                             <label htmlFor="lastName" className="text-sm font-medium">Last name</label>
-                                            <Input id="lastName" placeholder="Doe" required />
+                                            <Input
+                                                id="lastName"
+                                                placeholder="Doe"
+                                                value={lastName}
+                                                onChange={(e) => setLastName(e.target.value)}
+                                                onKeyDown={handleKeyDown}
+                                            />
                                         </div>
                                     </div>
 
                                     <div className="space-y-2">
                                         <label htmlFor="email" className="text-sm font-medium">Email</label>
-                                        <Input id="email" type="email" placeholder="john@example.com" required />
+                                        <Input
+                                            id="email"
+                                            type="email"
+                                            placeholder="john@example.com"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            onKeyDown={handleKeyDown}
+                                        />
                                     </div>
 
                                     <div className="space-y-2">
@@ -141,7 +176,9 @@ export default function ContactPage() {
                                         <select
                                             id="subject"
                                             className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                            required
+                                            value={subject}
+                                            onChange={(e) => setSubject(e.target.value)}
+                                            onKeyDown={handleKeyDown}
                                         >
                                             <option value="">Select a subject</option>
                                             <option value="mentor">Apply to be a Mentor</option>
@@ -157,14 +194,15 @@ export default function ContactPage() {
                                             id="message"
                                             placeholder="Tell us about your experience and why you'd like to mentor..."
                                             className="min-h-[150px]"
-                                            required
+                                            value={message}
+                                            onChange={(e) => setMessage(e.target.value)}
                                         />
                                     </div>
 
-                                    <Button type="submit" className="w-full" disabled={loading}>
+                                    <Button className="w-full" onClick={handleSubmit} disabled={loading || !isFormValid}>
                                         {loading ? "Sending..." : "Send Message"}
                                     </Button>
-                                </form>
+                                </div>
                             )}
                         </CardContent>
                     </Card>

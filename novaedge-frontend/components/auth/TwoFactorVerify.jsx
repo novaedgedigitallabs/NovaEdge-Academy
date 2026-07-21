@@ -14,8 +14,7 @@ export default function TwoFactorVerify({ tempToken, onSuccess }) {
     const [loading, setLoading] = useState(false);
     const { login } = useAuth(); // We might need to manually handle the token set since login context usually takes email/pass
 
-    const handleVerify = async (e) => {
-        e.preventDefault();
+    const handleVerify = async () => {
         setLoading(true);
         try {
             const res = await login2FA(tempToken, code, isBackup);
@@ -45,20 +44,25 @@ export default function TwoFactorVerify({ tempToken, onSuccess }) {
                 </p>
             </div>
 
-            <form onSubmit={handleVerify} className="space-y-4">
+            <div className="space-y-4">
                 <Input
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
                     placeholder={isBackup ? "Backup Code" : "000000"}
                     className="text-center text-lg tracking-widest"
                     autoFocus
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter" && code && !loading) {
+                            handleVerify();
+                        }
+                    }}
                 />
 
-                <Button type="submit" className="w-full" disabled={loading || !code}>
+                <Button className="w-full" onClick={handleVerify} disabled={loading || !code}>
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Verify
                 </Button>
-            </form>
+            </div>
 
             <div className="text-center">
                 <button

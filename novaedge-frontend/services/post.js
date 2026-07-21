@@ -16,6 +16,14 @@ export const deletePost = async (postId) => {
     return apiDelete(`/api/v1/posts/${postId}`);
 };
 
+export const updatePost = async (postId, content) => {
+    return apiPut(`/api/v1/posts/${postId}`, { content });
+};
+
 export const likePost = async (postId) => {
     return apiPut(`/api/v1/posts/${postId}/like`);
+};
+
+export const getPostById = async (postId) => {
+    return apiGet(`/api/v1/posts/${postId}`);
 };

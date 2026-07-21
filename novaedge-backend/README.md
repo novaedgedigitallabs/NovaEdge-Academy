@@ -13,6 +13,7 @@ The backend API for the NovaEdge Academy Learning Management System (LMS). Built
 - **Email:** Nodemailer
 - **AI:** Google Gemini (Generative AI)
 - **Validation:** Joi / Custom Middleware
+- **Environment Management:** `@novaedgedigitallabs/envkit` & Zod
 
 ## ✨ Features
 
@@ -77,7 +78,7 @@ The backend API for the NovaEdge Academy Learning Management System (LMS). Built
     ```
 
 3.  **Environment Variables:**
-    Create a `.env` file in the root directory and add the following variables:
+    Create a `.env` file in the root directory and add the following variables. (You can also run `npx envkit generate` to auto-generate `.env.example` from the schema):
 
     ```env
     PORT=5000

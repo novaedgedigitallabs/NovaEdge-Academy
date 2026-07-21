@@ -21,62 +21,73 @@ exports.globalSearch = async (req, res) => {
         // Search Courses
         if (!type || type === "course" || type === "lecture") {
             searchPromises.push(
-                Course.find(
-                    { $text: { $search: q } },
-                    { score: { $meta: "textScore" } }
-                )
+                Course.find({ $text: { $search: q } }, { score: { $meta: "textScore" } })
                     .select("title description poster category slug lectures price instructorNames")
                     .sort({ score: { $meta: "textScore" } })
                     .lean()
-                    .then(results => results.map(r => ({ ...r, type: "course" })))
+                    .catch(() => [])
+                    .then(async (results) => {
+                        if (results.length > 0) return results.map(r => ({ ...r, type: "course" }));
+                        const fallback = await Course.find({
+                            $or: [{ title: regex }, { description: regex }, { category: regex }]
+                        }).select("title description poster category slug lectures price instructorNames").limit(limit).lean();
+                        return fallback.map(r => ({ ...r, type: "course", score: 1 }));
+                    })
             );
         }
 
         // Search Blogs
         if (!type || type === "blog") {
             searchPromises.push(
-                Blog.find(
-                    { $text: { $search: q } },
-                    { score: { $meta: "textScore" } }
-                )
+                Blog.find({ $text: { $search: q } }, { score: { $meta: "textScore" } })
                     .select("title content image slug tags author")
                     .sort({ score: { $meta: "textScore" } })
                     .lean()
-                    .then(results => results.map(r => ({ ...r, type: "blog" })))
+                    .catch(() => [])
+                    .then(async (results) => {
+                        if (results.length > 0) return results.map(r => ({ ...r, type: "blog" }));
+                        const fallback = await Blog.find({
+                            $or: [{ title: regex }, { content: regex }]
+                        }).select("title content image slug tags author").limit(limit).lean();
+                        return fallback.map(r => ({ ...r, type: "blog", score: 1 }));
+                    })
             );
         }
 
         // Search Mentors
         if (!type || type === "mentor") {
             searchPromises.push(
-                Mentor.find(
-                    { $text: { $search: q } },
-                    { score: { $meta: "textScore" } }
-                )
+                Mentor.find({ $text: { $search: q } }, { score: { $meta: "textScore" } })
                     .select("name bio image role skills expertise")
                     .sort({ score: { $meta: "textScore" } })
                     .lean()
-                    .then(results => results.map(r => ({ ...r, type: "mentor" })))
+                    .catch(() => [])
+                    .then(async (results) => {
+                        if (results.length > 0) return results.map(r => ({ ...r, type: "mentor" }));
+                        const fallback = await Mentor.find({
+                            $or: [{ name: regex }, { bio: regex }, { role: regex }]
+                        }).select("name bio image role skills expertise").limit(limit).lean();
+                        return fallback.map(r => ({ ...r, type: "mentor", score: 1 }));
+                    })
             );
         }
 
-        // Search Users (by username or name)
+        // Search Users (by name, username, or email)
         if (!type || type === "user") {
-            // Users might not have text index, so we use regex for username/name
-            // Or we can rely on text index if we add one. Let's assume regex for now as it's safer without migration
-            // But to match the Promise.all structure with scoring, we'll fake the score or use a different query structure.
-            // Actually, let's just use regex find and map to same structure.
+            const cleanQuery = q.trim().replace(/^@/, "");
+            const userRegex = new RegExp(cleanQuery, "i");
             searchPromises.push(
                 User.find({
                     $or: [
-                        { name: regex },
-                        { username: regex }
+                        { name: userRegex },
+                        { username: userRegex },
+                        { email: userRegex }
                     ]
                 })
-                    .select("name username avatar role bio") // Added bio if it exists, or we use something else
+                    .select("name username avatar role bio email")
                     .limit(limit)
                     .lean()
-                    .then(results => results.map(r => ({ ...r, type: "user", score: 1 }))) // Give default score
+                    .then(results => results.map(r => ({ ...r, type: "user", score: 1 })))
             );
         }
 

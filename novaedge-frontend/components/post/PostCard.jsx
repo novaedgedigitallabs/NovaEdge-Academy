@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useAuth } from "@/context/auth-context";
-import { likePost, deletePost, createPost } from "@/services/post";
+import { likePost, deletePost, createPost, updatePost } from "@/services/post";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,20 +13,24 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Heart, Trash2, MessageCircle, Repeat, Share2, BarChart2, MoreHorizontal } from "lucide-react";
+import { Heart, Trash2, Pencil, MessageCircle, Repeat, Share2, BarChart2, MoreHorizontal } from "lucide-react";
 import CommentSection from "./CommentSection";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-export default function PostCard({ post, onDelete }) {
+export default function PostCard({ post, onDelete, onUpdate }) {
     const { user } = useAuth();
     const [likes, setLikes] = useState(post.likes || []);
-    const [isLiked, setIsLiked] = useState(user && post.likes.includes(user._id));
+    const [isLiked, setIsLiked] = useState(user && post.likes?.includes(user._id));
     const [showComments, setShowComments] = useState(false);
     const [quoteContent, setQuoteContent] = useState("");
     const [quoteDialogOpen, setQuoteDialogOpen] = useState(false);
+    const [editDialogOpen, setEditDialogOpen] = useState(false);
+    const [postContent, setPostContent] = useState(post.content);
+    const [editContent, setEditContent] = useState(post.content);
+    const [isUpdating, setIsUpdating] = useState(false);
 
     const handleLike = async (e) => {
         e.stopPropagation();
@@ -54,6 +58,29 @@ export default function PostCard({ post, onDelete }) {
         } catch (error) {
             setLikes(previousLikes);
             setIsLiked(previousIsLiked);
+        }
+    };
+
+    const handleEditSave = async () => {
+        if (!editContent.trim()) {
+            toast.error("Post content cannot be empty");
+            return;
+        }
+        setIsUpdating(true);
+        try {
+            const res = await updatePost(post._id, editContent);
+            if (res.success) {
+                toast.success("Post updated successfully!");
+                setPostContent(editContent);
+                setEditDialogOpen(false);
+                if (onUpdate) onUpdate(res.post);
+            } else {
+                toast.error(res.message || "Failed to update post");
+            }
+        } catch (error) {
+            toast.error("Failed to update post");
+        } finally {
+            setIsUpdating(false);
         }
     };
 
@@ -98,6 +125,34 @@ export default function PostCard({ post, onDelete }) {
         }
     };
 
+    const handleShare = async (e) => {
+        e.stopPropagation();
+        const postUrl = typeof window !== "undefined" ? `${window.location.origin}/post/${post._id}` : "";
+
+        if (typeof navigator !== "undefined" && navigator.share) {
+            try {
+                await navigator.share({
+                    title: `Post by ${post.user?.name || "User"}`,
+                    text: postContent,
+                    url: postUrl,
+                });
+                toast.success("Shared successfully!");
+                return;
+            } catch (err) {
+                if (err.name === "AbortError") return;
+            }
+        }
+
+        if (typeof navigator !== "undefined" && navigator.clipboard) {
+            try {
+                await navigator.clipboard.writeText(postUrl);
+                toast.success("Post link copied to clipboard!");
+            } catch (err) {
+                toast.error("Failed to copy link");
+            }
+        }
+    };
+
     return (
         <article className="flex flex-col border-b border-border px-4 py-3 hover:bg-muted/5 transition-colors cursor-pointer">
             {/* Repost Indicator */}
@@ -136,6 +191,10 @@ export default function PostCard({ post, onDelete }) {
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setEditDialogOpen(true); }}>
+                                        <Pencil className="mr-2 h-4 w-4" />
+                                        Edit Post
+                                    </DropdownMenuItem>
                                     <DropdownMenuItem onClick={handleDelete} className="text-destructive">
                                         <Trash2 className="mr-2 h-4 w-4" />
                                         Delete
@@ -146,7 +205,7 @@ export default function PostCard({ post, onDelete }) {
                     </div>
 
                     <div className="mt-1 text-sm whitespace-pre-wrap leading-normal">
-                        {post.content.split(/(\s+)/).map((part, i) => {
+                        {postContent.split(/(\s+)/).map((part, i) => {
                             if (part.startsWith('#') && part.length > 1) {
                                 const tag = part.substring(1); // remove #
                                 return (
@@ -253,7 +312,13 @@ export default function PostCard({ post, onDelete }) {
                             <BarChart2 className="h-4 w-4" />
                         </Button>
 
-                        <Button variant="ghost" size="icon" className="group h-8 w-8 hover:bg-blue-500/10 hover:text-blue-500">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="group h-8 w-8 hover:bg-blue-500/10 hover:text-blue-500"
+                            onClick={handleShare}
+                            title="Share post"
+                        >
                             <Share2 className="h-4 w-4" />
                         </Button>
                     </div>
@@ -265,6 +330,27 @@ export default function PostCard({ post, onDelete }) {
                     <CommentSection postId={post._id} />
                 </div>
             )}
+
+            {/* Edit Post Modal */}
+            <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+                <DialogContent onClick={(e) => e.stopPropagation()}>
+                    <DialogHeader>
+                        <DialogTitle>Edit Post</DialogTitle>
+                    </DialogHeader>
+                    <Textarea
+                        value={editContent}
+                        onChange={(e) => setEditContent(e.target.value)}
+                        placeholder="Edit your post content..."
+                        className="min-h-[120px] bg-secondary/30 text-sm focus-visible:ring-1 focus-visible:ring-primary"
+                    />
+                    <DialogFooter className="gap-2 sm:gap-0">
+                        <Button variant="outline" size="sm" onClick={() => setEditDialogOpen(false)}>Cancel</Button>
+                        <Button size="sm" onClick={handleEditSave} disabled={isUpdating}>
+                            {isUpdating ? "Saving..." : "Save Changes"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </article>
     );
 }

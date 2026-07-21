@@ -20,8 +20,9 @@ const { isAuthenticatedUser } = require("../middleware/auth");
 router.route("/certificate/generate/:courseId").post(isAuthenticatedUser, generateCertificate);
 
 // Get My Certificates
-// GET /api/v1/my/certificates
+// GET /api/v1/my/certificates & /api/v1/certificates/me
 router.route("/my/certificates").get(isAuthenticatedUser, getMyCertificates);
+router.route("/certificates/me").get(isAuthenticatedUser, getMyCertificates);
 
 // --- PUBLIC ROUTES ---
 

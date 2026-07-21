@@ -15,11 +15,13 @@ import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-export default function MessagesPage() {
+import { Suspense } from "react";
+
+function MessagesContent() {
     const { user, isLoading: authLoading } = useAuth();
     const searchParams = useSearchParams();
     const router = useRouter();
-    const initialUserId = searchParams.get("userId");
+    const initialUserId = searchParams?.get ? searchParams.get("userId") : null;
 
     const [friends, setFriends] = useState([]);
     const [selectedFriend, setSelectedFriend] = useState(null);
@@ -298,5 +300,17 @@ export default function MessagesPage() {
                 </div>
             </div>
         </AppLayout>
+    );
+}
+
+export default function MessagesPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex h-screen items-center justify-center bg-background">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        }>
+            <MessagesContent />
+        </Suspense>
     );
 }

@@ -1,13 +1,13 @@
 "use client";
 
 import { useAuth } from "@/context/auth-context";
-import LandingPage from "@/components/home/LandingPage";
+import { Suspense } from "react";
+import RegisterPage from "@/app/register/page";
 import LeftSidebar from "@/components/layout/LeftSidebar";
 import RightSidebar from "@/components/layout/RightSidebar";
 import Feed from "@/components/home/Feed";
-import { Loader2 } from "lucide-react";
-
 import MobileNav from "@/components/layout/MobileNav";
+import { Loader2 } from "lucide-react";
 
 export default function Home() {
   const { user, isLoading } = useAuth();
@@ -21,7 +21,11 @@ export default function Home() {
   }
 
   if (!user) {
-    return <LandingPage />;
+    return (
+      <Suspense fallback={null}>
+        <RegisterPage />
+      </Suspense>
+    );
   }
 
   return (

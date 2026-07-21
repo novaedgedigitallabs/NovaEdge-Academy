@@ -80,7 +80,7 @@ export default function AdminCertificatesPage() {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="glass-card bg-white/30 backdrop-blur-sm p-6 space-y-6">
             <div>
                 <h2 className="text-3xl font-bold tracking-tight">Certificate Management</h2>
                 <p className="text-muted-foreground">

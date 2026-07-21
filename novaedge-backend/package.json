@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js",
+    "dev": "nodemon -e js,json,env server.js",
     "test": "jest"
   },
   "keywords": [],
@@ -14,7 +14,8 @@
   "type": "commonjs",
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
-    "bcryptjs": "^3.0.3",
+    "@novaedgedigitallabs/envkit": "^0.1.2",
+    "bcrypt": "^6.0.0",
     "cloudinary": "^2.8.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -28,7 +29,7 @@
     "mongodb": "^7.0.0",
     "mongoose": "^8.19.4",
     "multer": "^2.0.2",
-    "nodemailer": "^7.0.10",
+    "nodemailer": "^9.0.3",
     "otplib": "^12.0.1",
     "pdfkit": "^0.17.2",
     "puppeteer": "^24.31.0",
@@ -39,7 +40,11 @@
   },
   "devDependencies": {
     "jest": "^30.2.0",
+    "mongodb-memory-server": "^11.2.0",
     "nodemon": "^3.1.11",
     "supertest": "^7.1.4"
+  },
+  "overrides": {
+    "ip-address": "^10.1.1"
   }
 }

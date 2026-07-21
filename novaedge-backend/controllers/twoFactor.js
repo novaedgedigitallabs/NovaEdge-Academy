@@ -2,7 +2,7 @@ const User = require("../models/User");
 const { authenticator } = require("otplib");
 const qrcode = require("qrcode");
 const crypto = require("crypto");
-const bcrypt = require("bcryptjs");
+const bcrypt = require("bcrypt");
 const { encrypt, decrypt } = require("../utils/encryption");
 const sendToken = require("../utils/jwtToken");
 

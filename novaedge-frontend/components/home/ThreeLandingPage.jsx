@@ -36,7 +36,12 @@ export default function ThreeLandingPage() {
                 <Canvas
                     shadows
                     camera={{ position: [0, 0, 5], fov: 30 }}
-                    gl={{ antialias: true, alpha: true }}
+                    gl={{ 
+                        antialias: false, 
+                        alpha: true, 
+                        powerPreference: "high-performance",
+                        failIfMajorPerformanceCaveat: false 
+                    }}
                     className="absolute inset-0 z-0"
                 >
                     <Suspense fallback={null}>

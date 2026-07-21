@@ -64,8 +64,14 @@ exports.loginUser = async (req, res, next) => {
         .json({ success: false, message: "Please enter email and password" });
     }
 
-    // Find user in database (Explicitly ask for password because we set select:false in Model)
-    const user = await User.findOne({ email }).select("+password");
+    // Find user in database by Email OR Username
+    const user = await User.findOne({
+      $or: [
+        { email: email.toLowerCase() },
+        { username: email },
+        { email: email }
+      ]
+    }).select("+password");
 
     if (!user) {
       return res
@@ -119,8 +125,14 @@ exports.logout = async (req, res, next) => {
 // --- 4. GET CURRENT USER (Profile) ---
 exports.getUserProfile = async (req, res, next) => {
   try {
-    // req.user comes from the auth middleware we wrote earlier
-    const user = await User.findById(req.user.id);
+    if (!req.user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const user = await User.findById(req.user.id || req.user._id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
 
     res.status(200).json({
       success: true,
@@ -170,32 +182,63 @@ exports.updateProfile = async (req, res) => {
     const newUserData = {
       name: req.body.name,
       email: req.body.email,
-      username: req.body.username,
-      phoneNumber: req.body.phoneNumber,
+      bio: req.body.bio,
     };
+
+    if (req.body.username && req.body.username.trim() !== "") {
+      newUserData.username = req.body.username.trim();
+    }
+
+    if (req.body.phoneNumber && req.body.phoneNumber.trim() !== "") {
+      newUserData.phoneNumber = req.body.phoneNumber.trim();
+    }
+
+    if (req.body.socialLinks) {
+      newUserData.socialLinks = {
+        github: req.body.socialLinks.github || "",
+        linkedin: req.body.socialLinks.linkedin || "",
+        portfolio: req.body.socialLinks.portfolio || "",
+        twitter: req.body.socialLinks.twitter || "",
+      };
+    }
 
     // Update Avatar
     if (req.body.avatar && req.body.avatar !== "") {
       const user = await User.findById(req.user.id);
       const cloudinary = require("cloudinary").v2;
 
-      const imageId = user.avatar.public_id;
+      const imageId = user?.avatar?.public_id;
 
-      // Delete old avatar if it's not the default one
-      if (imageId !== "avatars/default_avatar_id") {
-        await cloudinary.uploader.destroy(imageId);
+      if (req.body.avatar.startsWith("http://") || req.body.avatar.startsWith("https://")) {
+        newUserData.avatar = {
+          public_id: imageId || "avatars/custom_url",
+          url: req.body.avatar,
+        };
+      } else {
+        try {
+          // Delete old avatar if it's not the default one
+          if (imageId && imageId !== "avatars/default_avatar_id" && imageId !== "avatars/custom_url") {
+            await cloudinary.uploader.destroy(imageId).catch(() => {});
+          }
+
+          const myCloud = await cloudinary.uploader.upload(req.body.avatar, {
+            folder: "avatars",
+            width: 300,
+            crop: "scale",
+          });
+
+          newUserData.avatar = {
+            public_id: myCloud.public_id,
+            url: myCloud.secure_url,
+          };
+        } catch (uploadError) {
+          console.error("Cloudinary upload failed, falling back to direct URL/base64:", uploadError.message);
+          newUserData.avatar = {
+            public_id: imageId || "avatars/custom_upload",
+            url: req.body.avatar,
+          };
+        }
       }
-
-      const myCloud = await cloudinary.uploader.upload(req.body.avatar, {
-        folder: "avatars",
-        width: 150,
-        crop: "scale",
-      });
-
-      newUserData.avatar = {
-        public_id: myCloud.public_id,
-        url: myCloud.secure_url,
-      };
     }
 
     const user = await User.findByIdAndUpdate(req.user.id, newUserData, {

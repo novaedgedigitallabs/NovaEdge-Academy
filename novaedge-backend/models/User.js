@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
+const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 
@@ -29,7 +29,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     unique: true,
     sparse: true,
-    match: [/^\+?[1-9]\d{1,14}$/, "Please enter a valid phone number"],
+    trim: true,
   },
   password: {
     type: String,
@@ -109,6 +109,12 @@ const userSchema = new mongoose.Schema({
   driveFolderId: {
     type: String, // Google Drive Folder ID for this user
   },
+  socialLinks: {
+    github: { type: String, default: "" },
+    linkedin: { type: String, default: "" },
+    portfolio: { type: String, default: "" },
+    twitter: { type: String, default: "" },
+  },
 });
 
 // --- SMART METHODS (The Brains) ---
@@ -116,7 +122,7 @@ const userSchema = new mongoose.Schema({
 // 1. Encrypt password before saving (Security)
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) {
-    next();
+    return next();
   }
   // Salt implies adding random data to password to make it unhackable
   const salt = await bcrypt.genSalt(10);

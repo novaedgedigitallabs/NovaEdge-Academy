@@ -3,6 +3,7 @@
 
 import { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { apiGet, apiPost } from "@/lib/api";
 
 const AuthContext = createContext(undefined);
 
@@ -11,39 +12,50 @@ export function AuthProvider({ children }) {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  // LOAD USER ON PAGE LOAD  (GET /api/v1/me)
+  // LOAD USER ON PAGE LOAD (GET /api/v1/me)
   useEffect(() => {
+    let isMounted = true;
     const fetchUser = async () => {
       try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL || ""}/api/v1/me`,
-          {
-            credentials: "include",
+        const data = await apiGet("/api/v1/me");
+        if (isMounted) {
+          if (data && data.success !== false && data.user) {
+            console.log("User authenticated:", data.user?.email);
+            setUser(data.user);
+          } else {
+            console.log("Auth check returned false:", data?.message);
+            if (typeof window !== "undefined") {
+              localStorage.removeItem("token");
+            }
+            setUser(null);
           }
-        );
-
-        console.log("Auth check response:", res.status);
-
-        if (res.ok) {
-          const data = await res.json();
-          console.log("User authenticated:", data.user?.email);
-          setUser(data.user);
-        } else {
-          console.log("Auth check failed with status:", res.status);
         }
       } catch (err) {
-        console.log("Auth check failed", err);
+        if (isMounted) {
+          console.log("Auth check failed:", err.response?.status || err.message);
+          // Only clear user on 401 Unauthorized
+          if (err.response?.status === 401) {
+            if (typeof window !== "undefined") {
+              localStorage.removeItem("token");
+            }
+            setUser(null);
+          }
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
     fetchUser();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // LOGIN (POST /api/v1/login) - returns { ok, message }
   const login = async (email, password) => {
-    // frontend validation
     if (!email || !password) {
       setIsLoading(false);
       return { ok: false, message: "Please enter email and password" };
@@ -51,29 +63,11 @@ export function AuthProvider({ children }) {
 
     setIsLoading(true);
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || ""}/api/v1/login`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ email, password }),
-        }
-      );
-
-      let data = {};
-      try {
-        data = await res.json();
-      } catch (e) {
-        // non-json response
-      }
-
-      console.log("LOGIN response status:", res.status, "body:", data);
-
-      if (!res.ok) {
-        const message = data?.message || `Login failed (status ${res.status})`;
+      const data = await apiPost("/api/v1/login", { email, password }, { validateStatus: status => status < 500 });
+      
+      if (data.success === false) {
         setIsLoading(false);
-        return { ok: false, message };
+        return { ok: false, message: data.message || "Login failed" };
       }
 
       // 2FA Check
@@ -84,6 +78,9 @@ export function AuthProvider({ children }) {
 
       // success
       const loggedUser = data.user || data;
+      if (data.token && typeof window !== "undefined") {
+        localStorage.setItem("token", data.token);
+      }
       setUser(loggedUser);
       setIsLoading(false);
 
@@ -95,9 +92,9 @@ export function AuthProvider({ children }) {
 
       return { ok: true };
     } catch (err) {
-      console.error("Login error:", err);
       setIsLoading(false);
-      return { ok: false, message: err.message || "Network error" };
+      const message = err.response?.data?.message || err.message || "Network error";
+      return { ok: false, message };
     }
   };
 
@@ -106,21 +103,17 @@ export function AuthProvider({ children }) {
     setIsLoading(true);
 
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || ""}/api/v1/register`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ name, email, password, referralCode, username, phoneNumber }),
-        }
-      );
+      const data = await apiPost("/api/v1/register", {
+        name,
+        email,
+        password,
+        referralCode,
+        username,
+        phoneNumber,
+      });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setIsLoading(false);
-        return { ok: false, message: data.message || "Registration failed" };
+      if (data.token && typeof window !== "undefined") {
+        localStorage.setItem("token", data.token);
       }
 
       setUser(data.user || data);
@@ -130,19 +123,21 @@ export function AuthProvider({ children }) {
     } catch (err) {
       console.error("Register error:", err);
       setIsLoading(false);
-      return { ok: false, message: err.message || "Network error" };
+      const message = err.response?.data?.message || err.message || "Registration failed";
+      return { ok: false, message };
     }
   };
 
   // LOGOUT (GET /api/v1/logout)
   const logout = async () => {
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL || ""}/api/v1/logout`, {
-        credentials: "include",
-      });
+      await apiGet("/api/v1/logout");
     } catch (e) {
       console.warn("Logout request failed", e);
     } finally {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("token");
+      }
       setUser(null);
       router.push("/");
     }
@@ -162,3 +157,4 @@ export function useAuth() {
   }
   return context;
 }
+

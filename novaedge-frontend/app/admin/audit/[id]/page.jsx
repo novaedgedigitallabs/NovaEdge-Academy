@@ -11,7 +11,7 @@ export default function AuditDetailPage() {
     const { id } = params;
 
     return (
-        <div className="container mx-auto py-8">
+        <div className="glass-card bg-white/30 backdrop-blur-sm p-6 space-y-6">
             <Button
                 variant="ghost"
                 className="mb-6 pl-0 hover:pl-2 transition-all"

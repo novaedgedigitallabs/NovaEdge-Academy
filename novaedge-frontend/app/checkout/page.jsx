@@ -33,7 +33,7 @@ function normalizeImageSrc(maybe) {
 function CheckoutContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const courseId = searchParams?.get("courseId");
+  const courseId = searchParams?.get ? searchParams.get("courseId") : null;
 
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(false);

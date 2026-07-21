@@ -13,7 +13,7 @@ const {
 } = require("../controllers/auth");
 
 // Import the Security Guard (Middleware)
-const { isAuthenticatedUser } = require("../middleware/auth");
+const { isAuthenticatedUser, checkAuthStatus } = require("../middleware/auth");
 
 // --- PUBLIC ROUTES (Anyone can access) ---
 
@@ -35,7 +35,7 @@ router.route("/user/:id").get(getPublicProfile);
 // --- PROTECTED ROUTES (Must be logged in) ---
 
 // Path: /api/v1/me
-router.route("/me").get(isAuthenticatedUser, getUserProfile);
+router.route("/me").get(checkAuthStatus, getUserProfile);
 
 // Path: /api/v1/me/update
 router.route("/me/update").put(isAuthenticatedUser, updateProfile);

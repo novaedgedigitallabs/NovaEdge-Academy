@@ -1,52 +1,42 @@
-// lib/api.js
-export const apiBase = process.env.NEXT_PUBLIC_API_URL || "";
+import axios from 'axios';
 
-async function parseJson(res) {
-  const text = await res.text().catch(() => "");
-  try {
-    return text ? JSON.parse(text) : {};
-  } catch {
-    return {};
+const api = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000',
+  timeout: 30000,
+  withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+api.interceptors.request.use((config) => {
+  if (typeof window !== "undefined") {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
   }
-}
+  return config;
+});
 
-export async function apiGet(path) {
-  const res = await fetch(`${apiBase}${path}`, { credentials: "include" });
-  const data = await parseJson(res);
-  if (!res.ok) throw new Error(data.message || `GET ${path} failed`);
-  return data;
-}
+export const apiGet = async (url, config = {}) => {
+  const response = await api.get(url, config);
+  return response.data;
+};
 
-export async function apiPost(path, body) {
-  const res = await fetch(`${apiBase}${path}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify(body),
-  });
-  const data = await parseJson(res);
-  if (!res.ok) throw new Error(data.message || `POST ${path} failed`);
-  return data;
-}
+export const apiPost = async (url, data = {}, config = {}) => {
+  const response = await api.post(url, data, config);
+  return response.data;
+};
 
-export async function apiPut(path, body) {
-  const res = await fetch(`${apiBase}${path}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify(body),
-  });
-  const data = await parseJson(res);
-  if (!res.ok) throw new Error(data.message || `PUT ${path} failed`);
-  return data;
-}
+export const apiPut = async (url, data = {}, config = {}) => {
+  const response = await api.put(url, data, config);
+  return response.data;
+};
 
-export async function apiDelete(path) {
-  const res = await fetch(`${apiBase}${path}`, {
-    method: "DELETE",
-    credentials: "include",
-  });
-  const data = await parseJson(res);
-  if (!res.ok) throw new Error(data.message || `DELETE ${path} failed`);
-  return data;
-}
+export const apiDelete = async (url, config = {}) => {
+  const response = await api.delete(url, config);
+  return response.data;
+};
+
+export default api;

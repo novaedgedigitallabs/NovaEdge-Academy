@@ -1,4 +1,6 @@
 import React from 'react';
+import AppLayout from '@/components/layout/AppLayout';
+import { ShieldCheck, Lock, FileText } from 'lucide-react';
 
 export const metadata = {
     title: 'Privacy Policy | NovaEdge Academy',
@@ -7,66 +9,61 @@ export const metadata = {
 
 export default function PrivacyPage() {
     return (
-        <div className="container mx-auto px-4 py-16 max-w-4xl">
-            <h1 className="text-4xl font-bold mb-8 text-foreground">Privacy Policy</h1>
-            <p className="text-muted-foreground mb-8">Last updated: {new Date().toLocaleDateString()}</p>
+        <AppLayout className="max-w-5xl">
+            <div className="px-4 py-8 max-w-4xl mx-auto space-y-8">
+                <div className="flex items-center gap-3 border-b border-border/40 pb-6">
+                    <div className="h-12 w-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+                        <Lock className="h-6 w-6" />
+                    </div>
+                    <div>
+                        <h1 className="text-2xl font-bold tracking-tight text-foreground">Privacy Policy</h1>
+                        <p className="text-xs text-muted-foreground mt-0.5">Last updated: {new Date().toLocaleDateString()}</p>
+                    </div>
+                </div>
 
-            <div className="space-y-8">
-                <section>
-                    <h2 className="text-2xl font-semibold mb-4 text-foreground">1. Introduction</h2>
-                    <p className="text-muted-foreground leading-relaxed">
-                        Welcome to NovaEdge Academy ("we," "our," or "us"). We are committed to protecting your personal information and your right to privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and use our services.
-                    </p>
-                </section>
+                <div className="space-y-6 text-sm leading-relaxed text-muted-foreground">
+                    <section className="bg-card/40 border border-border/60 rounded-2xl p-6 backdrop-blur-md">
+                        <h2 className="text-lg font-bold mb-3 text-foreground flex items-center gap-2">
+                            <FileText className="w-4 h-4 text-primary" /> 1. Introduction
+                        </h2>
+                        <p>
+                            Welcome to NovaEdge Academy (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;). We are committed to protecting your personal information and your right to privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and use our services.
+                        </p>
+                    </section>
 
-                <section>
-                    <h2 className="text-2xl font-semibold mb-4 text-foreground">2. Information We Collect</h2>
-                    <p className="text-muted-foreground leading-relaxed mb-4">
-                        We collect information that you provide directly to us, such as when you create an account, enroll in a course, or contact us for support. This may include:
-                    </p>
-                    <ul className="list-disc list-inside text-muted-foreground space-y-2 ml-4">
-                        <li>Personal identification information (Name, email address, phone number, etc.)</li>
-                        <li>Payment information (processed securely by our payment providers)</li>
-                        <li>Profile information (Bio, profile picture, social links)</li>
-                        <li>Course progress and performance data</li>
-                    </ul>
-                </section>
+                    <section className="bg-card/40 border border-border/60 rounded-2xl p-6 backdrop-blur-md">
+                        <h2 className="text-lg font-bold mb-3 text-foreground flex items-center gap-2">
+                            <ShieldCheck className="w-4 h-4 text-primary" /> 2. Information We Collect
+                        </h2>
+                        <p className="mb-3">
+                            We collect information that you provide directly to us, such as when you create an account, enroll in a course, or contact us for support. This may include:
+                        </p>
+                        <ul className="list-disc list-inside space-y-2 text-xs">
+                            <li><strong className="text-foreground">Personal Identification:</strong> Name, email address, phone number, etc.</li>
+                            <li><strong className="text-foreground">Payment Information:</strong> Processed securely by our payment providers.</li>
+                            <li><strong className="text-foreground">Profile Information:</strong> Bio, profile picture, social links.</li>
+                            <li><strong className="text-foreground">Course Progress:</strong> Quiz scores, certificates earned, and performance data.</li>
+                        </ul>
+                    </section>
 
-                <section>
-                    <h2 className="text-2xl font-semibold mb-4 text-foreground">3. How We Use Your Information</h2>
-                    <p className="text-muted-foreground leading-relaxed mb-4">
-                        We use the information we collect to:
-                    </p>
-                    <ul className="list-disc list-inside text-muted-foreground space-y-2 ml-4">
-                        <li>Provide, operate, and maintain our services</li>
-                        <li>Process your transactions and manage your enrollments</li>
-                        <li>Send you administrative information, such as updates and security alerts</li>
-                        <li>Personalize your learning experience</li>
-                        <li>Improve our website and course offerings</li>
-                    </ul>
-                </section>
+                    <section className="bg-card/40 border border-border/60 rounded-2xl p-6 backdrop-blur-md">
+                        <h2 className="text-lg font-bold mb-3 text-foreground">3. How We Use Your Information</h2>
+                        <ul className="list-disc list-inside space-y-2 text-xs">
+                            <li>Provide, operate, and maintain our educational services.</li>
+                            <li>Process your transactions and manage course enrollments.</li>
+                            <li>Send administrative notifications, system updates, and security alerts.</li>
+                            <li>Personalize your learning recommendations.</li>
+                        </ul>
+                    </section>
 
-                <section>
-                    <h2 className="text-2xl font-semibold mb-4 text-foreground">4. Data Security</h2>
-                    <p className="text-muted-foreground leading-relaxed">
-                        We implement appropriate technical and organizational security measures designed to protect the security of any personal information we process. However, please also remember that we cannot guarantee that the internet itself is 100% secure.
-                    </p>
-                </section>
-
-                <section>
-                    <h2 className="text-2xl font-semibold mb-4 text-foreground">5. Your Rights</h2>
-                    <p className="text-muted-foreground leading-relaxed">
-                        Depending on your location, you may have certain rights regarding your personal information, such as the right to access, correct, or delete your data. You can manage most of your personal data directly through your account settings.
-                    </p>
-                </section>
-
-                <section>
-                    <h2 className="text-2xl font-semibold mb-4 text-foreground">6. Contact Us</h2>
-                    <p className="text-muted-foreground leading-relaxed">
-                        If you have any questions about this Privacy Policy, please contact us at support@novaedge.com.
-                    </p>
-                </section>
+                    <section className="bg-card/40 border border-border/60 rounded-2xl p-6 backdrop-blur-md">
+                        <h2 className="text-lg font-bold mb-3 text-foreground">4. Data Security</h2>
+                        <p className="text-xs">
+                            We implement appropriate technical and organizational security measures designed to protect the security of any personal information we process.
+                        </p>
+                    </section>
+                </div>
             </div>
-        </div>
+        </AppLayout>
     );
 }

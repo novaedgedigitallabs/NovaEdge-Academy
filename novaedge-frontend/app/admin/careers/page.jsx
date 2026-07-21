@@ -49,7 +49,7 @@ export default function AdminCareersPage() {
     };
 
     return (
-        <div className="p-6 space-y-6">
+        <div className="glass-card bg-white/30 backdrop-blur-sm p-6 space-y-6">
             <div className="flex justify-between items-center">
                 <h1 className="text-3xl font-bold tracking-tight">Careers</h1>
                 <Link href="/admin/careers/new">

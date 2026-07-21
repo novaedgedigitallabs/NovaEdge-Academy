@@ -37,10 +37,9 @@ export default function SecuritySettingsPage() {
     if (loading) return <div className="p-8"><Loader2 className="animate-spin" /></div>;
 
     return (
-        <div className="container mx-auto px-4 py-8 max-w-3xl">
-            <h1 className="text-3xl font-bold mb-8">Security Settings</h1>
+        <div className="space-y-6">
 
-            <Card>
+            <Card className="bg-card/40 border-border/60 backdrop-blur-md shadow-xl overflow-hidden">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         {enabled ? <ShieldCheck className="text-green-500" /> : <ShieldAlert className="text-yellow-500" />}
