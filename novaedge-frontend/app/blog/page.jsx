@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Search, Calendar, Clock, ArrowRight, User } from 'lucide-react';
 import { getAllPosts } from "@/services/blogs";
 import Link from "next/link";
+import AppLayout from "@/components/layout/AppLayout";
 
 export default function BlogPage() {
     const [posts, setPosts] = useState([]);
@@ -35,7 +36,8 @@ export default function BlogPage() {
     }, []);
 
     return (
-        <div className="min-h-screen bg-background text-foreground selection:bg-primary/30">
+        <AppLayout>
+            <div className="min-h-screen bg-background text-foreground">
             {/* Hero Section */}
             <section className="relative py-20 overflow-hidden">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-primary/20 via-background to-background" />
@@ -157,5 +159,6 @@ export default function BlogPage() {
                 </div>
             </section>
         </div>
+        </AppLayout>
     );
 }

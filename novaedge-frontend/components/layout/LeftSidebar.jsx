@@ -16,7 +16,8 @@ import {
     Settings, 
     MoreHorizontal, 
     PenSquare, 
-    LogOut 
+    LogOut,
+    Newspaper
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -67,6 +68,11 @@ const sidebarLinks = [
         icon: Globe,
         route: "/community",
         label: "Community",
+    },
+    {
+        icon: Newspaper,
+        route: "/blog",
+        label: "Blog",
     },
     {
         icon: MessageSquare,
