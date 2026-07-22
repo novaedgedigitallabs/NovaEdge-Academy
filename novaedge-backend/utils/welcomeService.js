@@ -1,8 +1,8 @@
 const sendEmail = require("./sendEmail");
 
 /**
- * Humanized & Clean Welcome Email Template.
- * Single solid text colors, no emojis, natural human wording, and no generic corporate jargon.
+ * Humanized & Clean Welcome Email Template with Official Header Logo.
+ * Uses robust table layouts & explicit inline styles for 100% pixel-perfect rendering in Gmail/Outlook.
  * Dispatches to user email with CC to course@novaedgeacademy.in
  */
 exports.sendWelcomeEmail = async ({ name, email }) => {
@@ -26,13 +26,11 @@ exports.sendWelcomeEmail = async ({ name, email }) => {
         <!-- Main Container -->
         <table width="600" border="0" cellspacing="0" cellpadding="0" style="width: 600px; max-width: 600px; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
           
-          <!-- Header -->
+          <!-- Header with Logo -->
           <tr>
             <td style="padding: 32px 36px 20px 36px; border-bottom: 1px solid #e2e8f0; text-align: center;">
-              <div style="font-size: 22px; font-weight: 700; color: #0f172a;">
-                NovaEdge Academy
-              </div>
-              <div style="font-size: 12px; color: #64748b; margin-top: 3px;">
+              <img src="https://www.novaedgeacademy.in/Header_logo.webp" alt="NovaEdge Academy" width="180" style="display: block; margin: 0 auto; border: 0; outline: none; max-width: 180px; height: auto;" />
+              <div style="font-size: 12px; color: #64748b; margin-top: 6px;">
                 NovaEdge Digital Labs
               </div>
             </td>
