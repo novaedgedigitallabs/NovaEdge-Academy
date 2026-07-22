@@ -10,7 +10,7 @@ import { Loader2 } from "lucide-react";
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
-function RegisterForm() {
+export function RegisterForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

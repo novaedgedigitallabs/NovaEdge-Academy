@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/context/auth-context";
 import { Suspense } from "react";
-import RegisterPage from "@/app/register/page";
+import { RegisterForm } from "@/app/register/page";
 import LeftSidebar from "@/components/layout/LeftSidebar";
 import RightSidebar from "@/components/layout/RightSidebar";
 import Feed from "@/components/home/Feed";
@@ -22,8 +22,14 @@ export default function Home() {
 
   if (!user) {
     return (
-      <Suspense fallback={null}>
-        <RegisterPage />
+      <Suspense
+        fallback={
+          <div className="flex h-screen items-center justify-center bg-background">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        }
+      >
+        <RegisterForm />
       </Suspense>
     );
   }
