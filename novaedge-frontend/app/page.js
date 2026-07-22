@@ -3,10 +3,7 @@
 import { useAuth } from "@/context/auth-context";
 import { Suspense } from "react";
 import { RegisterForm } from "@/app/register/page";
-import LeftSidebar from "@/components/layout/LeftSidebar";
-import RightSidebar from "@/components/layout/RightSidebar";
 import Feed from "@/components/home/Feed";
-import MobileNav from "@/components/layout/MobileNav";
 import { Loader2 } from "lucide-react";
 
 export default function Home() {
@@ -34,12 +31,5 @@ export default function Home() {
     );
   }
 
-  return (
-    <div className="flex min-h-screen justify-center bg-background text-foreground">
-      <LeftSidebar />
-      <Feed />
-      <RightSidebar />
-      <MobileNav />
-    </div>
-  );
+  return <Feed />;
 }
