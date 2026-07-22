@@ -14,9 +14,12 @@ const {
 router.route("/create").post(isAuthenticatedUser, createPost);
 router.route("/all").get(getAllPosts);
 router.route("/user/:id").get(getUserPosts);
-router.route("/:id").get(getPostById);
-router.route("/:id").put(isAuthenticatedUser, updatePost);
-router.route("/:id").delete(isAuthenticatedUser, deletePost);
 router.route("/:id/like").put(isAuthenticatedUser, likePost);
+
+router
+    .route("/:id")
+    .get(getPostById)
+    .put(isAuthenticatedUser, updatePost)
+    .delete(isAuthenticatedUser, deletePost);
 
 module.exports = router;

@@ -11,7 +11,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Heart, Trash2, Pencil, MessageCircle, Repeat, Share2, BarChart2, MoreHorizontal } from "lucide-react";
 import CommentSection from "./CommentSection";
@@ -296,6 +296,7 @@ export default function PostCard({ post, onDelete, onUpdate }) {
                             <DialogContent onClick={(e) => e.stopPropagation()}>
                                 <DialogHeader>
                                     <DialogTitle>Quote Repost</DialogTitle>
+                                    <DialogDescription className="sr-only">Add a quote comment to this repost</DialogDescription>
                                 </DialogHeader>
                                 <Textarea
                                     value={quoteContent}
@@ -350,6 +351,7 @@ export default function PostCard({ post, onDelete, onUpdate }) {
                 <DialogContent onClick={(e) => e.stopPropagation()}>
                     <DialogHeader>
                         <DialogTitle>Edit Post</DialogTitle>
+                        <DialogDescription className="sr-only">Edit your post content</DialogDescription>
                     </DialogHeader>
                     <Textarea
                         value={editContent}
