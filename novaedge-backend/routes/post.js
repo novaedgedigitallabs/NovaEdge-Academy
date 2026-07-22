@@ -15,6 +15,8 @@ router.route("/create").post(isAuthenticatedUser, createPost);
 router.route("/all").get(getAllPosts);
 router.route("/user/:id").get(getUserPosts);
 router.route("/:id/like").put(isAuthenticatedUser, likePost);
+router.route("/update/:id").put(isAuthenticatedUser, updatePost);
+router.route("/:id/update").put(isAuthenticatedUser, updatePost);
 
 router
     .route("/:id")

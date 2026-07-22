@@ -17,7 +17,14 @@ export const deletePost = async (postId) => {
 };
 
 export const updatePost = async (postId, content) => {
-    return apiPut(`/api/v1/posts/${postId}`, { content });
+    try {
+        return await apiPut(`/api/v1/posts/${postId}`, { content });
+    } catch (err) {
+        if (err.response && err.response.status === 404) {
+            return await apiPut(`/api/v1/posts/update/${postId}`, { content });
+        }
+        throw err;
+    }
 };
 
 export const likePost = async (postId) => {
