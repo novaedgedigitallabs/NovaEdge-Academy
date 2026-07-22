@@ -5,11 +5,20 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Search, Calendar, Clock, ArrowRight, User, Rss, ExternalLink } from 'lucide-react';
 import { getAllPosts } from "@/services/blogs";
 import { getRssFeedPosts } from "@/services/rss";
 import Link from "next/link";
 import AppLayout from "@/components/layout/AppLayout";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { 
+    faRss, 
+    faMagnifyingGlass, 
+    faCalendarDays, 
+    faClock, 
+    faArrowRight, 
+    faUser, 
+    faArrowUpRightFromSquare 
+} from "@fortawesome/free-solid-svg-icons";
 
 export default function BlogPage() {
     const [posts, setPosts] = useState([]);
@@ -57,14 +66,14 @@ export default function BlogPage() {
                     <div className="container relative mx-auto px-4 text-center">
                         <div className="flex items-center justify-center gap-2 mb-4">
                             <Badge variant="outline" className="border-border text-foreground px-3 py-1 text-xs font-semibold gap-1.5">
-                                <Rss className="w-3.5 h-3.5" /> RSS Sync Active
+                                <FontAwesomeIcon icon={faRss} className="w-3 h-3 text-primary" /> RSS Sync Active
                             </Badge>
                             <a 
                                 href="/rss.xml" 
                                 target="_blank" 
                                 className="text-xs text-muted-foreground hover:text-foreground underline flex items-center gap-1"
                             >
-                                /rss.xml <ExternalLink className="w-3 h-3" />
+                                /rss.xml <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="w-2.5 h-2.5" />
                             </a>
                         </div>
 
@@ -77,7 +86,7 @@ export default function BlogPage() {
                         </p>
 
                         <div className="max-w-md mx-auto relative">
-                            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                            <FontAwesomeIcon icon={faMagnifyingGlass} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
                             <Input
                                 placeholder="Search articles, categories, or keywords..."
                                 value={searchQuery}
@@ -110,12 +119,12 @@ export default function BlogPage() {
                                             <Badge className="bg-secondary text-foreground border-border">
                                                 {featuredPost.category || "Technology"}
                                             </Badge>
-                                            <span className="flex items-center gap-1">
-                                                <Calendar className="w-3.5 h-3.5" /> 
+                                            <span className="flex items-center gap-1.5">
+                                                <FontAwesomeIcon icon={faCalendarDays} className="w-3 h-3" /> 
                                                 {new Date(featuredPost.createdAt).toLocaleDateString()}
                                             </span>
-                                            <span className="flex items-center gap-1">
-                                                <Clock className="w-3.5 h-3.5" /> {featuredPost.readTime || "5 min read"}
+                                            <span className="flex items-center gap-1.5">
+                                                <FontAwesomeIcon icon={faClock} className="w-3 h-3" /> {featuredPost.readTime || "5 min read"}
                                             </span>
                                         </div>
                                         <h3 className="text-xl md:text-2xl font-bold mb-3 text-foreground group-hover:text-primary transition-colors leading-snug">
@@ -128,14 +137,14 @@ export default function BlogPage() {
                                     <div className="flex items-center justify-between pt-4 border-t border-border/40">
                                         <div className="flex items-center gap-2">
                                             <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center text-foreground text-xs font-bold">
-                                                <User className="w-3.5 h-3.5" />
+                                                <FontAwesomeIcon icon={faUser} className="w-3 h-3" />
                                             </div>
                                             <span className="text-xs font-medium text-foreground">{featuredPost.author || "NovaEdge Digital Labs"}</span>
                                         </div>
 
                                         <Link href={`/blog/${featuredPost._id}`}>
                                             <Button size="sm" className="rounded-full text-xs font-bold gap-1.5">
-                                                Read Article <ArrowRight className="w-3.5 h-3.5" />
+                                                Read Article <FontAwesomeIcon icon={faArrowRight} className="w-3 h-3" />
                                             </Button>
                                         </Link>
                                     </div>
@@ -159,7 +168,7 @@ export default function BlogPage() {
 
                         {loading ? (
                             <div className="py-16 text-center text-muted-foreground flex flex-col items-center gap-3">
-                                <Rss className="w-8 h-8 animate-pulse text-primary" />
+                                <FontAwesomeIcon icon={faRss} className="w-8 h-8 animate-pulse text-primary" />
                                 <p className="text-sm">Loading latest blog articles...</p>
                             </div>
                         ) : filteredPosts.length === 0 ? (
@@ -186,12 +195,12 @@ export default function BlogPage() {
                                         </div>
                                         <CardHeader className="p-5 pb-3">
                                             <div className="flex items-center gap-3 mb-2 text-[11px] text-muted-foreground">
-                                                <span className="flex items-center gap-1">
-                                                    <Calendar className="w-3 h-3" /> 
+                                                <span className="flex items-center gap-1.5">
+                                                    <FontAwesomeIcon icon={faCalendarDays} className="w-3 h-3" /> 
                                                     {new Date(post.createdAt).toLocaleDateString()}
                                                 </span>
-                                                <span className="flex items-center gap-1">
-                                                    <Clock className="w-3 h-3" /> 
+                                                <span className="flex items-center gap-1.5">
+                                                    <FontAwesomeIcon icon={faClock} className="w-3 h-3" /> 
                                                     {post.readTime || "5 min read"}
                                                 </span>
                                             </div>
@@ -207,7 +216,7 @@ export default function BlogPage() {
                                         <CardFooter className="p-5 pt-4 mt-auto flex items-center justify-between border-t border-border/40">
                                             <div className="flex items-center gap-2">
                                                 <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center text-foreground text-[10px] font-bold">
-                                                    <User className="w-3 h-3" />
+                                                    <FontAwesomeIcon icon={faUser} className="w-3 h-3" />
                                                 </div>
                                                 <span className="text-[11px] font-medium text-muted-foreground truncate max-w-[120px]">
                                                     {post.author || "NovaEdge Digital Labs"}
@@ -216,7 +225,7 @@ export default function BlogPage() {
 
                                             <Link href={`/blog/${post._id}`}>
                                                 <Button variant="ghost" size="sm" className="text-primary hover:text-primary hover:bg-primary/10 -mr-2 text-xs gap-1 font-semibold">
-                                                    Read <ArrowRight className="w-3 h-3" />
+                                                    Read <FontAwesomeIcon icon={faArrowRight} className="w-3 h-3" />
                                                 </Button>
                                             </Link>
                                         </CardFooter>
