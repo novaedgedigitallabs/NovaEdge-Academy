@@ -79,6 +79,12 @@ export default function UserProfilePage() {
         );
     }
 
+    const displayRole = (user.role === "admin" && (user.email?.toLowerCase().includes("admin") || user.isAdmin))
+        ? "Admin"
+        : user.role === "mentor"
+        ? "Mentor"
+        : "Student";
+
     return (
         <AppLayout>
             <div className="px-4 py-6 max-w-5xl mx-auto space-y-6">
@@ -103,7 +109,7 @@ export default function UserProfilePage() {
                                 )}
 
                                 <Badge variant="secondary" className="text-xs font-semibold px-3 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 capitalize mb-4">
-                                    {user.role || "Student"}
+                                    {displayRole}
                                 </Badge>
 
                                 {currentUser && currentUser._id !== user._id && (

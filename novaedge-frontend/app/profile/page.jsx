@@ -95,6 +95,12 @@ export default function ProfilePage() {
 
   if (authLoading || !user) return null;
 
+  const displayRole = (user.role === "admin" && (user.email?.toLowerCase().includes("admin") || user.isAdmin))
+    ? "Admin"
+    : user.role === "mentor"
+    ? "Mentor"
+    : "Student";
+
   return (
     <AppLayout className="max-w-2xl xl:max-w-3xl border-r border-border p-0 sm:pb-0">
       {/* Header / Back button */}
@@ -160,9 +166,9 @@ export default function ProfilePage() {
         )}
 
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground mb-4">
-          {user.role === "admin" && (
-            <span className="bg-primary/10 text-primary border border-primary/20 px-2.5 py-0.5 rounded-full text-xs font-bold capitalize">Admin</span>
-          )}
+          <span className="bg-primary/10 text-primary border border-primary/20 px-2.5 py-0.5 rounded-full text-xs font-bold capitalize">
+            {displayRole}
+          </span>
           <div className="flex items-center gap-1.5 text-xs">
             <Calendar className="w-3.5 h-3.5 text-primary" />
             <span>Joined {new Date(user.createdAt || Date.now()).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}</span>
@@ -270,7 +276,7 @@ export default function ProfilePage() {
             </div>
           ) : courses.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-muted-foreground mb-4 text-sm">You haven't enrolled in any courses yet.</p>
+              <p className="text-muted-foreground mb-4 text-sm">You haven&apos;t enrolled in any courses yet.</p>
               <Button onClick={() => router.push("/courses")} className="rounded-full px-6 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold">
                 Browse Courses
               </Button>
