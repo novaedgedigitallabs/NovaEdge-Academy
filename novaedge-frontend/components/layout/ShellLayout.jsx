@@ -36,7 +36,7 @@ export default function ShellLayout({ children }) {
             <LeftSidebar />
 
             {/* Main Middle Content Column */}
-            <main className="flex w-full min-w-0 flex-col border-x border-border pb-20 sm:pb-10 max-w-2xl xl:max-w-3xl">
+            <main className="flex w-full min-w-0 flex-col pb-20 sm:pb-10 max-w-2xl xl:max-w-3xl">
                 {children}
             </main>
 
