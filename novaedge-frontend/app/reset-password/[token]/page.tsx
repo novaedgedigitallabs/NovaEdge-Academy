@@ -1,17 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { useState, use } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, CheckCircle2, Lock } from "lucide-react";
 import { apiPost } from "@/lib/api";
 
-export default function ResetPasswordPage({ params }: { params: Promise<{ token: string }> }) {
-  const { token } = use(params);
+export default function ResetPasswordPage() {
+  const params = useParams();
+  const token = params?.token as string;
   const router = useRouter();
+  
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -20,7 +22,7 @@ export default function ResetPasswordPage({ params }: { params: Promise<{ token:
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!password || isSubmitting) return;
+    if (!password || isSubmitting || !token) return;
 
     if (password.length < 6) {
       setError("Password must be at least 6 characters long");
