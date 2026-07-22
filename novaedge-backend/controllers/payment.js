@@ -3,11 +3,13 @@ const crypto = require("crypto");
 const Payment = require("../models/Payment");
 const Enrollment = require("../models/Enrollment");
 const Course = require("../models/Course");
-
-// --- 1. BUY SUBSCRIPTION (Create Order) ---
 const Coupon = require("../models/Coupon");
+const User = require("../models/User");
+const Referral = require("../models/Referral");
+const WalletTransaction = require("../models/WalletTransaction");
+const { sendPurchaseInvoiceEmail } = require("../utils/invoiceService");
 
-// --- 1. BUY SUBSCRIPTION (Create Order) ---
+// --- 1. BUY SUBSCRIPTION / COURSE (Create Order or Auto-Enroll if 100% Free) ---
 exports.checkout = async (req, res) => {
   try {
     const { courseId, couponCode, useWallet } = req.body;
@@ -60,10 +62,61 @@ exports.checkout = async (req, res) => {
       finalAmount -= usableWallet;
     }
 
-    // Ensure at least ₹1 for Razorpay if not fully covered (Razorpay min is ₹1)
-    // If fully covered (finalAmount == 0), we skip Razorpay creation or handle it differently.
-    // For simplicity, let's assume we always charge at least ₹1 via Razorpay unless it's 100% free.
-    // If 100% free, we can bypass Razorpay order creation.
+    // If 100% Discounted or Free (finalAmount === 0), complete enrollment directly
+    if (finalAmount <= 0) {
+      if (walletAmountUsed > 0) {
+        const user = await User.findById(req.user.id);
+        user.walletBalance -= walletAmountUsed;
+        await user.save();
+
+        await WalletTransaction.create({
+          user: req.user.id,
+          amount: -walletAmountUsed,
+          type: "redemption",
+          description: `Used for course ${course.title}`,
+        });
+      }
+
+      if (couponId) {
+        await Coupon.findByIdAndUpdate(couponId, { $inc: { usedCount: 1 } });
+      }
+
+      const payment = await Payment.create({
+        razorpay_order_id: `FREE_${Date.now()}`,
+        razorpay_payment_id: `FREE_PAY_${Date.now()}`,
+        razorpay_signature: "FREE_ORDER",
+        user: req.user.id,
+        course: courseId,
+        amount: 0,
+        status: "completed",
+        coupon: couponId,
+        discountAmount,
+      });
+
+      await Enrollment.create({
+        user: req.user.id,
+        course: courseId,
+        paymentId: payment._id,
+      });
+
+      const userObj = await User.findById(req.user.id);
+      sendPurchaseInvoiceEmail({
+        user: userObj,
+        course,
+        payment,
+        amountPaid: 0,
+        walletAmountUsed,
+        discountAmount,
+        couponCode,
+      }).catch((err) => console.error("Invoice email error:", err.message));
+
+      return res.status(200).json({
+        success: true,
+        freeEnrollment: true,
+        course,
+        finalAmount: 0,
+      });
+    }
 
     let order = null;
     if (finalAmount > 0) {
@@ -94,7 +147,7 @@ exports.checkout = async (req, res) => {
   }
 };
 
-// --- 2. PAYMENT VERIFICATION (The Security Check) ---
+// --- 2. PAYMENT VERIFICATION (Security & Verification) ---
 exports.paymentVerification = async (req, res) => {
   try {
     const {
@@ -102,7 +155,7 @@ exports.paymentVerification = async (req, res) => {
       razorpay_payment_id,
       razorpay_signature,
       courseId,
-      couponCode // Frontend sends this back
+      couponCode
     } = req.body;
 
     const body = razorpay_order_id + "|" + razorpay_payment_id;
@@ -115,7 +168,6 @@ exports.paymentVerification = async (req, res) => {
     const isAuthentic = expectedSignature === razorpay_signature;
 
     if (isAuthentic) {
-      // Fetch order from Razorpay to get actual amount paid
       const order = await instance.orders.fetch(razorpay_order_id);
       const amountPaid = order.amount / 100;
       const walletAmountUsed = Number(order.notes.walletAmountUsed) || 0;
@@ -130,7 +182,6 @@ exports.paymentVerification = async (req, res) => {
         coupon = await Coupon.findOne({ code: couponCode.toUpperCase() });
         if (coupon) {
           discountAmount = course.price - amountPaid - walletAmountUsed;
-          // Increment usage
           await Coupon.findByIdAndUpdate(coupon._id, { $inc: { usedCount: 1 } });
         }
       }
@@ -169,17 +220,14 @@ exports.paymentVerification = async (req, res) => {
         paymentId: payment._id,
       });
 
-      // D. Referral Reward (If first purchase)
+      // D. Referral Reward
       const referral = await Referral.findOne({ referee: req.user.id, status: "pending" });
       if (referral) {
-        // Grant Reward (e.g., ₹500)
         const reward = 500;
-
         referral.status = "qualified";
         referral.rewardAmount = reward;
         await referral.save();
 
-        // Credit Referrer
         const referrer = await User.findById(referral.referrer);
         referrer.walletBalance += reward;
         await referrer.save();
@@ -192,8 +240,21 @@ exports.paymentVerification = async (req, res) => {
         });
       }
 
+      // E. Send Purchase Invoice Email to User with CC to course@novaedgeacademy.in
+      const userObj = await User.findById(req.user.id);
+      sendPurchaseInvoiceEmail({
+        user: userObj,
+        course,
+        payment,
+        amountPaid,
+        walletAmountUsed,
+        discountAmount,
+        couponCode,
+      }).catch((err) => console.error("Invoice email error:", err.message));
+
+      const frontendUrl = process.env.FRONTEND_URL || "https://www.novaedgeacademy.in";
       res.redirect(
-        `http://localhost:3000/payment/success?reference=${razorpay_payment_id}`
+        `${frontendUrl}/payment/success?reference=${razorpay_payment_id}`
       );
     } else {
       res.status(400).json({
@@ -206,7 +267,7 @@ exports.paymentVerification = async (req, res) => {
   }
 };
 
-// --- 3. SEND API KEY (Frontend needs this) ---
+// --- 3. SEND API KEY ---
 exports.getRazorpayKey = async (req, res) => {
   res.status(200).json({
     success: true,
