@@ -5,7 +5,7 @@ const seedDefaultUser = async () => {
     const User = require("../models/User");
     const crypto = require("crypto");
 
-    // 1. Seed / Update Prince Kashyap
+    // 1. Seed Prince Kashyap ONLY if user does not exist
     let existingPrince = await User.findOne({ 
       $or: [{ email: "princekashyap2084@gmail.com" }, { username: "princekashyap4563" }] 
     });
@@ -24,12 +24,9 @@ const seedDefaultUser = async () => {
         referralCode: crypto.randomBytes(4).toString("hex").toUpperCase(),
       });
       console.log("Default user princekashyap2084@gmail.com seeded automatically.");
-    } else if (existingPrince.role !== "admin") {
-      existingPrince.role = "admin";
-      await existingPrince.save();
     }
 
-    // 2. Seed / Update Amit Kumar Raikwar
+    // 2. Seed Amit Kumar Raikwar ONLY if user does not exist
     let existingAmit = await User.findOne({ 
       $or: [{ email: "amitkumarraikwar92@gmail.com" }, { username: "amitkumarraikwar" }] 
     });
@@ -48,9 +45,6 @@ const seedDefaultUser = async () => {
         referralCode: crypto.randomBytes(4).toString("hex").toUpperCase(),
       });
       console.log("Default user amitkumarraikwar92@gmail.com seeded automatically.");
-    } else if (existingAmit.role !== "admin") {
-      existingAmit.role = "admin";
-      await existingAmit.save();
     }
   } catch (err) {
     console.error("Auto-seeding default user error:", err.message);
