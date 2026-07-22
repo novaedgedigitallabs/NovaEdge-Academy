@@ -1,62 +1,57 @@
-// This is a MOCK LLM Service.
-// In production, replace this with calls to OpenAI, Anthropic, or a local LLM.
+const { generateOpenRouterCompletion } = require("./openrouter");
 
 exports.generateLectureContent = async (lectureTitle, lectureDescription) => {
-    // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    const prompt = `
+    You are an expert curriculum author for NovaEdge Academy.
+    Create structured educational resources for a lecture titled "${lectureTitle}".
+    Description: "${lectureDescription || "Comprehensive guide and hands-on practice."}"
 
-    // Return structured JSON
-    return {
-        summary: `This lecture covers the core concepts of ${lectureTitle}. We explore ${lectureDescription || "the fundamental principles"}, discussing real-world applications and best practices. By the end, you will have a solid understanding of how to apply these skills in your projects.`,
-        keyPoints: [
-            `Understanding the basics of ${lectureTitle}`,
-            "Key terminology and definitions",
-            "Common pitfalls and how to avoid them",
-            "Best practices for implementation",
-            "Future trends and advanced topics",
-        ],
-        mcqs: [
-            {
-                question: `What is the primary focus of ${lectureTitle}?`,
-                options: [
-                    "To confuse beginners",
-                    `To master ${lectureTitle} concepts`,
-                    "To waste time",
-                    "None of the above",
-                ],
-                correctAnswer: `To master ${lectureTitle} concepts`,
-                explanation: "The lecture is designed to provide comprehensive knowledge on the subject.",
-            },
-            {
-                question: "Which of the following is a key benefit discussed?",
-                options: [
-                    "Increased complexity",
-                    "Reduced performance",
-                    "Improved efficiency",
-                    "Higher costs",
-                ],
-                correctAnswer: "Improved efficiency",
-                explanation: "Efficiency is a major advantage of applying these principles correctly.",
-            },
-            {
-                question: "What should you avoid when implementing this?",
-                options: [
-                    "Following best practices",
-                    "Ignoring documentation",
-                    "Testing your code",
-                    "Asking for help",
-                ],
-                correctAnswer: "Ignoring documentation",
-                explanation: "Documentation provides essential guidance and should not be overlooked.",
-            },
-        ],
-    };
+    Return strictly valid JSON format without markdown code blocks with structure:
+    {
+      "summary": "Concise summary of lecture (150 words)...",
+      "keyPoints": ["Key point 1", "Key point 2", "Key point 3", "Key point 4", "Key point 5"],
+      "mcqs": [
+        {
+          "question": "Question text...",
+          "options": ["Option A", "Option B", "Option C", "Option D"],
+          "correctAnswer": "Option B",
+          "explanation": "Explanation text..."
+        }
+      ]
+    }
+    `;
+
+    try {
+        const text = await generateOpenRouterCompletion(prompt);
+        const cleanedText = text.replace(/```json/g, "").replace(/```/g, "").trim();
+        return JSON.parse(cleanedText);
+    } catch (err) {
+        console.error("OpenRouter Lecture Generation Error:", err.message);
+        return {
+            summary: `This lecture covers core concepts of ${lectureTitle}. We explore ${lectureDescription || "fundamental principles"}, discussing real-world applications and best practices.`,
+            keyPoints: [
+                `Understanding the basics of ${lectureTitle}`,
+                "Key terminology and definitions",
+                "Common pitfalls and how to avoid them",
+                "Best practices for implementation",
+                "Future trends and advanced topics",
+            ],
+            mcqs: [
+                {
+                    question: `What is the primary focus of ${lectureTitle}?`,
+                    options: [
+                        "To confuse beginners",
+                        `To master ${lectureTitle} concepts`,
+                        "To waste time",
+                        "None of the above",
+                    ],
+                    correctAnswer: `To master ${lectureTitle} concepts`,
+                    explanation: "The lecture is designed to provide comprehensive knowledge on the subject.",
+                },
+            ],
+        };
+    }
 };
-
-const geminiModel = require("./gemini");
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-
-// ... (generateLectureContent remains mock or can be updated later)
 
 exports.generateChatResponse = async (query, context) => {
     try {
@@ -70,11 +65,11 @@ exports.generateChatResponse = async (query, context) => {
         const contextText = context.map(c => `Title: ${c.title}\nContent: ${c.text}`).join("\n\n");
 
         const prompt = `
-        You are a helpful and friendly AI teaching assistant for a course.
-        Your goal is to answer the student's question based on the provided course context.
+        You are a helpful and friendly AI teaching assistant for NovaEdge Academy.
+        Your goal is to answer the student's question based on the provided course context using OpenRouter AI.
         
         IMPORTANT: 
-        1. Explain the answer in simple, human language (ELI5 style). Avoid complex jargon unless necessary, and if you use it, explain it simply.
+        1. Explain the answer in simple, human language (ELI5 style).
         2. Use Markdown formatting (bold, lists, code blocks) to make the answer easy to read.
         3. Be concise and encouraging.
 
@@ -86,21 +81,19 @@ exports.generateChatResponse = async (query, context) => {
         Answer:
         `;
 
-        const result = await geminiModel.generateContent(prompt);
-        const response = await result.response;
-        const text = response.text();
+        const text = await generateOpenRouterCompletion(prompt);
 
         return {
-            text: text,
+            text: text || "I'm sorry, I couldn't generate an answer right now.",
             citations: context.filter(c => c.lectureId).map(c => ({
                 lectureId: c.lectureId,
                 title: c.title
             }))
         };
     } catch (error) {
-        console.error("Gemini Chat Error:", error);
+        console.error("OpenRouter Chat Error:", error.message);
         return {
-            text: "I'm sorry, I'm having trouble thinking right now. Please try again later.",
+            text: "I'm sorry, I'm having trouble thinking right now. Please check OPENROUTER_API_KEY configuration.",
             citations: []
         };
     }
