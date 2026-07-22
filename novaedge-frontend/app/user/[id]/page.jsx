@@ -15,7 +15,8 @@ import FriendActionButton from "@/components/friend/FriendActionButton";
 import { useAuth } from "@/context/auth-context";
 
 export default function PublicProfilePage() {
-    const { id } = useParams();
+    const params = useParams();
+    const idParam = params?.id;
     const router = useRouter();
     const { user: currentUser } = useAuth();
     const [user, setUser] = useState(null);
@@ -24,36 +25,51 @@ export default function PublicProfilePage() {
     const [error, setError] = useState(null);
 
     useEffect(() => {
+        if (!idParam) return;
+
         const fetchUser = async () => {
+            setLoading(true);
+            setError(null);
             try {
-                const res = await apiGet(`/api/v1/user/${id}`);
-                if (res.success && res.user) {
-                    if (res.user.username && id !== res.user.username) {
-                        router.replace(`/${res.user.username}`);
-                        return;
-                    }
-                    setUser({ ...res.user, certificates: res.certificates || [] });
-                } else {
-                    setError(res.message || "User not found");
+                const isMongoId = /^[0-9a-fA-F]{24}$/.test(idParam);
+                let res = null;
+
+                if (isMongoId) {
+                    res = await apiGet(`/api/v1/user/${idParam}`).catch(() => null);
                 }
 
-                if (res.success && res.user) {
+                if (!res || !res.success) {
+                    res = await apiGet(`/api/v1/user/lookup?username=${encodeURIComponent(idParam)}`).catch(() => null);
+                }
+
+                if (!res || !res.success) {
+                    res = await apiGet(`/api/v1/user/${idParam}`).catch(() => null);
+                }
+
+                if (res && res.success && res.user) {
+                    setUser({ ...res.user, certificates: res.certificates || [] });
+
+                    if (res.user.username && isMongoId && idParam !== res.user.username) {
+                        router.replace(`/${res.user.username}`);
+                    }
+
                     const postsRes = await getUserPosts(res.user._id).catch(() => ({ success: false }));
-                    if (postsRes.success && Array.isArray(postsRes.posts)) {
+                    if (postsRes && postsRes.success && Array.isArray(postsRes.posts)) {
                         setPosts(postsRes.posts);
                     }
+                } else {
+                    setError(res?.message || "User not found");
                 }
             } catch (err) {
-                setError(err?.response?.data?.message || err.message || "Failed to load profile");
+                console.error("Profile load error:", err);
+                setError("Failed to load user profile");
             } finally {
                 setLoading(false);
             }
         };
 
-        if (id) {
-            fetchUser();
-        }
-    }, [id]);
+        fetchUser();
+    }, [idParam, router]);
 
     if (loading) {
         return (
