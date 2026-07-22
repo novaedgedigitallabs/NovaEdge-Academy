@@ -8,7 +8,7 @@ const seedDefaultUser = async () => {
     // 1. Seed / Update Prince Kashyap
     let existingPrince = await User.findOne({ 
       $or: [{ email: "princekashyap2084@gmail.com" }, { username: "princekashyap4563" }] 
-    }).select("+password");
+    });
 
     if (!existingPrince) {
       await User.create({
@@ -24,20 +24,15 @@ const seedDefaultUser = async () => {
         referralCode: crypto.randomBytes(4).toString("hex").toUpperCase(),
       });
       console.log("Default user princekashyap2084@gmail.com seeded automatically.");
-    } else {
+    } else if (existingPrince.role !== "admin") {
       existingPrince.role = "admin";
-      const matches = await existingPrince.matchPassword("Pk8537127");
-      if (!matches) {
-        existingPrince.password = "Pk8537127";
-      }
       await existingPrince.save();
-      console.log("Updated default user princekashyap2084@gmail.com to admin role.");
     }
 
     // 2. Seed / Update Amit Kumar Raikwar
     let existingAmit = await User.findOne({ 
       $or: [{ email: "amitkumarraikwar92@gmail.com" }, { username: "amitkumarraikwar" }] 
-    }).select("+password");
+    });
 
     if (!existingAmit) {
       await User.create({
@@ -53,14 +48,9 @@ const seedDefaultUser = async () => {
         referralCode: crypto.randomBytes(4).toString("hex").toUpperCase(),
       });
       console.log("Default user amitkumarraikwar92@gmail.com seeded automatically.");
-    } else {
+    } else if (existingAmit.role !== "admin") {
       existingAmit.role = "admin";
-      const matches = await existingAmit.matchPassword("Pk8537127");
-      if (!matches) {
-        existingAmit.password = "Pk8537127";
-      }
       await existingAmit.save();
-      console.log("Updated default user amitkumarraikwar92@gmail.com to admin role.");
     }
   } catch (err) {
     console.error("Auto-seeding default user error:", err.message);
@@ -69,16 +59,15 @@ const seedDefaultUser = async () => {
 
 const connectDB = async () => {
   if (mongoose.connection.readyState >= 1) {
-    await seedDefaultUser();
     return;
   }
 
   try {
     const conn = await mongoose.connect(process.env.MONGO_URI, {
-      serverSelectionTimeoutMS: 3000,
+      serverSelectionTimeoutMS: 5000,
     });
     console.log(`MongoDB Connected: ${conn.connection.host}`);
-    await seedDefaultUser();
+    seedDefaultUser().catch(() => {});
   } catch (error) {
     console.warn(`Primary MongoDB connection failed (${error.message}). Starting MongoMemoryServer fallback...`);
     try {
@@ -88,7 +77,7 @@ const connectDB = async () => {
       const mongoUri = mongoServer.getUri();
       const conn = await mongoose.connect(mongoUri);
       console.log(`MongoDB Connected (MongoMemoryServer): ${conn.connection.host}`);
-      await seedDefaultUser();
+      seedDefaultUser().catch(() => {});
     } catch (memError) {
       console.error(`MongoDB Connection Error: ${memError.message}`);
     }

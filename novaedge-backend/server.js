@@ -18,6 +18,15 @@ connectDB();
 connectCloudinary();
 
 // 3. Middleware (The Gatekeepers)
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
+
 app.use(express.json({ limit: "50mb" })); // Parse JSON bodies (limit increased for big data)
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(cookieParser()); // Parse cookies (for Auth)
