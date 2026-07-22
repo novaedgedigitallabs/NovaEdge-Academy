@@ -10,7 +10,7 @@ import PostCard from "@/components/post/PostCard";
 import { getUserPosts } from "@/services/post";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Calendar, ArrowLeft, Loader2, Sparkles, BookOpen, Award, Github, Linkedin, Globe, Twitter } from "lucide-react";
+import { Calendar, ArrowLeft, Loader2, Sparkles, BookOpen, Award, Github, Linkedin, Globe, Twitter, Camera } from "lucide-react";
 
 export default function ProfilePage() {
   const { user, isLoading: authLoading } = useAuth();
@@ -109,8 +109,28 @@ export default function ProfilePage() {
       </div>
 
       {/* Cover Image */}
-      <div className="h-48 bg-muted relative">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/30 via-primary/10 to-secondary/30" />
+      <div className="h-48 sm:h-56 bg-muted relative overflow-hidden group">
+        {user.coverImage?.url ? (
+          <img
+            src={user.coverImage.url}
+            alt="Profile Cover"
+            className="w-full h-full object-cover object-center"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-900/60 via-indigo-900/40 to-slate-900/80 flex items-center justify-center">
+            <Sparkles className="w-12 h-12 text-primary/20" />
+          </div>
+        )}
+
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => router.push("/settings/profile")}
+          className="absolute top-3 right-3 rounded-full opacity-80 group-hover:opacity-100 transition-opacity bg-black/60 hover:bg-black/80 text-white backdrop-blur-sm text-xs gap-1.5 cursor-pointer"
+        >
+          <Camera className="w-3.5 h-3.5" />
+          <span>Edit Cover</span>
+        </Button>
       </div>
 
       {/* Profile Info */}

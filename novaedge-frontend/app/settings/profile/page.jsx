@@ -15,6 +15,7 @@ import { toast } from "sonner";
 export default function EditProfilePage() {
     const { user, setUser, logout } = useAuth();
     const fileInputRef = useRef(null);
+    const coverFileInputRef = useRef(null);
     
     const [name, setName] = useState("");
     const [username, setUsername] = useState("");
@@ -22,6 +23,7 @@ export default function EditProfilePage() {
     const [phoneNumber, setPhoneNumber] = useState("");
     const [bio, setBio] = useState("");
     const [avatarUrl, setAvatarUrl] = useState("");
+    const [coverUrl, setCoverUrl] = useState("");
     
     // Social & Profile links
     const [github, setGithub] = useState("");
@@ -39,6 +41,7 @@ export default function EditProfilePage() {
             setPhoneNumber(user.phoneNumber || "");
             setBio(user.bio || "");
             setAvatarUrl(user.avatar?.url || "");
+            setCoverUrl(user.coverImage?.url || "");
 
             if (user.socialLinks) {
                 setGithub(user.socialLinks.github || "");
@@ -53,13 +56,29 @@ export default function EditProfilePage() {
         const file = e.target.files?.[0];
         if (file) {
             if (file.size > 5 * 1024 * 1024) {
-                toast.error("Image size should be less than 5MB");
+                toast.error("Avatar image size should be less than 5MB");
                 return;
             }
             const reader = new FileReader();
             reader.onloadend = () => {
                 setAvatarUrl(reader.result);
-                toast.success("Image preview loaded! Click 'Save Changes' to update.");
+                toast.success("Avatar preview loaded! Click 'Save Changes' to update.");
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleCoverFileChange = (e) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            if (file.size > 8 * 1024 * 1024) {
+                toast.error("Cover image size should be less than 8MB");
+                return;
+            }
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setCoverUrl(reader.result);
+                toast.success("Cover banner preview loaded! Click 'Save Changes' to update.");
             };
             reader.readAsDataURL(file);
         }
@@ -91,6 +110,11 @@ export default function EditProfilePage() {
             // If user provided a new base64 or URL for avatar
             if (avatarUrl && avatarUrl !== user?.avatar?.url) {
                 updatePayload.avatar = avatarUrl;
+            }
+
+            // If user provided a new base64 or URL for cover
+            if (coverUrl && coverUrl !== user?.coverImage?.url) {
+                updatePayload.coverImage = coverUrl;
             }
 
             const res = await apiPut("/api/v1/me/update", updatePayload);
@@ -180,6 +204,57 @@ export default function EditProfilePage() {
                                     className="text-xs bg-secondary/30"
                                 />
                             </div>
+                        </div>
+                    </div>
+
+                    {/* Cover Banner Image Section */}
+                    <div className="space-y-4 border-b border-border/40 pb-6">
+                        <Label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                            <Camera className="w-3.5 h-3.5 text-primary" /> Profile Cover Banner Image
+                        </Label>
+
+                        <div className="relative w-full h-32 rounded-xl overflow-hidden border border-border/60 bg-muted group cursor-pointer" onClick={() => coverFileInputRef.current?.click()}>
+                            {coverUrl ? (
+                                <img src={coverUrl} alt="Cover Banner Preview" className="w-full h-full object-cover object-center" />
+                            ) : (
+                                <div className="w-full h-full bg-gradient-to-r from-purple-900/60 via-indigo-900/40 to-slate-900/80 flex items-center justify-center">
+                                    <span className="text-xs text-muted-foreground font-medium">Click to select cover banner image</span>
+                                </div>
+                            )}
+                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                <Button type="button" variant="secondary" size="sm" className="rounded-full text-xs font-semibold gap-2">
+                                    <Camera className="w-4 h-4" /> Change Cover Banner
+                                </Button>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                            <input
+                                type="file"
+                                ref={coverFileInputRef}
+                                onChange={handleCoverFileChange}
+                                accept="image/*"
+                                className="hidden"
+                            />
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                size="sm"
+                                onClick={() => coverFileInputRef.current?.click()}
+                                className="rounded-full text-xs font-semibold flex items-center gap-2 bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20"
+                            >
+                                <Upload className="w-3.5 h-3.5" />
+                                Upload Cover File
+                            </Button>
+
+                            <Input
+                                id="coverUrl"
+                                type="text"
+                                placeholder="Or paste cover image URL: https://example.com/banner.jpg"
+                                value={coverUrl}
+                                onChange={(e) => setCoverUrl(e.target.value)}
+                                className="text-xs bg-secondary/30 flex-1"
+                            />
                         </div>
                     </div>
 

@@ -252,6 +252,44 @@ exports.updateProfile = async (req, res) => {
       }
     }
 
+    // Update Cover Image
+    if (req.body.coverImage && req.body.coverImage !== "") {
+      const user = await User.findById(req.user.id);
+      const cloudinary = require("cloudinary").v2;
+
+      const coverId = user?.coverImage?.public_id;
+
+      if (req.body.coverImage.startsWith("http://") || req.body.coverImage.startsWith("https://")) {
+        newUserData.coverImage = {
+          public_id: coverId || "covers/custom_url",
+          url: req.body.coverImage,
+        };
+      } else {
+        try {
+          if (coverId && coverId !== "covers/custom_url") {
+            await cloudinary.uploader.destroy(coverId).catch(() => {});
+          }
+
+          const myCloud = await cloudinary.uploader.upload(req.body.coverImage, {
+            folder: "covers",
+            width: 1200,
+            crop: "scale",
+          });
+
+          newUserData.coverImage = {
+            public_id: myCloud.public_id,
+            url: myCloud.secure_url,
+          };
+        } catch (uploadError) {
+          console.error("Cloudinary cover upload failed, falling back to direct URL/base64:", uploadError.message);
+          newUserData.coverImage = {
+            public_id: coverId || "covers/custom_upload",
+            url: req.body.coverImage,
+          };
+        }
+      }
+    }
+
     const user = await User.findByIdAndUpdate(req.user.id, newUserData, {
       new: true,
       runValidators: true,

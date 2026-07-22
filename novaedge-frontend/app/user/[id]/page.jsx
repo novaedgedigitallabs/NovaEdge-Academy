@@ -87,7 +87,13 @@ export default function PublicProfilePage() {
                     <div className="md:col-span-1">
                         <Card className="p-0 bg-card/40 backdrop-blur-md border border-border/60 rounded-2xl shadow-xl overflow-hidden flex flex-col">
                             {/* Decorative Cover Header */}
-                            <div className="h-20 bg-gradient-to-r from-primary/30 via-primary/10 to-secondary/30 relative" />
+                            <div className="h-24 bg-muted relative overflow-hidden">
+                                {user.coverImage?.url ? (
+                                    <img src={user.coverImage.url} alt="Cover Banner" className="w-full h-full object-cover object-center" />
+                                ) : (
+                                    <div className="absolute inset-0 bg-gradient-to-r from-purple-900/60 via-indigo-900/40 to-slate-900/80" />
+                                )}
+                            </div>
 
                             <div className="px-6 pb-6 pt-0 flex flex-col items-center -mt-10 text-center">
                                 <Avatar className="w-24 h-24 mb-3 border-4 border-background shadow-lg">
