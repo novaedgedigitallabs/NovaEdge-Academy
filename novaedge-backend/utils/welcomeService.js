@@ -1,7 +1,8 @@
 const sendEmail = require("./sendEmail");
 
 /**
- * Send Welcome Email to newly registered or newly enrolled student with CC to course@novaedgeacademy.in
+ * Send Welcome Email using NovaEdge custom letterhead HTML template.
+ * Dispatches to user email with CC to course@novaedgeacademy.in
  */
 exports.sendWelcomeEmail = async ({ name, email }) => {
   try {
@@ -10,86 +11,232 @@ exports.sendWelcomeEmail = async ({ name, email }) => {
     const studentName = name || "Valued Student";
 
     const htmlContent = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <style>
-        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #09090b; color: #e4e4e7; margin: 0; padding: 20px; }
-        .container { max-width: 650px; margin: auto; padding: 32px; border: 1px solid #27272a; background-color: #18181b; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); }
-        .logo-header { text-align: center; padding-bottom: 24px; border-bottom: 1px solid #27272a; margin-bottom: 28px; }
-        .logo-title { font-size: 26px; font-weight: bold; background: linear-gradient(135deg, #c084fc, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-transform: uppercase; letter-spacing: 1.5px; }
-        .hero-banner { background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(99, 102, 241, 0.15)); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 12px; padding: 24px; text-align: center; margin-bottom: 28px; }
-        .hero-banner h2 { margin: 0 0 8px 0; color: #ffffff; font-size: 24px; }
-        .hero-banner p { margin: 0; color: #a1a1aa; font-size: 14px; }
-        .step-list { margin: 24px 0; }
-        .step-item { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 16px; background-color: #27272a/50; padding: 14px 18px; border-radius: 10px; border: 1px solid #27272a; }
-        .step-number { background: #a855f7; color: #ffffff; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; flex-shrink: 0; }
-        .step-text h4 { margin: 0 0 2px 0; color: #ffffff; font-size: 15px; }
-        .step-text p { margin: 0; color: #a1a1aa; font-size: 13px; }
-        .btn-container { text-align: center; margin: 32px 0 24px 0; }
-        .btn { background: linear-gradient(135deg, #a855f7, #6366f1); color: #ffffff !important; text-decoration: none; padding: 14px 32px; border-radius: 9999px; font-weight: bold; font-size: 15px; display: inline-block; box-shadow: 0 10px 15px -3px rgba(168, 85, 247, 0.4); }
-        .footer { text-align: center; margin-top: 36px; padding-top: 20px; border-top: 1px solid #27272a; color: #71717a; font-size: 12px; }
-        .footer a { color: #c084fc; text-decoration: none; }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="logo-header">
-          <div class="logo-title">NovaEdge Academy</div>
-          <p style="margin: 4px 0 0 0; color: #a1a1aa; font-size: 12px;">Empowering Next-Gen Innovators</p>
-        </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Welcome to NovaEdge Academy</title>
+<style>
+  :root{
+    --ink:#14172B;
+    --ink-soft:#4B4F63;
+    --paper:#FBFAF8;
+    --card:#FFFFFF;
+    --rule:#DEDCD5;
+    --rule-soft:#EDEBE5;
+    --accent:#2748C4;
+    --accent-soft:#EEF1FC;
+    --mono: 'SF Mono','Roboto Mono','Courier New',monospace;
+    --serif: Georgia,'Iowan Old Style','Times New Roman',serif;
+    --sans: -apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    font-family:var(--sans);
+    background:
+      radial-gradient(circle at 1px 1px, rgba(20,23,43,0.05) 1px, transparent 0) 0 0/22px 22px,
+      var(--paper);
+    color:var(--ink);
+    padding:48px 16px;
+    -webkit-font-smoothing:antialiased;
+  }
 
-        <div class="hero-banner">
-          <h2>Welcome aboard, ${studentName}! 🎉</h2>
-          <p>We're thrilled to have you join our learning community at NovaEdge Academy.</p>
-        </div>
+  .sheet{
+    max-width:640px;
+    margin:0 auto;
+    background:var(--card);
+    border:1px solid var(--rule);
+    position:relative;
+    box-shadow:0 1px 2px rgba(20,23,43,0.04), 0 12px 32px -16px rgba(20,23,43,0.18);
+  }
 
-        <p style="color: #e4e4e7; font-size: 15px; line-height: 1.6;">
-          Your account is active and ready. You now have full access to interactive courses, hands-on coding assignments, community discussions, and verified certification tracks.
-        </p>
+  /* Letterhead */
+  .letterhead{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    padding:38px 44px 26px;
+  }
+  .wordmark h1{
+    font-family:var(--serif);
+    font-size:26px;
+    font-weight:400;
+    letter-spacing:-0.01em;
+    color:var(--ink);
+  }
+  .wordmark p{
+    font-family:var(--mono);
+    font-size:10.5px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin-top:6px;
+  }
 
-        <div class="step-list">
-          <div class="step-item">
-            <div class="step-number">1</div>
-            <div class="step-text">
-              <h4>Explore Your Dashboard</h4>
-              <p>Track your learning progress, streak, and enrolled courses in one place.</p>
-            </div>
-          </div>
-          <div class="step-item">
-            <div class="step-number">2</div>
-            <div class="step-text">
-              <h4>Learn & Practice</h4>
-              <p>Watch HD video lectures, solve quizzes, and practice real-world projects.</p>
-            </div>
-          </div>
-          <div class="step-item">
-            <div class="step-number">3</div>
-            <div class="step-text">
-              <h4>Earn Verified Certificates</h4>
-              <p>Complete courses to showcase industry-standard certificates on your resume & LinkedIn.</p>
-            </div>
-          </div>
-        </div>
+  .rule{ height:1px; background:var(--rule); margin:0 44px; }
 
-        <div class="btn-container">
-          <a href="https://www.novaedgeacademy.in/profile" class="btn">Go to My Dashboard</a>
-        </div>
+  /* Hero */
+  .hero{ padding:34px 44px 6px; }
+  .eyebrow-lbl{
+    font-family:var(--mono);
+    font-size:10px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin-bottom:12px;
+  }
+  .hero h2{
+    font-family:var(--serif);
+    font-size:28px;
+    font-weight:400;
+    line-height:1.3;
+    color:var(--ink);
+    letter-spacing:-0.01em;
+  }
+  .hero h2 .name{ color:var(--accent); font-style:italic; }
+  .hero p.lead{
+    margin-top:14px;
+    font-size:14.5px;
+    line-height:1.7;
+    color:var(--ink-soft);
+    max-width:480px;
+  }
 
-        <div class="footer">
-          <p>Need assistance or have questions? Reach out to us anytime at <a href="mailto:course@novaedgeacademy.in">course@novaedgeacademy.in</a></p>
-          <p style="margin-top: 8px; font-size: 11px;">NovaEdge Digital Labs &copy; ${new Date().getFullYear()} NovaEdge Academy. All rights reserved.</p>
+  /* Steps */
+  .steps{ padding:28px 44px 8px; }
+  .steps .eyebrow-lbl{ color:var(--ink-soft); }
+  .step-row{
+    display:flex;
+    gap:18px;
+    padding:16px 0;
+    border-bottom:1px solid var(--rule-soft);
+  }
+  .step-row:last-child{ border-bottom:none; }
+  .step-num{
+    font-family:var(--mono);
+    font-size:12px;
+    font-weight:700;
+    color:var(--accent);
+    min-width:22px;
+    padding-top:2px;
+  }
+  .step-body .t{
+    font-size:14.5px;
+    font-weight:600;
+    color:var(--ink);
+    margin-bottom:3px;
+  }
+  .step-body .d{
+    font-size:13px;
+    color:var(--ink-soft);
+    line-height:1.6;
+  }
+
+  /* CTA */
+  .cta-wrap{ padding:30px 44px 8px; text-align:center; }
+  .cta{
+    display:inline-block;
+    background:var(--ink);
+    color:var(--paper);
+    text-decoration:none;
+    font-size:13.5px;
+    font-weight:600;
+    letter-spacing:0.01em;
+    padding:13px 30px;
+  }
+  .cta:hover{ background:var(--accent); }
+
+  /* Footer */
+  .footer{ padding:30px 44px 34px; text-align:center; }
+  .footer .thanks{
+    font-family:var(--serif);
+    font-size:14.5px;
+    font-style:italic;
+    color:var(--ink);
+    margin-bottom:10px;
+  }
+  .footer .contact{ font-size:12.5px; color:var(--ink-soft); }
+  .footer .contact a{ color:var(--accent); text-decoration:none; font-weight:600; }
+  .footer .copyright{
+    font-family:var(--mono);
+    font-size:10px;
+    letter-spacing:0.06em;
+    color:#A9A6A0;
+    margin-top:18px;
+  }
+
+  @media (max-width:520px){
+    .letterhead,.hero,.steps,.cta-wrap,.footer{ padding-left:22px; padding-right:22px; }
+    .rule{ margin:0 22px; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="sheet">
+    <div class="letterhead">
+      <div class="wordmark">
+        <h1>NovaEdge Academy</h1>
+        <p>NovaEdge Digital Labs</p>
+      </div>
+    </div>
+    <div class="rule"></div>
+
+    <div class="hero">
+      <div class="eyebrow-lbl">Official Welcome</div>
+      <h2>Welcome aboard, <span class="name">${studentName}</span>.</h2>
+      <p class="lead">We're delighted to welcome you to NovaEdge Academy. Your journey toward mastering next-generation skills starts right now.</p>
+    </div>
+
+    <div class="steps">
+      <div class="eyebrow-lbl">Getting Started</div>
+
+      <div class="step-row">
+        <div class="step-num">01</div>
+        <div class="step-body">
+          <div class="t">Access Your Dashboard</div>
+          <div class="d">Track your enrolled courses, streak progress, and learning achievements in one place.</div>
         </div>
       </div>
-    </body>
-    </html>
+
+      <div class="step-row">
+        <div class="step-num">02</div>
+        <div class="step-body">
+          <div class="t">Interactive Lectures & Practice</div>
+          <div class="d">Watch HD video lectures, solve quizzes, and practice real-world coding assignments.</div>
+        </div>
+      </div>
+
+      <div class="step-row">
+        <div class="step-num">03</div>
+        <div class="step-body">
+          <div class="t">Earn Verified Certificates</div>
+          <div class="d">Complete courses to earn industry-standard certificates ready to share on LinkedIn.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cta-wrap">
+      <a href="https://www.novaedgeacademy.in/profile" class="cta">Go to My Dashboard</a>
+    </div>
+
+    <div class="rule"></div>
+    <div class="footer">
+      <p class="thanks">Thank you for learning with NovaEdge Academy.</p>
+      <p class="contact">Questions or need assistance? Write to <a href="mailto:course@novaedgeacademy.in">course@novaedgeacademy.in</a></p>
+      <p class="copyright">NOVAEDGE DIGITAL LABS &copy; ${new Date().getFullYear()} NOVAEDGE ACADEMY — ALL RIGHTS RESERVED</p>
+    </div>
+  </div>
+
+</body>
+</html>
     `;
 
     const plainText = `
 Welcome to NovaEdge Academy, ${studentName}!
 
-We are excited to have you join our learning platform.
+We are delighted to welcome you to NovaEdge Academy.
 Access your dashboard: https://www.novaedgeacademy.in/profile
 
 If you need any help, contact: course@novaedgeacademy.in
@@ -98,7 +245,7 @@ If you need any help, contact: course@novaedgeacademy.in
     await sendEmail({
       email,
       cc: "course@novaedgeacademy.in",
-      subject: `Welcome to NovaEdge Academy, ${studentName}! 🎉`,
+      subject: `Welcome to NovaEdge Academy, ${studentName}!`,
       message: plainText,
       html: htmlContent,
     });
