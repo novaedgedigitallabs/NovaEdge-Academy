@@ -337,3 +337,84 @@ exports.lookupUser = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// --- 8. FORGOT PASSWORD ---
+exports.forgotPassword = async (req, res, next) => {
+  let user = null;
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ success: false, message: "Please provide a valid email address" });
+    }
+
+    user = await User.findOne({ email: email.toLowerCase().trim() });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found with this email" });
+    }
+
+    // Get reset token
+    const resetToken = user.getResetPasswordToken();
+
+    await user.save({ validateBeforeSave: false });
+
+    // Create reset URL
+    const frontendUrl = process.env.FRONTEND_URL || "https://www.novaedgeacademy.in";
+    const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
+
+    const { sendPasswordResetEmail } = require("../utils/passwordResetService");
+    await sendPasswordResetEmail({ user, resetUrl });
+
+    res.status(200).json({
+      success: true,
+      message: `Password reset email sent to ${user.email}`,
+    });
+  } catch (error) {
+    if (user) {
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpire = undefined;
+      await user.save({ validateBeforeSave: false });
+    }
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// --- 9. RESET PASSWORD ---
+exports.resetPassword = async (req, res, next) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    if (!password || password.length < 6) {
+      return res.status(400).json({ success: false, message: "Password must be at least 6 characters long" });
+    }
+
+    // Hash token
+    const resetPasswordToken = crypto
+      .createHash("sha256")
+      .update(token)
+      .digest("hex");
+
+    const user = await User.findOne({
+      resetPasswordToken,
+      resetPasswordExpire: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ success: false, message: "Password reset token is invalid or has expired" });
+    }
+
+    // Set new password
+    user.password = password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+
+    await user.save();
+
+    sendToken(user, 200, res, req);
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+

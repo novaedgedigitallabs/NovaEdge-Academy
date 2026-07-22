@@ -1,8 +1,8 @@
 const sendEmail = require("./sendEmail");
 
 /**
- * Humanized & Clean Purchase Invoice Email Template with Official Header Logo.
- * Uses robust table layouts & explicit inline styles for 100% pixel-perfect rendering in Gmail/Outlook.
+ * Humanized & Clean Purchase Invoice Email Template.
+ * Single solid text colors, no emojis, human language, and no generic jargon.
  * Dispatches to user email with CC to course@novaedgeacademy.in
  */
 exports.sendPurchaseInvoiceEmail = async ({ user, course, payment, amountPaid, walletAmountUsed = 0, discountAmount = 0, couponCode = "" }) => {
@@ -40,18 +40,20 @@ exports.sendPurchaseInvoiceEmail = async ({ user, course, payment, amountPaid, w
         <!-- Main Container -->
         <table width="600" border="0" cellspacing="0" cellpadding="0" style="width: 600px; max-width: 600px; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
           
-          <!-- Header with Logo -->
+          <!-- Header -->
           <tr>
             <td style="padding: 32px 36px 24px 36px; border-bottom: 1px solid #e2e8f0;">
               <table width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tr>
-                  <td align="left" valign="middle">
-                    <img src="https://www.novaedgeacademy.in/Header_logo.webp" alt="NovaEdge Academy" width="160" style="display: block; border: 0; outline: none; max-width: 160px; height: auto;" />
-                    <div style="font-size: 11px; color: #64748b; margin-top: 6px;">
+                  <td align="left" valign="top">
+                    <div style="font-size: 20px; font-weight: 700; color: #0f172a;">
+                      NovaEdge Academy
+                    </div>
+                    <div style="font-size: 12px; color: #64748b; margin-top: 3px;">
                       NovaEdge Digital Labs
                     </div>
                   </td>
-                  <td align="right" valign="middle">
+                  <td align="right" valign="top">
                     <div style="font-size: 11px; font-weight: 700; color: #475569; letter-spacing: 1px; text-transform: uppercase;">
                       INVOICE
                     </div>
