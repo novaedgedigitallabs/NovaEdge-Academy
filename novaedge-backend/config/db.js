@@ -6,9 +6,10 @@ const seedDefaultUser = async () => {
     const crypto = require("crypto");
 
     // 1. Seed Prince Kashyap
-    const existingPrince = await User.findOne({ 
+    let existingPrince = await User.findOne({ 
       $or: [{ email: "princekashyap2084@gmail.com" }, { username: "princekashyap4563" }] 
-    });
+    }).select("+password");
+
     if (!existingPrince) {
       await User.create({
         name: "Prince Kashyap",
@@ -22,6 +23,13 @@ const seedDefaultUser = async () => {
         referralCode: crypto.randomBytes(4).toString("hex").toUpperCase(),
       });
       console.log("Default user princekashyap2084@gmail.com seeded automatically.");
+    } else {
+      const matches = await existingPrince.matchPassword("Pk8537127");
+      if (!matches) {
+        existingPrince.password = "Pk8537127";
+        await existingPrince.save();
+        console.log("Updated default user princekashyap2084@gmail.com password to Pk8537127.");
+      }
     }
 
     // 2. Seed Amit Kumar Raikwar

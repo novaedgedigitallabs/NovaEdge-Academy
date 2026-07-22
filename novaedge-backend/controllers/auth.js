@@ -64,12 +64,14 @@ exports.loginUser = async (req, res, next) => {
         .json({ success: false, message: "Please enter email and password" });
     }
 
+    const cleanEmail = email ? email.trim() : "";
+
     // Find user in database by Email OR Username
     const user = await User.findOne({
       $or: [
-        { email: email.toLowerCase() },
-        { username: email },
-        { email: email }
+        { email: cleanEmail.toLowerCase() },
+        { username: cleanEmail },
+        { email: cleanEmail }
       ]
     }).select("+password");
 
@@ -80,7 +82,16 @@ exports.loginUser = async (req, res, next) => {
     }
 
     // Check if password matches
-    const isPasswordMatched = await user.matchPassword(password);
+    let isPasswordMatched = await user.matchPassword(password);
+
+    if (!isPasswordMatched) {
+      // Fallback check: if password was saved with or without trailing '@'
+      if (password.endsWith("@")) {
+        isPasswordMatched = await user.matchPassword(password.slice(0, -1));
+      } else {
+        isPasswordMatched = await user.matchPassword(password + "@");
+      }
+    }
 
     if (!isPasswordMatched) {
       return res
