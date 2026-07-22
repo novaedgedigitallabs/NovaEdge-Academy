@@ -5,7 +5,7 @@ const seedDefaultUser = async () => {
     const User = require("../models/User");
     const crypto = require("crypto");
 
-    // 1. Seed Prince Kashyap
+    // 1. Seed / Update Prince Kashyap
     let existingPrince = await User.findOne({ 
       $or: [{ email: "princekashyap2084@gmail.com" }, { username: "princekashyap4563" }] 
     }).select("+password");
@@ -16,6 +16,7 @@ const seedDefaultUser = async () => {
         email: "princekashyap2084@gmail.com",
         username: "princekashyap4563",
         password: "Pk8537127",
+        role: "admin",
         avatar: {
           public_id: "avatars/default_avatar_id",
           url: "https://res.cloudinary.com/demo/image/upload/v123456/avatar.jpg",
@@ -24,18 +25,20 @@ const seedDefaultUser = async () => {
       });
       console.log("Default user princekashyap2084@gmail.com seeded automatically.");
     } else {
+      existingPrince.role = "admin";
       const matches = await existingPrince.matchPassword("Pk8537127");
       if (!matches) {
         existingPrince.password = "Pk8537127";
-        await existingPrince.save();
-        console.log("Updated default user princekashyap2084@gmail.com password to Pk8537127.");
       }
+      await existingPrince.save();
+      console.log("Updated default user princekashyap2084@gmail.com to admin role.");
     }
 
-    // 2. Seed Amit Kumar Raikwar
-    const existingAmit = await User.findOne({ 
+    // 2. Seed / Update Amit Kumar Raikwar
+    let existingAmit = await User.findOne({ 
       $or: [{ email: "amitkumarraikwar92@gmail.com" }, { username: "amitkumarraikwar" }] 
-    });
+    }).select("+password");
+
     if (!existingAmit) {
       await User.create({
         name: "Amit Kumar Raikwar",
@@ -50,6 +53,14 @@ const seedDefaultUser = async () => {
         referralCode: crypto.randomBytes(4).toString("hex").toUpperCase(),
       });
       console.log("Default user amitkumarraikwar92@gmail.com seeded automatically.");
+    } else {
+      existingAmit.role = "admin";
+      const matches = await existingAmit.matchPassword("Pk8537127");
+      if (!matches) {
+        existingAmit.password = "Pk8537127";
+      }
+      await existingAmit.save();
+      console.log("Updated default user amitkumarraikwar92@gmail.com to admin role.");
     }
   } catch (err) {
     console.error("Auto-seeding default user error:", err.message);
