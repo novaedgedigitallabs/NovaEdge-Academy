@@ -26,7 +26,7 @@ export default function PostCard({ post, onDelete, onUpdate }) {
     if (!post) return null;
     const author = post.user || {};
     const authorName = author.name || "Anonymous";
-    const authorUsername = author.username || (author.email ? author.email.split('@')[0] : "user");
+    const authorUsername = author.username || (author.email ? author.email.split('@')[0] : null) || (author.name ? author.name.toLowerCase().replace(/\s+/g, '') : "user");
     const authorId = author._id || "";
     const authorAvatar = author.avatar?.url;
 
@@ -38,6 +38,7 @@ export default function PostCard({ post, onDelete, onUpdate }) {
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [postContent, setPostContent] = useState(post.content || "");
     const [editContent, setEditContent] = useState(post.content || "");
+    const [isEdited, setIsEdited] = useState(post.isEdited || false);
     const [isUpdating, setIsUpdating] = useState(false);
 
     const handleLike = async (e) => {
@@ -80,6 +81,7 @@ export default function PostCard({ post, onDelete, onUpdate }) {
             if (res.success) {
                 toast.success("Post updated successfully!");
                 setPostContent(editContent);
+                setIsEdited(true);
                 setEditDialogOpen(false);
                 if (onUpdate) onUpdate(res.post);
             } else {
@@ -181,7 +183,7 @@ export default function PostCard({ post, onDelete, onUpdate }) {
 
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1 text-sm truncate">
+                        <div className="flex items-center gap-1.5 text-sm truncate">
                             <Link href={`/user/${authorId}`} className="font-bold hover:underline" onClick={(e) => e.stopPropagation()}>
                                 {authorName}
                             </Link>
@@ -190,6 +192,9 @@ export default function PostCard({ post, onDelete, onUpdate }) {
                             <span className="text-muted-foreground hover:underline">
                                 {formatDistanceToNow(new Date(post.createdAt || Date.now()))}
                             </span>
+                            {(isEdited || post.isEdited) && (
+                                <span className="text-xs text-muted-foreground/80 font-normal italic">· Edited</span>
+                            )}
                         </div>
                         {user && authorId && (user._id === authorId || user.role === "admin") && (
                             <DropdownMenu>

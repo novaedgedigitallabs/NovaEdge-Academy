@@ -42,13 +42,13 @@ exports.createPost = async (req, res) => {
         }
 
         // Populate user details for immediate display
-        await post.populate("user", "name avatar username");
+        await post.populate("user", "name avatar username email");
         if (repostOf) {
             await post.populate({
                 path: "repostOf",
                 populate: {
                     path: "user",
-                    select: "name avatar username"
+                    select: "name avatar username email"
                 }
             });
         }
@@ -66,12 +66,12 @@ exports.createPost = async (req, res) => {
 exports.getAllPosts = async (req, res) => {
     try {
         const posts = await Post.find()
-            .populate("user", "name avatar username")
+            .populate("user", "name avatar username email")
             .populate({
                 path: "repostOf",
                 populate: {
                     path: "user",
-                    select: "name avatar username"
+                    select: "name avatar username email"
                 }
             })
             .sort({ createdAt: -1 });
@@ -89,12 +89,12 @@ exports.getAllPosts = async (req, res) => {
 exports.getUserPosts = async (req, res) => {
     try {
         const posts = await Post.find({ user: req.params.id })
-            .populate("user", "name avatar username")
+            .populate("user", "name avatar username email")
             .populate({
                 path: "repostOf",
                 populate: {
                     path: "user",
-                    select: "name avatar username"
+                    select: "name avatar username email"
                 }
             })
             .sort({ createdAt: -1 });
@@ -142,7 +142,7 @@ exports.getPostById = async (req, res) => {
                 path: "repostOf",
                 populate: {
                     path: "user",
-                    select: "name avatar username"
+                    select: "name avatar username email"
                 }
             });
 
@@ -206,9 +206,10 @@ exports.updatePost = async (req, res) => {
 
         post.content = content.trim();
         post.hashtags = uniqueHashtags;
+        post.isEdited = true;
         await post.save();
 
-        await post.populate("user", "name avatar username");
+        await post.populate("user", "name avatar username email");
 
         res.status(200).json({
             success: true,

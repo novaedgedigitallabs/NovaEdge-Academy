@@ -24,7 +24,15 @@ const postSchema = new mongoose.Schema({
         default: null,
     },
     hashtags: [String],
+    isEdited: {
+        type: Boolean,
+        default: false,
+    },
     createdAt: {
+        type: Date,
+        default: Date.now,
+    },
+    updatedAt: {
         type: Date,
         default: Date.now,
     },
@@ -32,6 +40,6 @@ const postSchema = new mongoose.Schema({
         type: Number,
         default: 0,
     }
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model("Post", postSchema);
