@@ -20,8 +20,12 @@ export const updatePost = async (postId, content) => {
     try {
         return await apiPut(`/api/v1/posts/${postId}`, { content });
     } catch (err) {
-        if (err.response && err.response.status === 404) {
-            return await apiPut(`/api/v1/posts/update/${postId}`, { content });
+        if (err.response && (err.response.status === 404 || err.response.status === 405)) {
+            try {
+                return await apiPost(`/api/v1/posts/update/${postId}`, { content });
+            } catch (err2) {
+                return await apiPut(`/api/v1/posts/update/${postId}`, { content });
+            }
         }
         throw err;
     }
