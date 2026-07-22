@@ -1,7 +1,8 @@
 const sendEmail = require("./sendEmail");
 
 /**
- * Generate and send purchase invoice email using NovaEdge custom invoice template (seal removed).
+ * World-Class HTML Purchase Invoice Email Template.
+ * Uses robust table layouts & explicit inline styles for 100% pixel-perfect rendering in Gmail/Outlook.
  * Dispatches to user email with CC to course@novaedgeacademy.in
  */
 exports.sendPurchaseInvoiceEmail = async ({ user, course, payment, amountPaid, walletAmountUsed = 0, discountAmount = 0, couponCode = "" }) => {
@@ -28,275 +29,177 @@ exports.sendPurchaseInvoiceEmail = async ({ user, course, payment, amountPaid, w
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Invoice #${invoiceNumber} — NovaEdge Academy</title>
-<style>
-  :root{
-    --ink:#14172B;
-    --ink-soft:#4B4F63;
-    --paper:#FBFAF8;
-    --card:#FFFFFF;
-    --rule:#DEDCD5;
-    --rule-soft:#EDEBE5;
-    --accent:#2748C4;
-    --accent-soft:#EEF1FC;
-    --mono: 'SF Mono','Roboto Mono','Courier New',monospace;
-    --serif: Georgia,'Iowan Old Style','Times New Roman',serif;
-    --sans: -apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
-  }
-  *{margin:0;padding:0;box-sizing:border-box;}
-  html,body{height:100%;}
-  body{
-    font-family:var(--sans);
-    background:
-      radial-gradient(circle at 1px 1px, rgba(20,23,43,0.05) 1px, transparent 0) 0 0/22px 22px,
-      var(--paper);
-    color:var(--ink);
-    padding:48px 16px;
-    -webkit-font-smoothing:antialiased;
-  }
-
-  .sheet{
-    max-width:680px;
-    margin:0 auto;
-    background:var(--card);
-    border:1px solid var(--rule);
-    position:relative;
-    box-shadow:0 1px 2px rgba(20,23,43,0.04), 0 12px 32px -16px rgba(20,23,43,0.18);
-  }
-
-  /* Letterhead */
-  .letterhead{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-    padding:38px 44px 26px;
-  }
-  .wordmark h1{
-    font-family:var(--serif);
-    font-size:26px;
-    font-weight:400;
-    letter-spacing:-0.01em;
-    color:var(--ink);
-  }
-  .wordmark p{
-    font-family:var(--mono);
-    font-size:10.5px;
-    letter-spacing:0.14em;
-    text-transform:uppercase;
-    color:var(--ink-soft);
-    margin-top:6px;
-  }
-  .meta{ text-align:right; }
-  .meta .eyebrow{
-    font-family:var(--mono);
-    font-size:10px;
-    letter-spacing:0.16em;
-    text-transform:uppercase;
-    color:var(--ink-soft);
-  }
-  .meta .num{
-    font-family:var(--mono);
-    font-size:16px;
-    font-weight:700;
-    color:var(--ink);
-    margin-top:4px;
-  }
-  .meta .date{
-    font-family:var(--mono);
-    font-size:11.5px;
-    color:var(--ink-soft);
-    margin-top:8px;
-  }
-
-  .rule{
-    height:1px;
-    background:var(--rule);
-    margin:0 44px;
-  }
-
-  /* Body */
-  .body{ padding:30px 44px 8px; }
-
-  .cols{
-    display:flex;
-    gap:32px;
-    flex-wrap:wrap;
-    padding-bottom:26px;
-    border-bottom:1px solid var(--rule-soft);
-  }
-  .cols .col{ flex:1; min-width:200px; }
-  .eyebrow-lbl{
-    font-family:var(--mono);
-    font-size:10px;
-    letter-spacing:0.14em;
-    text-transform:uppercase;
-    color:var(--ink-soft);
-    margin-bottom:9px;
-  }
-  .cols .name{
-    font-size:15px;
-    font-weight:600;
-    color:var(--ink);
-    margin-bottom:3px;
-  }
-  .cols .sub{
-    font-size:13.5px;
-    color:var(--ink-soft);
-  }
-  .cols .kv{ font-size:13.5px; line-height:1.9; }
-  .cols .kv b{ color:var(--ink); font-weight:600; }
-
-  table{ width:100%; border-collapse:collapse; margin-top:26px; }
-  thead th{
-    text-align:left;
-    font-family:var(--mono);
-    font-size:10px;
-    letter-spacing:0.14em;
-    text-transform:uppercase;
-    color:var(--ink-soft);
-    padding-bottom:12px;
-    border-bottom:1px solid var(--ink);
-  }
-  thead th.r{ text-align:right; }
-  tbody td{
-    padding:20px 0;
-    border-bottom:1px solid var(--rule-soft);
-    vertical-align:top;
-  }
-  .item-title{ font-size:15px; font-weight:600; color:var(--ink); }
-  .item-sub{ font-size:12.5px; color:var(--ink-soft); margin-top:5px; }
-  .amt{
-    text-align:right;
-    font-family:var(--mono);
-    font-size:14.5px;
-    font-weight:600;
-    color:var(--ink);
-    white-space:nowrap;
-  }
-
-  .totals{ display:flex; justify-content:flex-end; padding:22px 0 6px; }
-  .totals-box{ width:260px; }
-  .trow{
-    display:flex;
-    justify-content:space-between;
-    font-size:13.5px;
-    color:var(--ink-soft);
-    padding:6px 0;
-  }
-  .trow .v{ font-family:var(--mono); color:var(--ink); }
-  .grand{
-    margin-top:10px;
-    background:var(--ink);
-    color:var(--paper);
-    padding:14px 16px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-  }
-  .grand .lbl{ font-family:var(--mono); font-size:10.5px; letter-spacing:0.12em; text-transform:uppercase; opacity:0.75; }
-  .grand .val{ font-family:var(--mono); font-size:18px; font-weight:700; }
-
-  /* Footer */
-  .footer{
-    padding:28px 44px 34px;
-    text-align:center;
-  }
-  .footer .thanks{
-    font-family:var(--serif);
-    font-size:15px;
-    font-style:italic;
-    color:var(--ink);
-    margin-bottom:10px;
-  }
-  .footer .contact{ font-size:12.5px; color:var(--ink-soft); }
-  .footer .contact a{ color:var(--accent); text-decoration:none; font-weight:600; }
-  .footer .copyright{
-    font-family:var(--mono);
-    font-size:10px;
-    letter-spacing:0.06em;
-    color:#A9A6A0;
-    margin-top:18px;
-  }
-
-  @media (max-width:520px){
-    .letterhead, .body, .footer{ padding-left:22px; padding-right:22px; }
-    .letterhead{ flex-direction:column; gap:18px; }
-    .meta{ text-align:left; }
-    .rule{ margin:0 22px; }
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoice #${invoiceNumber} — NovaEdge Academy</title>
 </head>
-<body>
-
-  <div class="sheet" id="invoice">
-    <div class="letterhead">
-      <div class="wordmark">
-        <h1>NovaEdge Academy</h1>
-        <p>NovaEdge Digital Labs</p>
-      </div>
-      <div class="meta">
-        <div class="eyebrow">Invoice</div>
-        <div class="num">#${invoiceNumber}</div>
-        <div class="date">${invoiceDate}</div>
-      </div>
-    </div>
-    <div class="rule"></div>
-
-    <div class="body">
-      <div class="cols">
-        <div class="col">
-          <div class="eyebrow-lbl">Billed To</div>
-          <div class="name">${studentName}</div>
-          <div class="sub">${studentEmail}</div>
-        </div>
-        <div class="col">
-          <div class="eyebrow-lbl">Payment</div>
-          <div class="kv">
-            <b>Transaction ID</b><br>${transactionId}
-          </div>
-        </div>
-      </div>
-
-      <table>
-        <thead>
+<body style="margin: 0; padding: 0; background-color: #f4f4f7; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; -webkit-font-smoothing: antialiased;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f4f4f7; padding: 40px 10px;">
+    <tr>
+      <td align="center">
+        <!-- Main Card Container -->
+        <table width="600" border="0" cellspacing="0" cellpadding="0" style="width: 600px; max-width: 600px; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);">
+          
+          <!-- Top Accent Line -->
           <tr>
-            <th>Course Item</th>
-            <th class="r">Amount</th>
+            <td style="height: 6px; background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899);"></td>
           </tr>
-        </thead>
-        <tbody>
+
+          <!-- Header -->
           <tr>
-            <td>
-              <div class="item-title">${courseTitle}</div>
-              <div class="item-sub">Full Lifetime Access + Verified Certificate</div>
+            <td style="padding: 32px 40px 24px 40px; border-bottom: 1px solid #f1f5f9;">
+              <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td align="left" valign="top">
+                    <div style="font-size: 22px; font-weight: 800; color: #0f172a; letter-spacing: -0.5px; text-transform: uppercase;">
+                      NovaEdge <span style="color: #6366f1;">Academy</span>
+                    </div>
+                    <div style="font-size: 11px; font-weight: 600; color: #64748b; letter-spacing: 1px; text-transform: uppercase; margin-top: 4px;">
+                      NovaEdge Digital Labs
+                    </div>
+                  </td>
+                  <td align="right" valign="top">
+                    <div style="font-size: 11px; font-weight: 700; color: #6366f1; letter-spacing: 1.5px; text-transform: uppercase;">
+                      TAX INVOICE
+                    </div>
+                    <div style="font-size: 16px; font-weight: 700; color: #0f172a; margin-top: 4px; font-family: monospace;">
+                      #${invoiceNumber}
+                    </div>
+                    <div style="font-size: 12px; color: #64748b; margin-top: 2px;">
+                      ${invoiceDate}
+                    </div>
+                  </td>
+                </tr>
+              </table>
             </td>
-            <td class="amt">₹${originalPrice.toLocaleString("en-IN")}</td>
           </tr>
-        </tbody>
-      </table>
 
-      <div class="totals">
-        <div class="totals-box">
-          <div class="trow"><span>Subtotal</span><span class="v">₹${originalPrice.toLocaleString("en-IN")}</span></div>
-          ${discountAmount > 0 ? `<div class="trow"><span>Discount (${couponCode || "PROMO"})</span><span class="v">- ₹${discountFormatted}</span></div>` : ""}
-          ${walletAmountUsed > 0 ? `<div class="trow"><span>Wallet Credit</span><span class="v">- ₹${walletUsedFormatted}</span></div>` : ""}
-          <div class="grand">
-            <span class="lbl">Total Paid</span>
-            <span class="val">₹${paidAmountFormatted}</span>
-          </div>
-        </div>
-      </div>
-    </div>
+          <!-- Customer & Payment Details -->
+          <tr>
+            <td style="padding: 24px 40px; background-color: #f8fafc; border-bottom: 1px solid #f1f5f9;">
+              <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td width="50%" align="left" valign="top" style="padding-right: 12px;">
+                    <div style="font-size: 10px; font-weight: 700; color: #94a3b8; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px;">
+                      BILLED TO
+                    </div>
+                    <div style="font-size: 15px; font-weight: 700; color: #0f172a;">
+                      ${studentName}
+                    </div>
+                    <div style="font-size: 13px; color: #475569; margin-top: 2px; word-break: break-all;">
+                      ${studentEmail}
+                    </div>
+                  </td>
+                  <td width="50%" align="right" valign="top" style="padding-left: 12px;">
+                    <div style="font-size: 10px; font-weight: 700; color: #94a3b8; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px;">
+                      PAYMENT INFO
+                    </div>
+                    <div style="font-size: 13px; color: #334155;">
+                      <span style="color: #64748b;">Transaction ID:</span><br>
+                      <strong style="font-family: monospace; font-size: 12px; color: #0f172a;">${transactionId}</strong>
+                    </div>
+                    <div style="margin-top: 6px;">
+                      <span style="display: inline-block; background-color: #dcfce7; color: #166534; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 9999px; border: 1px solid #bbf7d0;">
+                        PAID &amp; COMPLETED
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
 
-    <div class="rule"></div>
-    <div class="footer">
-      <p class="thanks">Thank you for learning with NovaEdge Academy.</p>
-      <p class="contact">Questions about this invoice? Write to <a href="mailto:course@novaedgeacademy.in">course@novaedgeacademy.in</a></p>
-      <p class="copyright">NOVAEDGE DIGITAL LABS &copy; ${new Date().getFullYear()} NOVAEDGE ACADEMY — ALL RIGHTS RESERVED</p>
-    </div>
-  </div>
+          <!-- Items Table -->
+          <tr>
+            <td style="padding: 28px 40px 10px 40px;">
+              <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                <thead>
+                  <tr>
+                    <th align="left" style="font-size: 11px; font-weight: 700; color: #64748b; letter-spacing: 1px; text-transform: uppercase; padding-bottom: 12px; border-bottom: 2px solid #e2e8f0;">
+                      DESCRIPTION
+                    </th>
+                    <th align="right" style="font-size: 11px; font-weight: 700; color: #64748b; letter-spacing: 1px; text-transform: uppercase; padding-bottom: 12px; border-bottom: 2px solid #e2e8f0;">
+                      AMOUNT
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td align="left" style="padding: 16px 0; border-bottom: 1px solid #f1f5f9; valign: top;">
+                      <div style="font-size: 15px; font-weight: 700; color: #0f172a;">
+                        ${courseTitle}
+                      </div>
+                      <div style="font-size: 12px; color: #64748b; margin-top: 4px;">
+                        Full Lifetime Access &bull; Interactive Lectures &bull; Verified Certificate
+                      </div>
+                    </td>
+                    <td align="right" style="padding: 16px 0; border-bottom: 1px solid #f1f5f9; valign: top; font-family: monospace; font-size: 15px; font-weight: 700; color: #0f172a;">
+                      ₹${originalPrice.toLocaleString("en-IN")}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
 
+          <!-- Totals Section -->
+          <tr>
+            <td style="padding: 10px 40px 32px 40px;">
+              <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td width="50%"></td>
+                  <td width="50%" align="right">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                      <tr>
+                        <td align="left" style="padding: 6px 0; font-size: 13px; color: #64748b;">Subtotal:</td>
+                        <td align="right" style="padding: 6px 0; font-size: 13px; font-weight: 600; color: #334155; font-family: monospace;">₹${originalPrice.toLocaleString("en-IN")}</td>
+                      </tr>
+                      ${discountAmount > 0 ? `
+                      <tr>
+                        <td align="left" style="padding: 6px 0; font-size: 13px; color: #16a34a;">Coupon (${couponCode || "DISCOUNT"}):</td>
+                        <td align="right" style="padding: 6px 0; font-size: 13px; font-weight: 600; color: #16a34a; font-family: monospace;">- ₹${discountFormatted}</td>
+                      </tr>` : ""}
+                      ${walletAmountUsed > 0 ? `
+                      <tr>
+                        <td align="left" style="padding: 6px 0; font-size: 13px; color: #2563eb;">Wallet Balance:</td>
+                        <td align="right" style="padding: 6px 0; font-size: 13px; font-weight: 600; color: #2563eb; font-family: monospace;">- ₹${walletUsedFormatted}</td>
+                      </tr>` : ""}
+                      <tr>
+                        <td colspan="2" style="padding-top: 10px;">
+                          <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #0f172a; border-radius: 8px; padding: 12px 16px;">
+                            <tr>
+                              <td align="left" style="font-size: 11px; font-weight: 700; color: #94a3b8; letter-spacing: 1px; text-transform: uppercase;">TOTAL PAID</td>
+                              <td align="right" style="font-size: 18px; font-weight: 800; color: #ffffff; font-family: monospace;">₹${paidAmountFormatted}</td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 24px 40px; background-color: #f8fafc; border-top: 1px solid #f1f5f9; text-align: center;">
+              <div style="font-size: 14px; font-weight: 600; color: #334155; font-style: italic;">
+                Thank you for learning with NovaEdge Academy!
+              </div>
+              <div style="font-size: 12px; color: #64748b; margin-top: 6px;">
+                Have questions about this invoice? Write to <a href="mailto:course@novaedgeacademy.in" style="color: #6366f1; text-decoration: none; font-weight: 600;">course@novaedgeacademy.in</a>
+              </div>
+              <div style="font-size: 10px; font-weight: 600; color: #94a3b8; letter-spacing: 0.5px; text-transform: uppercase; margin-top: 16px;">
+                NOVAEDGE DIGITAL LABS &copy; ${new Date().getFullYear()} NOVAEDGE ACADEMY &bull; ALL RIGHTS RESERVED
+              </div>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>
     `;
@@ -310,7 +213,6 @@ Billed To: ${studentName} (${studentEmail})
 Course: ${courseTitle}
 Transaction ID: ${transactionId}
 
-Subtotal: ₹${originalPrice.toLocaleString("en-IN")}
 Total Paid: ₹${paidAmountFormatted}
 
 Thank you for learning with NovaEdge Academy!

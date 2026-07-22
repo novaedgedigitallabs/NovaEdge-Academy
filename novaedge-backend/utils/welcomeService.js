@@ -1,7 +1,8 @@
 const sendEmail = require("./sendEmail");
 
 /**
- * Send Welcome Email using NovaEdge custom letterhead HTML template.
+ * World-Class HTML Welcome Email Template.
+ * Uses robust table layouts & explicit inline styles for 100% pixel-perfect rendering in Gmail/Outlook.
  * Dispatches to user email with CC to course@novaedgeacademy.in
  */
 exports.sendWelcomeEmail = async ({ name, email }) => {
@@ -14,221 +15,156 @@ exports.sendWelcomeEmail = async ({ name, email }) => {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Welcome to NovaEdge Academy</title>
-<style>
-  :root{
-    --ink:#14172B;
-    --ink-soft:#4B4F63;
-    --paper:#FBFAF8;
-    --card:#FFFFFF;
-    --rule:#DEDCD5;
-    --rule-soft:#EDEBE5;
-    --accent:#2748C4;
-    --accent-soft:#EEF1FC;
-    --mono: 'SF Mono','Roboto Mono','Courier New',monospace;
-    --serif: Georgia,'Iowan Old Style','Times New Roman',serif;
-    --sans: -apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
-  }
-  *{margin:0;padding:0;box-sizing:border-box;}
-  html,body{height:100%;}
-  body{
-    font-family:var(--sans);
-    background:
-      radial-gradient(circle at 1px 1px, rgba(20,23,43,0.05) 1px, transparent 0) 0 0/22px 22px,
-      var(--paper);
-    color:var(--ink);
-    padding:48px 16px;
-    -webkit-font-smoothing:antialiased;
-  }
-
-  .sheet{
-    max-width:640px;
-    margin:0 auto;
-    background:var(--card);
-    border:1px solid var(--rule);
-    position:relative;
-    box-shadow:0 1px 2px rgba(20,23,43,0.04), 0 12px 32px -16px rgba(20,23,43,0.18);
-  }
-
-  /* Letterhead */
-  .letterhead{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-    padding:38px 44px 26px;
-  }
-  .wordmark h1{
-    font-family:var(--serif);
-    font-size:26px;
-    font-weight:400;
-    letter-spacing:-0.01em;
-    color:var(--ink);
-  }
-  .wordmark p{
-    font-family:var(--mono);
-    font-size:10.5px;
-    letter-spacing:0.14em;
-    text-transform:uppercase;
-    color:var(--ink-soft);
-    margin-top:6px;
-  }
-
-  .rule{ height:1px; background:var(--rule); margin:0 44px; }
-
-  /* Hero */
-  .hero{ padding:34px 44px 6px; }
-  .eyebrow-lbl{
-    font-family:var(--mono);
-    font-size:10px;
-    letter-spacing:0.16em;
-    text-transform:uppercase;
-    color:var(--accent);
-    margin-bottom:12px;
-  }
-  .hero h2{
-    font-family:var(--serif);
-    font-size:28px;
-    font-weight:400;
-    line-height:1.3;
-    color:var(--ink);
-    letter-spacing:-0.01em;
-  }
-  .hero h2 .name{ color:var(--accent); font-style:italic; }
-  .hero p.lead{
-    margin-top:14px;
-    font-size:14.5px;
-    line-height:1.7;
-    color:var(--ink-soft);
-    max-width:480px;
-  }
-
-  /* Steps */
-  .steps{ padding:28px 44px 8px; }
-  .steps .eyebrow-lbl{ color:var(--ink-soft); }
-  .step-row{
-    display:flex;
-    gap:18px;
-    padding:16px 0;
-    border-bottom:1px solid var(--rule-soft);
-  }
-  .step-row:last-child{ border-bottom:none; }
-  .step-num{
-    font-family:var(--mono);
-    font-size:12px;
-    font-weight:700;
-    color:var(--accent);
-    min-width:22px;
-    padding-top:2px;
-  }
-  .step-body .t{
-    font-size:14.5px;
-    font-weight:600;
-    color:var(--ink);
-    margin-bottom:3px;
-  }
-  .step-body .d{
-    font-size:13px;
-    color:var(--ink-soft);
-    line-height:1.6;
-  }
-
-  /* CTA */
-  .cta-wrap{ padding:30px 44px 8px; text-align:center; }
-  .cta{
-    display:inline-block;
-    background:var(--ink);
-    color:var(--paper);
-    text-decoration:none;
-    font-size:13.5px;
-    font-weight:600;
-    letter-spacing:0.01em;
-    padding:13px 30px;
-  }
-  .cta:hover{ background:var(--accent); }
-
-  /* Footer */
-  .footer{ padding:30px 44px 34px; text-align:center; }
-  .footer .thanks{
-    font-family:var(--serif);
-    font-size:14.5px;
-    font-style:italic;
-    color:var(--ink);
-    margin-bottom:10px;
-  }
-  .footer .contact{ font-size:12.5px; color:var(--ink-soft); }
-  .footer .contact a{ color:var(--accent); text-decoration:none; font-weight:600; }
-  .footer .copyright{
-    font-family:var(--mono);
-    font-size:10px;
-    letter-spacing:0.06em;
-    color:#A9A6A0;
-    margin-top:18px;
-  }
-
-  @media (max-width:520px){
-    .letterhead,.hero,.steps,.cta-wrap,.footer{ padding-left:22px; padding-right:22px; }
-    .rule{ margin:0 22px; }
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to NovaEdge Academy</title>
 </head>
-<body>
+<body style="margin: 0; padding: 0; background-color: #f4f4f7; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; -webkit-font-smoothing: antialiased;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f4f4f7; padding: 40px 10px;">
+    <tr>
+      <td align="center">
+        <!-- Main Card Container -->
+        <table width="600" border="0" cellspacing="0" cellpadding="0" style="width: 600px; max-width: 600px; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);">
+          
+          <!-- Top Accent Line -->
+          <tr>
+            <td style="height: 6px; background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899);"></td>
+          </tr>
 
-  <div class="sheet">
-    <div class="letterhead">
-      <div class="wordmark">
-        <h1>NovaEdge Academy</h1>
-        <p>NovaEdge Digital Labs</p>
-      </div>
-    </div>
-    <div class="rule"></div>
+          <!-- Header -->
+          <tr>
+            <td style="padding: 32px 40px 20px 40px; border-bottom: 1px solid #f1f5f9; text-align: center;">
+              <div style="font-size: 24px; font-weight: 800; color: #0f172a; letter-spacing: -0.5px; text-transform: uppercase;">
+                NovaEdge <span style="color: #6366f1;">Academy</span>
+              </div>
+              <div style="font-size: 11px; font-weight: 600; color: #64748b; letter-spacing: 1px; text-transform: uppercase; margin-top: 4px;">
+                Empowering Next-Gen Innovators
+              </div>
+            </td>
+          </tr>
 
-    <div class="hero">
-      <div class="eyebrow-lbl">Official Welcome</div>
-      <h2>Welcome aboard, <span class="name">${studentName}</span>.</h2>
-      <p class="lead">We're delighted to welcome you to NovaEdge Academy. Your journey toward mastering next-generation skills starts right now.</p>
-    </div>
+          <!-- Hero Greeting Banner -->
+          <tr>
+            <td style="padding: 32px 40px 24px 40px;">
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 10px; padding: 24px;">
+                <tr>
+                  <td align="center">
+                    <div style="font-size: 11px; font-weight: 700; color: #7c3aed; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px;">
+                      OFFICIAL WELCOME
+                    </div>
+                    <div style="font-size: 22px; font-weight: 800; color: #0f172a; line-height: 1.3;">
+                      Welcome aboard, <span style="color: #6366f1;">${studentName}</span>! 🎉
+                    </div>
+                    <div style="font-size: 14px; color: #475569; margin-top: 10px; line-height: 1.6; max-width: 460px;">
+                      We are thrilled to welcome you to NovaEdge Academy. Your journey toward mastering industry-ready skills and building real-world projects starts right now.
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
 
-    <div class="steps">
-      <div class="eyebrow-lbl">Getting Started</div>
+          <!-- Getting Started Steps -->
+          <tr>
+            <td style="padding: 0 40px 28px 40px;">
+              <div style="font-size: 11px; font-weight: 700; color: #94a3b8; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 16px;">
+                GETTING STARTED LAUNCHPAD
+              </div>
 
-      <div class="step-row">
-        <div class="step-num">01</div>
-        <div class="step-body">
-          <div class="t">Access Your Dashboard</div>
-          <div class="d">Track your enrolled courses, streak progress, and learning achievements in one place.</div>
-        </div>
-      </div>
+              <!-- Step 1 -->
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 12px; background-color: #f8fafc; border: 1px solid #f1f5f9; border-radius: 8px; padding: 14px 16px;">
+                <tr>
+                  <td width="36" align="center" valign="top" style="padding-right: 12px;">
+                    <div style="width: 28px; height: 28px; background-color: #6366f1; color: #ffffff; border-radius: 50%; font-size: 12px; font-weight: 800; line-height: 28px; text-align: center;">
+                      01
+                    </div>
+                  </td>
+                  <td align="left" valign="top">
+                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">
+                      Access Your Dashboard
+                    </div>
+                    <div style="font-size: 13px; color: #64748b; margin-top: 2px; line-height: 1.5;">
+                      Track your enrolled courses, daily study streak, and skill milestones in real-time.
+                    </div>
+                  </td>
+                </tr>
+              </table>
 
-      <div class="step-row">
-        <div class="step-num">02</div>
-        <div class="step-body">
-          <div class="t">Interactive Lectures & Practice</div>
-          <div class="d">Watch HD video lectures, solve quizzes, and practice real-world coding assignments.</div>
-        </div>
-      </div>
+              <!-- Step 2 -->
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 12px; background-color: #f8fafc; border: 1px solid #f1f5f9; border-radius: 8px; padding: 14px 16px;">
+                <tr>
+                  <td width="36" align="center" valign="top" style="padding-right: 12px;">
+                    <div style="width: 28px; height: 28px; background-color: #a855f7; color: #ffffff; border-radius: 50%; font-size: 12px; font-weight: 800; line-height: 28px; text-align: center;">
+                      02
+                    </div>
+                  </td>
+                  <td align="left" valign="top">
+                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">
+                      Interactive Lectures &amp; Practice
+                    </div>
+                    <div style="font-size: 13px; color: #64748b; margin-top: 2px; line-height: 1.5;">
+                      Watch HD video lectures, solve quizzes, and submit hands-on coding assignments.
+                    </div>
+                  </td>
+                </tr>
+              </table>
 
-      <div class="step-row">
-        <div class="step-num">03</div>
-        <div class="step-body">
-          <div class="t">Earn Verified Certificates</div>
-          <div class="d">Complete courses to earn industry-standard certificates ready to share on LinkedIn.</div>
-        </div>
-      </div>
-    </div>
+              <!-- Step 3 -->
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f8fafc; border: 1px solid #f1f5f9; border-radius: 8px; padding: 14px 16px;">
+                <tr>
+                  <td width="36" align="center" valign="top" style="padding-right: 12px;">
+                    <div style="width: 28px; height: 28px; background-color: #ec4899; color: #ffffff; border-radius: 50%; font-size: 12px; font-weight: 800; line-height: 28px; text-align: center;">
+                      03
+                    </div>
+                  </td>
+                  <td align="left" valign="top">
+                    <div style="font-size: 14px; font-weight: 700; color: #0f172a;">
+                      Earn Verified Certificates
+                    </div>
+                    <div style="font-size: 13px; color: #64748b; margin-top: 2px; line-height: 1.5;">
+                      Complete course tracks to earn industry-recognized certificates to feature on LinkedIn &amp; Resumes.
+                    </div>
+                  </td>
+                </tr>
+              </table>
 
-    <div class="cta-wrap">
-      <a href="https://www.novaedgeacademy.in/profile" class="cta">Go to My Dashboard</a>
-    </div>
+            </td>
+          </tr>
 
-    <div class="rule"></div>
-    <div class="footer">
-      <p class="thanks">Thank you for learning with NovaEdge Academy.</p>
-      <p class="contact">Questions or need assistance? Write to <a href="mailto:course@novaedgeacademy.in">course@novaedgeacademy.in</a></p>
-      <p class="copyright">NOVAEDGE DIGITAL LABS &copy; ${new Date().getFullYear()} NOVAEDGE ACADEMY — ALL RIGHTS RESERVED</p>
-    </div>
-  </div>
+          <!-- CTA Button -->
+          <tr>
+            <td align="center" style="padding: 0 40px 36px 40px;">
+              <table border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td align="center" style="background-color: #0f172a; border-radius: 9999px; padding: 14px 36px;">
+                    <a href="https://www.novaedgeacademy.in/profile" target="_blank" style="font-size: 14px; font-weight: 700; color: #ffffff; text-decoration: none; display: inline-block; letter-spacing: 0.5px;">
+                      GO TO MY DASHBOARD &rarr;
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
 
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 24px 40px; background-color: #f8fafc; border-top: 1px solid #f1f5f9; text-align: center;">
+              <div style="font-size: 14px; font-weight: 600; color: #334155; font-style: italic;">
+                Thank you for choosing NovaEdge Academy!
+              </div>
+              <div style="font-size: 12px; color: #64748b; margin-top: 6px;">
+                Need help or have questions? Contact us at <a href="mailto:course@novaedgeacademy.in" style="color: #6366f1; text-decoration: none; font-weight: 600;">course@novaedgeacademy.in</a>
+              </div>
+              <div style="font-size: 10px; font-weight: 600; color: #94a3b8; letter-spacing: 0.5px; text-transform: uppercase; margin-top: 16px;">
+                NOVAEDGE DIGITAL LABS &copy; ${new Date().getFullYear()} NOVAEDGE ACADEMY &bull; ALL RIGHTS RESERVED
+              </div>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>
     `;
@@ -245,7 +181,7 @@ If you need any help, contact: course@novaedgeacademy.in
     await sendEmail({
       email,
       cc: "course@novaedgeacademy.in",
-      subject: `Welcome to NovaEdge Academy, ${studentName}!`,
+      subject: `Welcome to NovaEdge Academy, ${studentName}! 🎉`,
       message: plainText,
       html: htmlContent,
     });
