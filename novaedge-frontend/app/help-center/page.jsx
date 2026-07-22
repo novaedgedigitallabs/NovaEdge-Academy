@@ -1,7 +1,6 @@
 "use client";
 
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
+import AppLayout from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, HelpCircle, MessageCircle, Mail } from "lucide-react";
@@ -9,87 +8,68 @@ import Link from "next/link";
 
 export default function HelpCenterPage() {
     return (
-        <div className="min-h-screen flex flex-col font-sans">
-            <Header />
-
-            <main className="flex-grow">
+        <AppLayout className="max-w-5xl">
+            <div className="px-4 py-8 space-y-10">
                 {/* Hero Section */}
-                <section className="relative overflow-hidden bg-background py-20 lg:py-24">
-                    <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-                    <div className="absolute left-0 right-0 top-0 -z-10 m-auto h-[310px] w-[310px] rounded-full bg-primary/20 opacity-20 blur-[100px]"></div>
-
-                    <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative max-w-3xl text-center">
-                        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-foreground text-balance mb-6">
-                            How can we help?
-                        </h1>
-                        <div className="relative max-w-xl mx-auto">
-                            <Search className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
-                            <Input
-                                type="search"
-                                placeholder="Search for answers..."
-                                className="pl-10 h-12 text-lg bg-background/50 backdrop-blur border-muted-foreground/20"
-                            />
-                        </div>
+                <div className="text-center max-w-2xl mx-auto space-y-4">
+                    <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
+                        How can we help?
+                    </h1>
+                    <div className="relative max-w-xl mx-auto">
+                        <Search className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            type="search"
+                            placeholder="Search for answers..."
+                            className="pl-10 h-10 text-xs bg-secondary/40 border-border/80 rounded-full"
+                        />
                     </div>
-                </section>
+                </div>
 
                 {/* FAQ Categories */}
-                <section className="py-16 bg-muted/30 border-y border-border/40">
-                    <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-                        <h2 className="text-2xl font-bold mb-8 text-center">Frequently Asked Questions</h2>
-                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {[
-                                "How do I reset my password?",
-                                "Where can I find my certificates?",
-                                "Can I download videos for offline viewing?",
-                                "How do I contact my mentor?",
-                                "What is the refund policy?",
-                                "How do I update my profile picture?"
-                            ].map((q, i) => (
-                                <div key={i} className="p-6 rounded-xl bg-card border border-border hover:border-primary/50 transition-colors cursor-pointer">
-                                    <h3 className="font-semibold mb-2 flex items-start gap-2">
-                                        <HelpCircle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                                        {q}
-                                    </h3>
-                                    <p className="text-sm text-muted-foreground ml-7">
-                                        Click to read the detailed answer in our knowledge base.
-                                    </p>
-                                </div>
-                            ))}
-                        </div>
+                <div className="space-y-4">
+                    <h2 className="text-lg font-bold text-foreground">Frequently Asked Questions</h2>
+                    <div className="grid md:grid-cols-2 gap-4">
+                        {[
+                            { q: "How do I reset my password?", a: "Go to Settings > Security or click Forgot Password on the login screen." },
+                            { q: "Where can I find my certificates?", a: "Navigate to Certificates on the left menu to view and download all your earned certificates." },
+                            { q: "How do I book a mentor session?", a: "Go to Mentors on the left sidebar and click 'Book Session' on any mentor card." },
+                            { q: "How do I update my profile details?", a: "Navigate to Settings > Profile to update avatar, cover image, and bio." },
+                            { q: "What is the refund policy?", a: "We offer a 7-day money-back guarantee for all paid subscriptions." },
+                            { q: "How do I submit assignments?", a: "Inside your course page, open the Assignment tab and click Submit File." }
+                        ].map((item, i) => (
+                            <div key={i} className="p-4 rounded-xl bg-card/60 border border-border/70 hover:border-primary/40 transition-colors">
+                                <h3 className="font-semibold text-xs text-foreground mb-1 flex items-start gap-2">
+                                    <HelpCircle className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                                    {item.q}
+                                </h3>
+                                <p className="text-xs text-muted-foreground ml-6 leading-relaxed">
+                                    {item.a}
+                                </p>
+                            </div>
+                        ))}
                     </div>
-                </section>
+                </div>
 
                 {/* Contact Options */}
-                <section className="py-20 bg-background">
-                    <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl text-center">
-                        <h2 className="text-3xl font-bold mb-4">Still need help?</h2>
-                        <p className="text-muted-foreground mb-12">Our support team is just a click away.</p>
+                <div className="p-6 rounded-2xl bg-card/40 border border-border/60 text-center space-y-4">
+                    <h2 className="text-lg font-bold text-foreground">Still need help?</h2>
+                    <p className="text-xs text-muted-foreground max-w-md mx-auto">Our support team is just a message away.</p>
 
-                        <div className="grid md:grid-cols-2 gap-8">
-                            <div className="p-8 rounded-2xl bg-secondary/10 border border-border flex flex-col items-center">
-                                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-6 text-primary">
-                                    <MessageCircle className="w-8 h-8" />
-                                </div>
-                                <h3 className="text-xl font-bold mb-2">Live Chat</h3>
-                                <p className="text-muted-foreground mb-6">Chat with our support team in real-time.</p>
-                                <Button>Start Chat</Button>
-                            </div>
+                    <div className="grid sm:grid-cols-2 gap-4 max-w-lg mx-auto pt-2">
+                        <Link href="/contact" className="p-4 rounded-xl bg-secondary/30 border border-border/60 flex flex-col items-center gap-2 hover:border-primary/40 transition-colors">
+                            <MessageCircle className="w-6 h-6 text-primary" />
+                            <h3 className="text-xs font-bold text-foreground">Live Support</h3>
+                            <Button size="sm" className="rounded-full text-xs h-7 px-4">Contact Support</Button>
+                        </Link>
 
-                            <div className="p-8 rounded-2xl bg-secondary/10 border border-border flex flex-col items-center">
-                                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-6 text-primary">
-                                    <Mail className="w-8 h-8" />
-                                </div>
-                                <h3 className="text-xl font-bold mb-2">Email Support</h3>
-                                <p className="text-muted-foreground mb-6">Get a response within 24 hours.</p>
-                                <Button variant="outline">Contact Us</Button>
-                            </div>
-                        </div>
+                        <Link href="/contact" className="p-4 rounded-xl bg-secondary/30 border border-border/60 flex flex-col items-center gap-2 hover:border-primary/40 transition-colors">
+                            <Mail className="w-6 h-6 text-primary" />
+                            <h3 className="text-xs font-bold text-foreground">Email Support</h3>
+                            <Button size="sm" variant="outline" className="rounded-full text-xs h-7 px-4">Send Email</Button>
+                        </Link>
                     </div>
-                </section>
-            </main>
-
-            <Footer />
-        </div>
+                </div>
+            </div>
+        </AppLayout>
     );
 }

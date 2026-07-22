@@ -2,28 +2,65 @@
 
 import { useEffect, useState } from "react";
 import { getPlans, createSubscription, verifySubscription } from "@/services/subscription";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
+import AppLayout from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
-import { Check, Loader2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Check, Loader2, Sparkles, Zap, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import Script from "next/script";
 import { useRouter } from "next/navigation";
 
+const DEFAULT_PLANS = [
+    {
+        _id: "plan_free",
+        name: "Starter",
+        price: 0,
+        interval: "month",
+        description: "Perfect for exploring free courses and community discussions.",
+        features: ["Access to free course previews", "Community feed & discussion forum", "Standard email support"]
+    },
+    {
+        _id: "plan_pro",
+        name: "Pro Membership",
+        price: 499,
+        interval: "month",
+        popular: true,
+        description: "Unlimited access to all courses, 1-on-1 mentorship, and certificates.",
+        features: ["Access to ALL 50+ Premium Courses", "1-on-1 Mentorship Booking Access", "Verified Completion Certificates", "Priority Support & Code Reviews"]
+    },
+    {
+        _id: "plan_annual",
+        name: "Annual VIP Pass",
+        price: 3999,
+        interval: "year",
+        description: "Best value! Save 33% with full annual membership benefits.",
+        features: ["Everything in Pro Membership", "Save 33% over monthly billing", "Downloadable source code & notes", "Exclusive VIP Mentor Discord badge"]
+    }
+];
+
 export default function PricingPage() {
-    const [plans, setPlans] = useState([]);
+    const [plans, setPlans] = useState(DEFAULT_PLANS);
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState(null);
     const router = useRouter();
 
     useEffect(() => {
-        getPlans().then(data => {
-            setPlans(data.plans);
-            setLoading(false);
-        });
+        getPlans()
+            .then(data => {
+                if (data?.plans && Array.isArray(data.plans) && data.plans.length > 0) {
+                    setPlans(data.plans);
+                }
+            })
+            .catch(() => {})
+            .finally(() => setLoading(false));
     }, []);
 
     const handleSubscribe = async (plan) => {
+        if (plan.price === 0) {
+            toast.success("You are on the free Starter plan!");
+            return;
+        }
+
         setProcessing(plan._id);
         try {
             const { subscription_id, key } = await createSubscription(plan._id);
@@ -46,63 +83,105 @@ export default function PricingPage() {
                         toast.error("Verification failed");
                     }
                 },
-                theme: { color: "#000000" },
+                theme: { color: "#7c3aed" },
             };
 
             const rzp = new window.Razorpay(options);
             rzp.open();
         } catch (e) {
-            toast.error(e.message || "Failed to start subscription");
+            toast.error(e.message || "Failed to start subscription. Please try again.");
         } finally {
             setProcessing(null);
         }
     };
 
     return (
-        <div className="min-h-screen flex flex-col">
-            <Header />
+        <AppLayout className="max-w-5xl">
             <Script src="https://checkout.razorpay.com/v1/checkout.js" />
-            <main className="flex-grow container mx-auto py-20 px-4">
-                <div className="text-center mb-12">
-                    <h1 className="text-4xl font-bold mb-4">Simple, Transparent Pricing</h1>
-                    <p className="text-muted-foreground">Unlock all courses with a single subscription.</p>
+            <div className="px-4 py-8 space-y-8">
+                {/* Header Banner */}
+                <div className="text-center max-w-2xl mx-auto space-y-3">
+                    <Badge className="bg-primary/15 text-primary border-primary/30 px-3.5 py-1 text-xs font-bold rounded-full inline-flex items-center gap-1.5 shadow-xs">
+                        <Sparkles className="w-3.5 h-3.5 text-primary" /> Transparent Pricing
+                    </Badge>
+                    <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-foreground">
+                        Simple, Transparent Pricing
+                    </h1>
+                    <p className="text-sm text-muted-foreground">
+                        Unlock all premium courses, 1-on-1 mentorship, and verified certificates with a single plan.
+                    </p>
                 </div>
 
-                {loading ? (
-                    <div className="text-center">Loading plans...</div>
-                ) : (
-                    <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-                        {plans.map((plan) => (
-                            <div key={plan._id} className="border rounded-xl p-8 flex flex-col hover:shadow-lg transition-shadow">
-                                <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
-                                <div className="text-4xl font-bold mb-6">
-                                    ₹{plan.price}
-                                    <span className="text-base font-normal text-muted-foreground">/{plan.interval}</span>
-                                </div>
-                                <p className="text-muted-foreground mb-6">{plan.description}</p>
+                {/* Plans Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {plans.map((plan) => (
+                        <div 
+                            key={plan._id} 
+                            className={`relative rounded-2xl p-6 flex flex-col justify-between border transition-all duration-300 ${
+                                plan.popular 
+                                    ? "bg-gradient-to-b from-primary/20 via-card/80 to-card border-primary/60 shadow-xl shadow-primary/10 -translate-y-1" 
+                                    : "bg-card/40 backdrop-blur-md border-border/70 hover:border-primary/40"
+                            }`}
+                        >
+                            {plan.popular && (
+                                <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] font-extrabold uppercase tracking-wider px-3 py-0.5 rounded-full shadow-md">
+                                    Most Popular
+                                </Badge>
+                            )}
 
-                                <ul className="space-y-3 mb-8 flex-grow">
-                                    {plan.features.map((f, i) => (
-                                        <li key={i} className="flex items-center gap-2">
-                                            <Check className="w-5 h-5 text-green-500" />
+                            <div>
+                                <h3 className="text-xl font-bold text-foreground mb-1">{plan.name}</h3>
+                                <p className="text-xs text-muted-foreground mb-4 min-h-[32px]">{plan.description}</p>
+                                
+                                <div className="text-3xl font-black text-foreground mb-6 flex items-baseline gap-1">
+                                    ₹{plan.price}
+                                    <span className="text-xs font-semibold text-muted-foreground">/{plan.interval}</span>
+                                </div>
+
+                                <ul className="space-y-2.5 mb-8">
+                                    {(plan.features || []).map((f, i) => (
+                                        <li key={i} className="flex items-start gap-2 text-xs text-foreground/90">
+                                            <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                                             <span>{f}</span>
                                         </li>
                                     ))}
                                 </ul>
-
-                                <Button
-                                    onClick={() => handleSubscribe(plan)}
-                                    disabled={!!processing}
-                                    className="w-full"
-                                >
-                                    {processing === plan._id ? <Loader2 className="animate-spin" /> : "Subscribe Now"}
-                                </Button>
                             </div>
-                        ))}
-                    </div>
-                )}
-            </main>
-            <Footer />
-        </div>
+
+                            <Button
+                                onClick={() => handleSubscribe(plan)}
+                                disabled={!!processing}
+                                className={`w-full rounded-full font-bold h-10 text-xs shadow-md ${
+                                    plan.popular 
+                                        ? "bg-primary hover:bg-primary/90 text-primary-foreground" 
+                                        : "bg-secondary text-foreground hover:bg-secondary/80"
+                                }`}
+                            >
+                                {processing === plan._id ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : plan.price === 0 ? (
+                                    "Get Started Free"
+                                ) : (
+                                    <>
+                                        <Zap className="w-3.5 h-3.5 mr-1.5" /> Subscribe Now
+                                    </>
+                                )}
+                            </Button>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Trust Footer */}
+                <div className="flex flex-wrap items-center justify-center gap-6 pt-4 text-xs text-muted-foreground border-t border-border/40">
+                    <span className="flex items-center gap-1.5">
+                        <ShieldCheck className="w-4 h-4 text-emerald-400" /> Secure 256-bit Encrypted Checkout
+                    </span>
+                    <span>•</span>
+                    <span>Cancel Anytime</span>
+                    <span>•</span>
+                    <span>Instant Access</span>
+                </div>
+            </div>
+        </AppLayout>
     );
 }
