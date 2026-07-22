@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import RichTextEditor from "@/components/ui/rich-text-editor";
+import ImageUpload from "@/components/ui/image-upload";
 
 const formSchema = z.object({
     name: z.string().min(2, "Name must be at least 2 characters"),
@@ -101,9 +102,13 @@ export default function NewMentorPage() {
                         name="image"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Image URL (Optional)</FormLabel>
+                                <FormLabel>Mentor Image (Upload or URL)</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="https://..." {...field} />
+                                    <ImageUpload
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                        placeholder="https://..."
+                                    />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>

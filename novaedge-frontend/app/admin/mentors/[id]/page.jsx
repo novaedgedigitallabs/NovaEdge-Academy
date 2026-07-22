@@ -21,6 +21,7 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { use } from "react";
 import RichTextEditor from "@/components/ui/rich-text-editor";
+import ImageUpload from "@/components/ui/image-upload";
 
 const formSchema = z.object({
     name: z.string().min(2, "Name must be at least 2 characters"),
@@ -54,7 +55,7 @@ export default function EditMentorPage({ params }) {
                     name: mentor.name,
                     role: mentor.role,
                     bio: mentor.bio,
-                    image: mentor.image,
+                    image: mentor.image || "",
                 });
             } catch (error) {
                 toast.error("Failed to load mentor details");
@@ -130,9 +131,13 @@ export default function EditMentorPage({ params }) {
                         name="image"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Image URL (Optional)</FormLabel>
+                                <FormLabel>Mentor Image (Upload or URL)</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="https://..." {...field} />
+                                    <ImageUpload
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                        placeholder="https://..."
+                                    />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>

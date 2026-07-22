@@ -102,3 +102,90 @@
     transform: translateX(100%);
   }
 }
+
+/* Quill Rich Text Editor Dark Theme */
+.dark-quill-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.dark-quill-wrapper .ql-toolbar.ql-snow {
+  background-color: hsl(var(--secondary) / 0.6);
+  border: none;
+  border-bottom: 1px solid hsl(var(--border));
+  padding: 8px 12px;
+}
+
+.dark-quill-wrapper .ql-container.ql-snow {
+  border: none;
+  background-color: hsl(var(--background) / 0.4);
+  color: hsl(var(--foreground));
+  font-family: inherit;
+  min-height: 220px;
+}
+
+.dark-quill-wrapper .ql-editor {
+  min-height: 220px;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: hsl(var(--foreground));
+  padding: 16px;
+}
+
+.dark-quill-wrapper .ql-editor.ql-blank::before {
+  color: hsl(var(--muted-foreground));
+  font-style: normal;
+  left: 16px;
+  right: 16px;
+}
+
+/* Toolbar Icons & Picker Styling */
+.dark-quill-wrapper .ql-snow .ql-stroke {
+  stroke: hsl(var(--foreground) / 0.8) !important;
+}
+
+.dark-quill-wrapper .ql-snow .ql-fill {
+  fill: hsl(var(--foreground) / 0.8) !important;
+}
+
+.dark-quill-wrapper .ql-snow .ql-picker {
+  color: hsl(var(--foreground)) !important;
+}
+
+.dark-quill-wrapper .ql-snow .ql-picker-options {
+  background-color: hsl(var(--card)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  color: hsl(var(--foreground)) !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+  border-radius: 0.5rem;
+  padding: 8px !important;
+}
+
+.dark-quill-wrapper .ql-snow .ql-picker-item {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.dark-quill-wrapper .ql-snow .ql-picker-item:hover,
+.dark-quill-wrapper .ql-snow .ql-picker-item.ql-selected {
+  color: hsl(var(--primary)) !important;
+}
+
+.dark-quill-wrapper .ql-snow button:hover .ql-stroke,
+.dark-quill-wrapper .ql-snow button.ql-active .ql-stroke,
+.dark-quill-wrapper .ql-snow .ql-picker-label:hover .ql-stroke,
+.dark-quill-wrapper .ql-snow .ql-picker-label.ql-active .ql-stroke {
+  stroke: hsl(var(--primary)) !important;
+}
+
+.dark-quill-wrapper .ql-snow button:hover .ql-fill,
+.dark-quill-wrapper .ql-snow button.ql-active .ql-fill,
+.dark-quill-wrapper .ql-snow .ql-picker-label:hover .ql-fill,
+.dark-quill-wrapper .ql-snow .ql-picker-label.ql-active .ql-fill {
+  fill: hsl(var(--primary)) !important;
+}
+
+.dark-quill-wrapper .ql-snow button:hover,
+.dark-quill-wrapper .ql-snow button.ql-active,
+.dark-quill-wrapper .ql-snow .ql-picker-label:hover {
+  color: hsl(var(--primary)) !important;
+}

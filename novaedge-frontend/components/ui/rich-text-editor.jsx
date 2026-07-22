@@ -44,8 +44,9 @@ export default function RichTextEditor({ value, onChange, placeholder }) {
 
                 if (data.success) {
                     const quill = quillRef.current.getEditor();
-                    const range = quill.getSelection();
-                    quill.insertEmbed(range.index, "image", data.url);
+                    const range = quill.getSelection(true);
+                    const index = range ? range.index : 0;
+                    quill.insertEmbed(index, "image", data.url);
                     toast.success("Image uploaded successfully");
                 } else {
                     toast.error(data.message || "Upload failed");
@@ -83,7 +84,7 @@ export default function RichTextEditor({ value, onChange, placeholder }) {
     );
 
     return (
-        <div className="bg-white text-black rounded-md">
+        <div className="dark-quill-wrapper rounded-lg border border-border/80 bg-secondary/20 shadow-sm overflow-hidden">
             <ReactQuill
                 ref={quillRef}
                 theme="snow"
@@ -91,7 +92,7 @@ export default function RichTextEditor({ value, onChange, placeholder }) {
                 onChange={onChange}
                 modules={modules}
                 placeholder={placeholder}
-                className="h-[300px] mb-12" // Add margin bottom for toolbar
+                className="min-h-[220px]"
             />
         </div>
     );
