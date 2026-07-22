@@ -41,9 +41,11 @@ export default function PostCard({ post, onDelete, onUpdate }) {
     const [isEdited, setIsEdited] = useState(post.isEdited || false);
     const [isUpdating, setIsUpdating] = useState(false);
 
+    const targetPostId = post._id || post.id;
+
     const handleLike = async (e) => {
         e.stopPropagation();
-        if (!user) return;
+        if (!user || !targetPostId) return;
 
         const previousLikes = [...likes];
         const previousIsLiked = isLiked;
@@ -57,7 +59,7 @@ export default function PostCard({ post, onDelete, onUpdate }) {
         }
 
         try {
-            const res = await likePost(post._id);
+            const res = await likePost(targetPostId);
             if (!res.success) {
                 setLikes(previousLikes);
                 setIsLiked(previousIsLiked);
@@ -75,9 +77,13 @@ export default function PostCard({ post, onDelete, onUpdate }) {
             toast.error("Post content cannot be empty");
             return;
         }
+        if (!targetPostId) {
+            toast.error("Invalid post ID");
+            return;
+        }
         setIsUpdating(true);
         try {
-            const res = await updatePost(post._id, editContent);
+            const res = await updatePost(targetPostId, editContent);
             if (res.success) {
                 toast.success("Post updated successfully!");
                 setPostContent(editContent);
@@ -97,12 +103,13 @@ export default function PostCard({ post, onDelete, onUpdate }) {
 
     const handleDelete = async (e) => {
         e.stopPropagation();
+        if (!targetPostId) return;
         if (!confirm("Are you sure you want to delete this post?")) return;
         try {
-            const res = await deletePost(post._id);
+            const res = await deletePost(targetPostId);
             if (res.success) {
                 toast.success("Post deleted");
-                if (onDelete) onDelete(post._id);
+                if (onDelete) onDelete(targetPostId);
             }
         } catch (error) {
             toast.error("Failed to delete post");
@@ -111,9 +118,10 @@ export default function PostCard({ post, onDelete, onUpdate }) {
 
     const handleRepost = async (e) => {
         if (e) e.stopPropagation();
+        if (!targetPostId) return;
         if (!confirm("Repost this?")) return;
         try {
-            const res = await createPost("", post._id);
+            const res = await createPost("", targetPostId);
             if (res.success) {
                 toast.success("Reposted!");
             }
@@ -123,9 +131,9 @@ export default function PostCard({ post, onDelete, onUpdate }) {
     };
 
     const handleQuoteRepost = async () => {
-        if (!quoteContent.trim()) return;
+        if (!quoteContent.trim() || !targetPostId) return;
         try {
-            const res = await createPost(quoteContent, post._id);
+            const res = await createPost(quoteContent, targetPostId);
             if (res.success) {
                 toast.success("Quote posted!");
                 setQuoteDialogOpen(false);
@@ -138,7 +146,7 @@ export default function PostCard({ post, onDelete, onUpdate }) {
 
     const handleShare = async (e) => {
         e.stopPropagation();
-        const postUrl = typeof window !== "undefined" ? `${window.location.origin}/post/${post._id}` : "";
+        const postUrl = typeof window !== "undefined" ? `${window.location.origin}/post/${targetPostId}` : "";
 
         if (typeof navigator !== "undefined" && navigator.share) {
             try {

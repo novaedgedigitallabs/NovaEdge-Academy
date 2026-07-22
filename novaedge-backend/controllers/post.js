@@ -186,7 +186,18 @@ exports.likePost = async (req, res) => {
 exports.updatePost = async (req, res) => {
     try {
         const { content } = req.body;
-        const post = await Post.findById(req.params.id);
+        const postId = req.params.id;
+
+        if (!postId || postId === "undefined" || postId === "null") {
+            return res.status(400).json({ success: false, message: "Invalid post ID" });
+        }
+
+        let post;
+        try {
+            post = await Post.findById(postId);
+        } catch (err) {
+            return res.status(404).json({ success: false, message: "Post not found or invalid ID" });
+        }
 
         if (!post) {
             return res.status(404).json({ success: false, message: "Post not found" });
