@@ -105,6 +105,9 @@ export default function PublicProfilePage() {
         ? "Mentor"
         : "Student";
 
+    // Fallback cover image poster
+    const coverImageUrl = user.coverImage?.url || "/default-cover.png";
+
     // Extract social links with fallback support
     const socialGithub = user.socialLinks?.github || user.github;
     const socialLinkedin = user.socialLinks?.linkedin || user.linkedin;
@@ -127,20 +130,13 @@ export default function PublicProfilePage() {
                 </div>
             </div>
 
-            {/* Full-width Cover Image */}
-            <div className="h-44 sm:h-52 bg-muted relative overflow-hidden group">
-                {user.coverImage?.url ? (
-                    <img
-                        src={user.coverImage.url}
-                        alt="Profile Cover"
-                        className="w-full h-full object-cover object-center"
-                    />
-                ) : (
-                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-950 via-purple-900 to-slate-950 flex items-center justify-center">
-                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(120,119,198,0.25)_0,transparent_70%)]" />
-                        <Sparkles className="w-12 h-12 text-primary/30 animate-pulse" />
-                    </div>
-                )}
+            {/* Full-width Cover Image Poster */}
+            <div className="h-44 sm:h-56 bg-muted relative overflow-hidden group">
+                <img
+                    src={coverImageUrl}
+                    alt="Profile Cover Banner"
+                    className="w-full h-full object-cover object-center"
+                />
 
                 {isOwnProfile && (
                     <Button
@@ -212,58 +208,67 @@ export default function PublicProfilePage() {
                     )}
                 </div>
 
-                {/* Social Links Row */}
-                {hasSocialLinks && (
-                    <div className="flex flex-wrap items-center gap-2 mb-3 pt-2 border-t border-border/40">
-                        <span className="text-xs font-semibold text-muted-foreground mr-1 flex items-center gap-1">
-                            <LinkIcon className="w-3 h-3" /> Links:
-                        </span>
-                        {socialGithub && (
-                            <a
-                                href={socialGithub.startsWith('http') ? socialGithub : `https://${socialGithub}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/60 hover:bg-primary/20 border border-border/60 text-foreground hover:text-primary text-xs transition-colors"
-                            >
-                                <Github className="w-3.5 h-3.5 text-primary" />
-                                <span>GitHub</span>
-                            </a>
-                        )}
-                        {socialLinkedin && (
-                            <a
-                                href={socialLinkedin.startsWith('http') ? socialLinkedin : `https://${socialLinkedin}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/60 hover:bg-primary/20 border border-border/60 text-foreground hover:text-primary text-xs transition-colors"
-                            >
-                                <Linkedin className="w-3.5 h-3.5 text-primary" />
-                                <span>LinkedIn</span>
-                            </a>
-                        )}
-                        {socialPortfolio && (
-                            <a
-                                href={socialPortfolio.startsWith('http') ? socialPortfolio : `https://${socialPortfolio}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/60 hover:bg-primary/20 border border-border/60 text-foreground hover:text-primary text-xs transition-colors"
-                            >
-                                <Globe className="w-3.5 h-3.5 text-primary" />
-                                <span>Portfolio</span>
-                            </a>
-                        )}
-                        {socialTwitter && (
-                            <a
-                                href={socialTwitter.startsWith('http') ? socialTwitter : `https://${socialTwitter}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/60 hover:bg-primary/20 border border-border/60 text-foreground hover:text-primary transition-colors"
-                            >
-                                <Twitter className="w-3.5 h-3.5 text-primary" />
-                                <span>Twitter</span>
-                            </a>
-                        )}
-                    </div>
-                )}
+                {/* Social & Community Links Row */}
+                <div className="flex flex-wrap items-center gap-2 mb-3 pt-2 border-t border-border/40">
+                    <span className="text-xs font-semibold text-muted-foreground mr-1 flex items-center gap-1">
+                        <LinkIcon className="w-3 h-3 text-primary" /> Links:
+                    </span>
+                    {socialGithub && (
+                        <a
+                            href={socialGithub.startsWith('http') ? socialGithub : `https://${socialGithub}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/60 hover:bg-primary/20 border border-border/60 text-foreground hover:text-primary text-xs transition-colors"
+                        >
+                            <Github className="w-3.5 h-3.5 text-primary" />
+                            <span>GitHub</span>
+                        </a>
+                    )}
+                    {socialLinkedin && (
+                        <a
+                            href={socialLinkedin.startsWith('http') ? socialLinkedin : `https://${socialLinkedin}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/60 hover:bg-primary/20 border border-border/60 text-foreground hover:text-primary text-xs transition-colors"
+                        >
+                            <Linkedin className="w-3.5 h-3.5 text-primary" />
+                            <span>LinkedIn</span>
+                        </a>
+                    )}
+                    {socialPortfolio && (
+                        <a
+                            href={socialPortfolio.startsWith('http') ? socialPortfolio : `https://${socialPortfolio}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/60 hover:bg-primary/20 border border-border/60 text-foreground hover:text-primary text-xs transition-colors"
+                        >
+                            <Globe className="w-3.5 h-3.5 text-primary" />
+                            <span>Portfolio</span>
+                        </a>
+                    )}
+                    {socialTwitter && (
+                        <a
+                            href={socialTwitter.startsWith('http') ? socialTwitter : `https://${socialTwitter}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/60 hover:bg-primary/20 border border-border/60 text-foreground hover:text-primary text-xs transition-colors"
+                        >
+                            <Twitter className="w-3.5 h-3.5 text-primary" />
+                            <span>Twitter</span>
+                        </a>
+                    )}
+                    {!hasSocialLinks && (
+                        <a
+                            href="https://www.novaedgedigitallabs.tech"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/40 hover:bg-primary/20 border border-border/40 text-muted-foreground hover:text-primary text-xs transition-colors"
+                        >
+                            <Globe className="w-3.5 h-3.5 text-primary" />
+                            <span>NovaEdge Digital Labs</span>
+                        </a>
+                    )}
+                </div>
 
                 <div className="flex gap-6 text-sm mb-2 border-t border-border/40 pt-3">
                     <div className="hover:underline cursor-pointer">
