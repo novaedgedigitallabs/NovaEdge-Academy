@@ -29,6 +29,7 @@ export default function PostCard({ post, onDelete, onUpdate }) {
     const authorUsername = author.username || (author.email ? author.email.split('@')[0] : null) || (author.name ? author.name.toLowerCase().replace(/\s+/g, '') : "user");
     const authorId = author._id || "";
     const authorAvatar = author.avatar?.url;
+    const authorProfileLink = authorUsername ? `/${authorUsername}` : (authorId ? `/${authorId}` : "/profile");
 
     const [likes, setLikes] = useState(post.likes || []);
     const [isLiked, setIsLiked] = useState(user && post.likes?.includes(user._id));
@@ -61,11 +62,12 @@ export default function PostCard({ post, onDelete, onUpdate }) {
 
         try {
             const res = await likePost(targetPostId);
-            if (!res.success) {
+            if (res.success) {
+                setLikes(res.likes || []);
+                setIsLiked(res.likes?.includes(user._id));
+            } else {
                 setLikes(previousLikes);
                 setIsLiked(previousIsLiked);
-            } else {
-                setLikes(res.likes);
             }
         } catch (error) {
             setLikes(previousLikes);
@@ -73,72 +75,76 @@ export default function PostCard({ post, onDelete, onUpdate }) {
         }
     };
 
-    const handleEditSave = async () => {
-        if (!editContent.trim()) {
-            toast.error("Post content cannot be empty");
-            return;
-        }
-        if (!targetPostId) {
-            toast.error("Invalid post ID");
-            return;
-        }
-        setIsUpdating(true);
-        try {
-            const res = await updatePost(targetPostId, editContent);
-            if (res.success) {
-                toast.success("Post updated successfully!");
-                setPostContent(editContent);
-                setIsEdited(true);
-                setEditDialogOpen(false);
-                if (onUpdate) onUpdate(res.post || { ...post, content: editContent, isEdited: true });
-            } else {
-                toast.error(res.message || "Failed to update post");
-            }
-        } catch (error) {
-            console.error("Update post error:", error);
-            toast.error(error.response?.data?.message || error.message || "Failed to update post");
-        } finally {
-            setIsUpdating(false);
-        }
-    };
-
     const handleDelete = async (e) => {
         e.stopPropagation();
-        if (!targetPostId) return;
-        if (!confirm("Are you sure you want to delete this post?")) return;
+        if (!user || !targetPostId) return;
+
         try {
             const res = await deletePost(targetPostId);
             if (res.success) {
-                toast.success("Post deleted");
+                toast.success("Post deleted successfully");
                 if (onDelete) onDelete(targetPostId);
+            } else {
+                toast.error(res.message || "Failed to delete post");
             }
         } catch (error) {
             toast.error("Failed to delete post");
         }
     };
 
-    const handleRepost = async (e) => {
-        if (e) e.stopPropagation();
-        if (!targetPostId) return;
-        if (!confirm("Repost this?")) return;
+    const handleUpdate = async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!user || !targetPostId || !editContent.trim()) return;
+
+        setIsUpdating(true);
         try {
-            const res = await createPost("", targetPostId);
+            const res = await updatePost(targetPostId, { content: editContent.trim() });
             if (res.success) {
-                toast.success("Reposted!");
+                toast.success("Post updated successfully");
+                setPostContent(res.post.content);
+                setIsEdited(true);
+                setEditDialogOpen(false);
+                if (onUpdate) onUpdate(res.post);
+            } else {
+                toast.error(res.message || "Failed to update post");
+            }
+        } catch (error) {
+            toast.error("Failed to update post");
+        } finally {
+            setIsUpdating(false);
+        }
+    };
+
+    const handleRepost = async (e) => {
+        e.stopPropagation();
+        if (!user || !targetPostId) return;
+
+        try {
+            const res = await createPost({ repostOf: targetPostId });
+            if (res.success) {
+                toast.success("Post reposted to your feed");
+            } else {
+                toast.error(res.message || "Failed to repost");
             }
         } catch (error) {
             toast.error("Failed to repost");
         }
     };
 
-    const handleQuoteRepost = async () => {
-        if (!quoteContent.trim() || !targetPostId) return;
+    const handleQuoteSubmit = async () => {
+        if (!quoteContent.trim()) return;
         try {
-            const res = await createPost(quoteContent, targetPostId);
+            const res = await createPost({
+                content: quoteContent,
+                repostOf: targetPostId
+            });
             if (res.success) {
-                toast.success("Quote posted!");
+                toast.success("Quote post created");
                 setQuoteDialogOpen(false);
                 setQuoteContent("");
+            } else {
+                toast.error(res.message || "Failed to post quote");
             }
         } catch (error) {
             toast.error("Failed to post quote");
@@ -147,19 +153,18 @@ export default function PostCard({ post, onDelete, onUpdate }) {
 
     const handleShare = async (e) => {
         e.stopPropagation();
-        const postUrl = typeof window !== "undefined" ? `${window.location.origin}/post/${targetPostId}` : "";
+        const postUrl = `${window.location.origin}/post/${targetPostId}`;
 
-        if (typeof navigator !== "undefined" && navigator.share) {
+        if (navigator.share) {
             try {
                 await navigator.share({
                     title: `Post by ${authorName}`,
                     text: postContent,
                     url: postUrl,
                 });
-                toast.success("Shared successfully!");
                 return;
             } catch (err) {
-                if (err.name === "AbortError") return;
+                // Share cancelled
             }
         }
 
@@ -183,27 +188,24 @@ export default function PostCard({ post, onDelete, onUpdate }) {
                 </div>
             )}
 
-            const authorProfileLink = authorUsername ? `/${authorUsername}` : (authorId ? `/${authorId}` : "/profile");
+            <div className="flex gap-3">
+                <Link href={authorProfileLink} onClick={(e) => e.stopPropagation()}>
+                    <Avatar className="h-10 w-10">
+                        <AvatarImage src={authorAvatar} />
+                        <AvatarFallback>{authorName[0]}</AvatarFallback>
+                    </Avatar>
+                </Link>
 
-            return (
-                <div className="flex gap-3">
-                    <Link href={authorProfileLink} onClick={(e) => e.stopPropagation()}>
-                        <Avatar className="h-10 w-10">
-                            <AvatarImage src={authorAvatar} />
-                            <AvatarFallback>{authorName[0]}</AvatarFallback>
-                        </Avatar>
-                    </Link>
-
-                    <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-1.5 text-sm truncate">
-                                <Link href={authorProfileLink} className="font-bold hover:underline" onClick={(e) => e.stopPropagation()}>
-                                    {authorName}
-                                </Link>
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 text-sm truncate">
+                            <Link href={authorProfileLink} className="font-bold hover:underline" onClick={(e) => e.stopPropagation()}>
+                                {authorName}
+                            </Link>
                             <span className="text-muted-foreground truncate">@{authorUsername}</span>
                             <span className="text-muted-foreground">·</span>
-                            <span className="text-muted-foreground hover:underline">
-                                {formatDistanceToNow(new Date(post.createdAt || Date.now()))}
+                            <span className="text-muted-foreground hover:underline text-xs">
+                                {formatDistanceToNow(new Date(post.createdAt || Date.now()), { addSuffix: true })}
                             </span>
                             {(isEdited || post.isEdited) && (
                                 <span className="text-xs text-muted-foreground/80 font-normal italic">· Edited</span>
@@ -218,193 +220,138 @@ export default function PostCard({ post, onDelete, onUpdate }) {
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                     <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setEditDialogOpen(true); }}>
-                                        <Pencil className="mr-2 h-4 w-4" />
-                                        Edit Post
+                                        <Pencil className="mr-2 h-4 w-4" /> Edit Post
                                     </DropdownMenuItem>
                                     <DropdownMenuItem onClick={handleDelete} className="text-destructive">
-                                        <Trash2 className="mr-2 h-4 w-4" />
-                                        Delete
+                                        <Trash2 className="mr-2 h-4 w-4" /> Delete Post
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         )}
                     </div>
 
-                    <div className="mt-1 text-sm whitespace-pre-wrap leading-normal">
-                        {(postContent || "").split(/(\s+)/).map((part, i) => {
-                            if (part.startsWith('#') && part.length > 1) {
-                                const tag = part.substring(1); // remove #
-                                return (
-                                    <Link
-                                        key={i}
-                                        href={`/hashtag/${tag.toLowerCase()}`}
-                                        className="text-primary font-bold hover:underline"
-                                        onClick={async (e) => {
-                                            e.stopPropagation();
-                                            try {
-                                                await fetch(`${process.env.NEXT_PUBLIC_API_URL || ""}/api/v1/hashtag/click`, {
-                                                    method: "POST",
-                                                    headers: { "Content-Type": "application/json" },
-                                                    body: JSON.stringify({ tag }),
-                                                    credentials: "include"
-                                                });
-                                            } catch (err) {
-                                                console.error("Failed to track click", err);
-                                            }
-                                        }}
-                                    >
-                                        {part}
-                                    </Link>
-                                );
-                            }
-                            return part;
-                        })}
+                    {/* Post Text */}
+                    <div className="mt-1 text-sm text-foreground/90 whitespace-pre-line leading-relaxed">
+                        {postContent}
                     </div>
 
-                    {/* Location & Event Date Badges */}
-                    {(targetPost.location || targetPost.eventDate) && (
-                        <div className="mt-2 flex flex-wrap gap-2 text-xs font-semibold text-muted-foreground">
-                            {targetPost.location && (
-                                <span className="flex items-center gap-1 bg-primary/10 text-primary px-2.5 py-1 rounded-full border border-primary/20">
-                                    <MapPin className="w-3.5 h-3.5" />
-                                    {targetPost.location}
-                                </span>
-                            )}
-                            {targetPost.eventDate && (
-                                <span className="flex items-center gap-1 bg-purple-500/10 text-purple-400 px-2.5 py-1 rounded-full border border-purple-500/20">
-                                    <Calendar className="w-3.5 h-3.5" />
-                                    {targetPost.eventDate}
-                                </span>
-                            )}
+                    {/* Media Attachments */}
+                    {post.images && post.images.length > 0 && (
+                        <div className={cn(
+                            "mt-3 grid gap-2 rounded-2xl overflow-hidden border border-border",
+                            post.images.length === 1 ? "grid-cols-1" : "grid-cols-2"
+                        )}>
+                            {post.images.map((img, i) => (
+                                <img
+                                    key={i}
+                                    src={typeof img === 'string' ? img : img.url}
+                                    alt="Post media"
+                                    className="w-full h-auto object-cover max-h-[350px]"
+                                />
+                            ))}
                         </div>
                     )}
 
-                    {/* Post Image */}
-                    {targetPost.image?.url && (
-                        <div className="mt-3 overflow-hidden rounded-2xl border border-border bg-black/20 max-h-96">
-                            <img
-                                src={targetPost.image.url}
-                                alt="Post media"
-                                className="w-full h-full object-cover max-h-96"
-                            />
-                        </div>
-                    )}
-
-                    {/* Reposted Content Display */}
-                    {post.repostOf && (
-                        <div className="mt-3 rounded-xl border border-border p-3">
-                            <div className="flex items-center gap-2 mb-1">
-                                <Avatar className="h-5 w-5">
-                                    <AvatarImage src={post.repostOf.user?.avatar?.url} />
-                                    <AvatarFallback>{post.repostOf.user?.name?.[0] || "U"}</AvatarFallback>
-                                </Avatar>
-                                <span className="font-bold text-sm">{post.repostOf.user?.name || "User"}</span>
-                                <span className="text-muted-foreground text-sm">@{post.repostOf.user?.username || (post.repostOf.user?.email ? post.repostOf.user.email.split('@')[0] : "user")}</span>
-                                <span className="text-muted-foreground text-sm">· {formatDistanceToNow(new Date(post.repostOf.createdAt || Date.now()))}</span>
-                            </div>
-                            <p className="text-sm">{post.repostOf.content}</p>
-                        </div>
-                    )}
-
-                    <div className="mt-3 flex items-center justify-between max-w-md text-muted-foreground">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="group h-8 w-8 hover:bg-blue-500/10 hover:text-blue-500"
+                    {/* Post Actions */}
+                    <div className="mt-3 flex items-center justify-between text-muted-foreground max-w-md text-xs">
+                        <button
                             onClick={(e) => { e.stopPropagation(); setShowComments(!showComments); }}
+                            className="flex items-center gap-1.5 hover:text-primary transition-colors group"
                         >
-                            <MessageCircle className="h-4 w-4" />
-                        </Button>
+                            <MessageCircle className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                            <span>{post.commentsCount || 0}</span>
+                        </button>
 
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="group h-8 w-8 hover:bg-green-500/10 hover:text-green-500">
-                                    <Repeat className="h-4 w-4" />
-                                </Button>
+                                <button
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="flex items-center gap-1.5 hover:text-green-500 transition-colors group"
+                                >
+                                    <Repeat className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                                    <span>{post.repostsCount || 0}</span>
+                                </button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent>
-                                <DropdownMenuItem onClick={handleRepost}>
-                                    <Repeat className="w-4 h-4 mr-2" /> Repost
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => setQuoteDialogOpen(true)}>
-                                    <MessageCircle className="w-4 h-4 mr-2" /> Quote
-                                </DropdownMenuItem>
+                            <DropdownMenuContent align="start">
+                                <DropdownMenuItem onClick={handleRepost}>Repost</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setQuoteDialogOpen(true)}>Quote Post</DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
 
-                        {/* Separate Quote Repost Modal */}
-                        <Dialog open={quoteDialogOpen} onOpenChange={setQuoteDialogOpen}>
-                            <DialogContent onClick={(e) => e.stopPropagation()}>
-                                <DialogHeader>
-                                    <DialogTitle>Quote Repost</DialogTitle>
-                                    <DialogDescription className="sr-only">Add a quote comment to this repost</DialogDescription>
-                                </DialogHeader>
-                                <Textarea
-                                    value={quoteContent}
-                                    onChange={(e) => setQuoteContent(e.target.value)}
-                                    placeholder="Add a comment..."
-                                    className="min-h-[100px] bg-secondary/30 text-sm focus-visible:ring-1 focus-visible:ring-primary"
-                                />
-                                <DialogFooter>
-                                    <Button onClick={handleQuoteRepost}>Post</Button>
-                                </DialogFooter>
-                            </DialogContent>
-                        </Dialog>
-
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className={cn(
-                                "group h-8 w-8 hover:bg-pink-500/10 hover:text-pink-500",
-                                isLiked && "text-pink-500"
-                            )}
+                        <button
                             onClick={handleLike}
+                            className={cn(
+                                "flex items-center gap-1.5 transition-colors group",
+                                isLiked ? "text-pink-600 font-bold" : "hover:text-pink-600"
+                            )}
                         >
-                            <Heart className={cn("h-4 w-4", isLiked && "fill-current")} />
-                            {likes.length > 0 && <span className="ml-2 text-xs group-hover:text-pink-500">{likes.length}</span>}
-                        </Button>
+                            <Heart className={cn("h-4 w-4 group-hover:scale-110 transition-transform", isLiked && "fill-current")} />
+                            <span>{likes.length}</span>
+                        </button>
 
-                        <Button variant="ghost" size="icon" className="group h-8 w-8 hover:bg-blue-500/10 hover:text-blue-500">
-                            <BarChart2 className="h-4 w-4" />
-                        </Button>
-
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="group h-8 w-8 hover:bg-blue-500/10 hover:text-blue-500"
+                        <button
                             onClick={handleShare}
-                            title="Share post"
+                            className="flex items-center gap-1.5 hover:text-primary transition-colors group"
                         >
-                            <Share2 className="h-4 w-4" />
-                        </Button>
+                            <Share2 className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                        </button>
                     </div>
                 </div>
             </div>
 
+            {/* Comment Section Drawer */}
             {showComments && (
-                <div className="mt-2 pl-12" onClick={(e) => e.stopPropagation()}>
-                    <CommentSection postId={post._id} />
+                <div className="mt-3 pt-3 border-t border-border/40" onClick={(e) => e.stopPropagation()}>
+                    <CommentSection postId={targetPostId} />
                 </div>
             )}
 
             {/* Edit Post Modal */}
             <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-                <DialogContent onClick={(e) => e.stopPropagation()}>
+                <DialogContent className="sm:max-w-md bg-card border-border" onClick={(e) => e.stopPropagation()}>
                     <DialogHeader>
                         <DialogTitle>Edit Post</DialogTitle>
-                        <DialogDescription className="sr-only">Edit your post content</DialogDescription>
+                        <DialogDescription>Modify your published post content.</DialogDescription>
                     </DialogHeader>
-                    <Textarea
-                        value={editContent}
-                        onChange={(e) => setEditContent(e.target.value)}
-                        placeholder="Edit your post content..."
-                        className="min-h-[120px] bg-secondary/30 text-sm focus-visible:ring-1 focus-visible:ring-primary"
-                    />
-                    <DialogFooter className="gap-2 sm:gap-0">
-                        <Button variant="outline" size="sm" onClick={() => setEditDialogOpen(false)}>Cancel</Button>
-                        <Button size="sm" onClick={handleEditSave} disabled={isUpdating}>
-                            {isUpdating ? "Saving..." : "Save Changes"}
-                        </Button>
+                    <form onSubmit={handleUpdate} className="space-y-4">
+                        <Textarea
+                            value={editContent}
+                            onChange={(e) => setEditContent(e.target.value)}
+                            placeholder="What's on your mind?"
+                            className="min-h-[120px] bg-secondary/20"
+                        />
+                        <DialogFooter>
+                            <Button type="button" variant="ghost" onClick={() => setEditDialogOpen(false)}>Cancel</Button>
+                            <Button type="submit" disabled={isUpdating || !editContent.trim()}>
+                                {isUpdating ? "Saving..." : "Save Changes"}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
+
+            {/* Quote Post Modal */}
+            <Dialog open={quoteDialogOpen} onOpenChange={setQuoteDialogOpen}>
+                <DialogContent className="sm:max-w-md bg-card border-border" onClick={(e) => e.stopPropagation()}>
+                    <DialogHeader>
+                        <DialogTitle>Quote Post</DialogTitle>
+                        <DialogDescription>Add your thoughts to this post.</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <Textarea
+                            value={quoteContent}
+                            onChange={(e) => setQuoteContent(e.target.value)}
+                            placeholder="Add a comment..."
+                            className="min-h-[100px] bg-secondary/20"
+                        />
+                        <div className="p-3 border border-border rounded-xl bg-secondary/10 text-xs">
+                            <span className="font-bold">{authorName}</span>
+                            <p className="text-muted-foreground line-clamp-2 mt-1">{postContent}</p>
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="ghost" onClick={() => setQuoteDialogOpen(false)}>Cancel</Button>
+                        <Button onClick={handleQuoteSubmit} disabled={!quoteContent.trim()}>Post Quote</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
