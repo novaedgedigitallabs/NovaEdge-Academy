@@ -6,18 +6,16 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { getAllPosts } from "@/services/blogs";
-import { getRssFeedPosts } from "@/services/rss";
 import Link from "next/link";
 import AppLayout from "@/components/layout/AppLayout";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { 
-    faRss, 
     faMagnifyingGlass, 
     faCalendarDays, 
     faClock, 
     faArrowRight, 
-    faUser, 
-    faArrowUpRightFromSquare 
+    faUser,
+    faNewspaper
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function BlogPage() {
@@ -29,22 +27,19 @@ export default function BlogPage() {
     useEffect(() => {
         const fetchPosts = async () => {
             try {
-                const [localRes, rssItems] = await Promise.all([
-                    getAllPosts().catch(() => ({ data: [] })),
-                    getRssFeedPosts().catch(() => [])
-                ]);
+                const res = await getAllPosts();
+                const allPosts = res?.data || res?.posts || (Array.isArray(res) ? res : []);
 
-                const localPosts = localRes?.data || localRes?.posts || [];
-                const combined = [...localPosts, ...rssItems];
-
-                if (combined.length > 0) {
-                    setFeaturedPost(combined[0]);
-                    setPosts(combined.slice(1));
+                if (allPosts.length > 0) {
+                    setFeaturedPost(allPosts[0]);
+                    setPosts(allPosts.slice(1));
                 } else {
+                    setFeaturedPost(null);
                     setPosts([]);
                 }
             } catch (error) {
                 console.error("Failed to load blog posts", error);
+                setPosts([]);
             } finally {
                 setLoading(false);
             }
@@ -64,25 +59,18 @@ export default function BlogPage() {
                 {/* Hero Section */}
                 <section className="relative py-12 md:py-16 overflow-hidden border-b border-border/40">
                     <div className="container relative mx-auto px-4 text-center">
-                        <div className="flex items-center justify-center gap-2 mb-4">
+                        <div className="flex items-center justify-center mb-4">
                             <Badge variant="outline" className="border-border text-foreground px-3 py-1 text-xs font-semibold gap-1.5">
-                                <FontAwesomeIcon icon={faRss} className="w-3 h-3 text-primary" /> RSS Sync Active
+                                <FontAwesomeIcon icon={faNewspaper} className="w-3 h-3 text-primary" /> Official Blog
                             </Badge>
-                            <a 
-                                href="/rss.xml" 
-                                target="_blank" 
-                                className="text-xs text-muted-foreground hover:text-foreground underline flex items-center gap-1"
-                            >
-                                /rss.xml <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="w-2.5 h-2.5" />
-                            </a>
                         </div>
 
-                        {/* Single Solid Text Color - No double colors */}
+                        {/* Single Solid Text Color */}
                         <h1 className="text-3xl md:text-5xl font-extrabold mb-4 tracking-tight text-foreground">
-                            Tech Insights & Blog Feed
+                            Blog & Articles
                         </h1>
                         <p className="text-sm md:text-base text-muted-foreground max-w-xl mx-auto mb-8 leading-relaxed">
-                            Stay ahead with real-time updates from NovaEdge Digital Labs, AI engineering, full-stack development, and startup guides.
+                            Stay up to date with the latest tutorials, technology trends, and platform announcements.
                         </p>
 
                         <div className="max-w-md mx-auto relative">
@@ -107,7 +95,7 @@ export default function BlogPage() {
                             <div className="grid md:grid-cols-2 gap-6 bg-card border border-border/60 rounded-2xl overflow-hidden hover:border-primary/50 transition-colors group shadow-lg">
                                 <div className="relative h-56 md:h-full min-h-[240px] overflow-hidden bg-black/40">
                                     <img
-                                        src={featuredPost.image}
+                                        src={featuredPost.image || "/Header_logo.webp"}
                                         alt={featuredPost.title}
                                         className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                         onError={(e) => { e.target.src = "/Header_logo.webp"; }}
@@ -121,7 +109,7 @@ export default function BlogPage() {
                                             </Badge>
                                             <span className="flex items-center gap-1.5">
                                                 <FontAwesomeIcon icon={faCalendarDays} className="w-3 h-3" /> 
-                                                {new Date(featuredPost.createdAt).toLocaleDateString()}
+                                                {new Date(featuredPost.createdAt || Date.now()).toLocaleDateString()}
                                             </span>
                                             <span className="flex items-center gap-1.5">
                                                 <FontAwesomeIcon icon={faClock} className="w-3 h-3" /> {featuredPost.readTime || "5 min read"}
@@ -139,7 +127,7 @@ export default function BlogPage() {
                                             <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center text-foreground text-xs font-bold">
                                                 <FontAwesomeIcon icon={faUser} className="w-3 h-3" />
                                             </div>
-                                            <span className="text-xs font-medium text-foreground">{featuredPost.author || "NovaEdge Digital Labs"}</span>
+                                            <span className="text-xs font-medium text-foreground">{featuredPost.author || "Admin"}</span>
                                         </div>
 
                                         <Link href={`/blog/${featuredPost._id}`}>
@@ -168,13 +156,14 @@ export default function BlogPage() {
 
                         {loading ? (
                             <div className="py-16 text-center text-muted-foreground flex flex-col items-center gap-3">
-                                <FontAwesomeIcon icon={faRss} className="w-8 h-8 animate-pulse text-primary" />
-                                <p className="text-sm">Loading latest blog articles...</p>
+                                <FontAwesomeIcon icon={faNewspaper} className="w-8 h-8 animate-pulse text-primary" />
+                                <p className="text-sm">Loading articles...</p>
                             </div>
-                        ) : filteredPosts.length === 0 ? (
-                            <div className="py-16 text-center text-muted-foreground bg-card/40 rounded-2xl border border-border/60">
-                                <p className="text-base font-semibold">No articles found matching &quot;{searchQuery}&quot;</p>
-                                <p className="text-xs mt-1">Try searching for alternative topics or clear your query.</p>
+                        ) : filteredPosts.length === 0 && !featuredPost ? (
+                            <div className="py-16 text-center text-muted-foreground bg-card/40 rounded-2xl border border-border/60 max-w-md mx-auto p-8">
+                                <FontAwesomeIcon icon={faNewspaper} className="w-10 h-10 text-muted-foreground mb-3" />
+                                <p className="text-base font-semibold text-foreground">No blog posts available yet</p>
+                                <p className="text-xs mt-1 text-muted-foreground">Articles added manually from the admin dashboard will appear here.</p>
                             </div>
                         ) : (
                             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -182,7 +171,7 @@ export default function BlogPage() {
                                     <Card key={post._id} className="bg-card/60 border-border/60 hover:border-primary/50 transition-all group flex flex-col h-full overflow-hidden shadow-sm hover:shadow-md">
                                         <div className="relative h-44 overflow-hidden bg-black/40">
                                             <img
-                                                src={post.image}
+                                                src={post.image || "/Header_logo.webp"}
                                                 alt={post.title}
                                                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                                 onError={(e) => { e.target.src = "/Header_logo.webp"; }}
@@ -197,7 +186,7 @@ export default function BlogPage() {
                                             <div className="flex items-center gap-3 mb-2 text-[11px] text-muted-foreground">
                                                 <span className="flex items-center gap-1.5">
                                                     <FontAwesomeIcon icon={faCalendarDays} className="w-3 h-3" /> 
-                                                    {new Date(post.createdAt).toLocaleDateString()}
+                                                    {new Date(post.createdAt || Date.now()).toLocaleDateString()}
                                                 </span>
                                                 <span className="flex items-center gap-1.5">
                                                     <FontAwesomeIcon icon={faClock} className="w-3 h-3" /> 
@@ -219,7 +208,7 @@ export default function BlogPage() {
                                                     <FontAwesomeIcon icon={faUser} className="w-3 h-3" />
                                                 </div>
                                                 <span className="text-[11px] font-medium text-muted-foreground truncate max-w-[120px]">
-                                                    {post.author || "NovaEdge Digital Labs"}
+                                                    {post.author || "Admin"}
                                                 </span>
                                             </div>
 

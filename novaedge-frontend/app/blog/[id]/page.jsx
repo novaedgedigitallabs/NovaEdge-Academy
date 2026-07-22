@@ -4,7 +4,6 @@ import React, { useEffect, useState, use } from 'react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { getPost } from "@/services/blogs";
-import { getRssPostByIdOrSlug } from "@/services/rss";
 import Link from "next/link";
 import AppLayout from "@/components/layout/AppLayout";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -23,15 +22,9 @@ export default function BlogPostPage({ params }) {
     useEffect(() => {
         const fetchPost = async () => {
             try {
-                // Try RSS first since dynamic articles come from RSS
-                const rssPost = await getRssPostByIdOrSlug(id);
-                if (rssPost) {
-                    setPost(rssPost);
-                } else {
-                    const res = await getPost(id).catch(() => null);
-                    if (res?.data || res?.post) {
-                        setPost(res.data || res.post);
-                    }
+                const res = await getPost(id);
+                if (res?.data || res?.post || res) {
+                    setPost(res?.data || res?.post || res);
                 }
             } catch (error) {
                 console.error("Failed to load post", error);
@@ -72,7 +65,7 @@ export default function BlogPostPage({ params }) {
                 <div className="relative h-[320px] md:h-[420px] w-full overflow-hidden border-b border-border/40 bg-black/40">
                     <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent z-10" />
                     <img
-                        src={post.image}
+                        src={post.image || "/Header_logo.webp"}
                         alt={post.title}
                         className="absolute inset-0 w-full h-full object-cover"
                         onError={(e) => { e.target.src = "/Header_logo.webp"; }}
@@ -94,11 +87,11 @@ export default function BlogPostPage({ params }) {
                                 <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center text-foreground text-xs font-bold">
                                     <FontAwesomeIcon icon={faUser} className="w-3 h-3" />
                                 </div>
-                                <span>{post.author || "NovaEdge Digital Labs"}</span>
+                                <span>{post.author || "Admin"}</span>
                             </div>
                             <span className="flex items-center gap-1.5">
                                 <FontAwesomeIcon icon={faCalendarDays} className="w-3 h-3 text-muted-foreground" /> 
-                                {new Date(post.createdAt).toLocaleDateString()}
+                                {new Date(post.createdAt || Date.now()).toLocaleDateString()}
                             </span>
                             <span className="flex items-center gap-1.5">
                                 <FontAwesomeIcon icon={faClock} className="w-3 h-3 text-muted-foreground" /> 
