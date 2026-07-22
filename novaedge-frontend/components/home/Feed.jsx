@@ -19,6 +19,17 @@ export default function Feed() {
     useEffect(() => {
         fetchPosts();
         fetchEnrollments();
+
+        const handleNewPost = (e) => {
+            if (e.detail) {
+                setPosts((prev) => [e.detail, ...prev]);
+            } else {
+                fetchPosts();
+            }
+        };
+
+        window.addEventListener("novaedge_post_created", handleNewPost);
+        return () => window.removeEventListener("novaedge_post_created", handleNewPost);
     }, []);
 
     const fetchPosts = async () => {

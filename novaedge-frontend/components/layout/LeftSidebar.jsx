@@ -144,12 +144,14 @@ export default function LeftSidebar() {
                 </div>
 
                 <Dialog open={isPostDialogOpen} onOpenChange={setIsPostDialogOpen}>
-                    <DialogTrigger asChild>
-                        <Button className="mt-2 w-full rounded-full text-base font-bold h-12 lg:h-13 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md shadow-primary/20 cursor-pointer">
-                            <span className="max-lg:hidden">Post</span>
-                            <PenSquare className="lg:hidden h-5 w-5" />
-                        </Button>
-                    </DialogTrigger>
+                    <Button 
+                        type="button"
+                        onClick={() => setIsPostDialogOpen(true)}
+                        className="mt-2 w-full rounded-full text-base font-bold h-12 lg:h-13 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md shadow-primary/20 cursor-pointer"
+                    >
+                        <span className="max-lg:hidden">Post</span>
+                        <PenSquare className="lg:hidden h-5 w-5" />
+                    </Button>
                     <DialogContent className="sm:max-w-xl p-0 border border-border bg-background rounded-2xl overflow-hidden shadow-2xl">
                         <DialogHeader className="px-6 pt-5 pb-3 border-b border-border/60">
                             <DialogTitle className="text-lg font-bold flex items-center gap-2 text-foreground">

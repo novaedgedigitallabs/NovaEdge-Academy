@@ -96,6 +96,9 @@ export default function CreatePost({ onPostCreated }) {
                 setShowDatePicker(false);
                 setShowLocationInput(false);
                 toast.success("Post published!");
+                if (typeof window !== "undefined") {
+                    window.dispatchEvent(new CustomEvent("novaedge_post_created", { detail: res.post }));
+                }
                 if (onPostCreated) onPostCreated(res.post);
             } else {
                 toast.error(res.message || "Failed to publish post");
