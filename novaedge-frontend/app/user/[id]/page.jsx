@@ -31,24 +31,16 @@ export default function PublicProfilePage() {
             setLoading(true);
             setError(null);
             try {
-                const isMongoId = /^[0-9a-fA-F]{24}$/.test(idParam);
-                let res = null;
-
-                if (isMongoId) {
-                    res = await apiGet(`/api/v1/user/${idParam}`).catch(() => null);
-                }
+                let res = await apiGet(`/api/v1/user/${encodeURIComponent(idParam)}`).catch(() => null);
 
                 if (!res || !res.success) {
                     res = await apiGet(`/api/v1/user/lookup?username=${encodeURIComponent(idParam)}`).catch(() => null);
                 }
 
-                if (!res || !res.success) {
-                    res = await apiGet(`/api/v1/user/${idParam}`).catch(() => null);
-                }
-
                 if (res && res.success && res.user) {
                     setUser({ ...res.user, certificates: res.certificates || [] });
 
+                    const isMongoId = /^[0-9a-fA-F]{24}$/.test(idParam);
                     if (res.user.username && isMongoId && idParam !== res.user.username) {
                         router.replace(`/${res.user.username}`);
                     }

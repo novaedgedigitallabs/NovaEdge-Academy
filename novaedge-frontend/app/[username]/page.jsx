@@ -31,25 +31,18 @@ export default function UserProfilePage() {
             setLoading(true);
             setError(null);
             try {
-                const isMongoId = /^[0-9a-fA-F]{24}$/.test(usernameParam);
-                let res = null;
+                // Try fetching public profile by username/id directly first
+                let res = await apiGet(`/api/v1/user/${encodeURIComponent(usernameParam)}`).catch(() => null);
 
-                if (isMongoId) {
-                    res = await apiGet(`/api/v1/user/${usernameParam}`).catch(() => null);
-                }
-
+                // Fallback to user lookup endpoint
                 if (!res || !res.success) {
                     res = await apiGet(`/api/v1/user/lookup?username=${encodeURIComponent(usernameParam)}`).catch(() => null);
-                }
-
-                if (!res || !res.success) {
-                    res = await apiGet(`/api/v1/user/${usernameParam}`).catch(() => null);
                 }
 
                 if (res && res.success && res.user) {
                     setUser({ ...res.user, certificates: res.certificates || [] });
 
-                    // If user has a clean username and current URL is an ObjectID, update URL cleanly
+                    const isMongoId = /^[0-9a-fA-F]{24}$/.test(usernameParam);
                     if (res.user.username && isMongoId && usernameParam !== res.user.username) {
                         router.replace(`/${res.user.username}`);
                     }
@@ -107,7 +100,7 @@ export default function UserProfilePage() {
         ? "Mentor"
         : "Student";
 
-    // Fallback cover image poster
+    // Cover image poster
     const coverImageUrl = user.coverImage?.url || "/default-cover.png";
 
     // Extract social links with fallback support

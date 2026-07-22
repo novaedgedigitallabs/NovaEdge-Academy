@@ -319,7 +319,7 @@ exports.lookupUser = async (req, res) => {
       return res.status(400).json({ success: false, message: "Please provide username or phone" });
     }
 
-    const user = await User.findOne(query).select("_id name username avatar");
+    const user = await User.findOne(query).select("-password -twoFactor.secret -twoFactor.tempSecret -resetPasswordToken -resetPasswordExpire");
 
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
