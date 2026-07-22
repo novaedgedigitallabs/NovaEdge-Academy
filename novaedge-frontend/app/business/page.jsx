@@ -85,7 +85,7 @@ export default function BusinessPage() {
                 </div>
 
                 {/* CTA Card */}
-                <div className="p-6 rounded-2xl bg-gradient-to-r from-primary/20 via-purple-900/20 to-card border border-primary/30 text-center space-y-3">
+                <div className="p-6 rounded-2xl bg-card/60 border border-primary/30 text-center space-y-3">
                     <h2 className="text-lg font-bold text-foreground">Ready to transform your engineering team?</h2>
                     <p className="text-xs text-muted-foreground max-w-md mx-auto">
                         Join forward-thinking companies that trust NovaEdge for their employee tech training.

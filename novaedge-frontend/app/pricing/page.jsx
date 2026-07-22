@@ -116,7 +116,7 @@ export default function PricingPage() {
                             key={plan._id} 
                             className={`relative rounded-2xl p-6 flex flex-col justify-between border transition-all duration-300 ${
                                 plan.popular 
-                                    ? "bg-gradient-to-b from-primary/20 via-card/80 to-card border-primary/60 shadow-xl shadow-primary/10 -translate-y-1" 
+                                    ? "bg-card/80 border-primary shadow-xl -translate-y-1" 
                                     : "bg-card/40 backdrop-blur-md border-border/70 hover:border-primary/40"
                             }`}
                         >

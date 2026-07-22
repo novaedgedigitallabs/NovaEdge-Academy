@@ -162,12 +162,12 @@ export default function CommunityPage() {
         <AppLayout className="max-w-5xl">
             <div className="px-4 py-6 space-y-8">
                 {/* Hero Section */}
-                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-card via-card/80 to-primary/10 border border-border/70 p-8 md:p-12 text-center backdrop-blur-xl shadow-2xl">
-                    <div className="absolute right-6 top-6 h-32 w-32 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
+                <div className="relative overflow-hidden rounded-3xl bg-card/60 border border-border/70 p-8 md:p-12 text-center backdrop-blur-xl shadow-xl">
+                    <div className="absolute right-6 top-6 h-32 w-32 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
                     
 
                     <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-foreground mb-3 leading-tight">
-                        Join the <span className="bg-gradient-to-r from-primary via-purple-400 to-indigo-400 bg-clip-text text-transparent">Community</span>
+                        Join the <span className="text-primary">Community</span>
                     </h1>
                     <p className="text-xs sm:text-sm text-muted-foreground max-w-xl mx-auto mb-6 leading-relaxed">
                         Connect with thousands of developers, designers, and tech creators. Share your work, get feedback, and attend live workshops.

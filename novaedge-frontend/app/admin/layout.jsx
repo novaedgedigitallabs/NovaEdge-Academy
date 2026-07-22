@@ -155,7 +155,7 @@ export default function AdminLayout({ children }) {
                     {isActive && (
                       <motion.div
                         layoutId="admin-active-nav"
-                        className="absolute inset-0 rounded-lg bg-gradient-to-r from-primary/90 to-primary/70"
+                        className="absolute inset-0 rounded-lg bg-primary"
                         transition={premiumSpring}
                         style={{ zIndex: -1 }}
                       />

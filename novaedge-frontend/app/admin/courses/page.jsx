@@ -149,7 +149,7 @@ export default function AdminCoursesPage() {
           </p>
         </div>
         <Link href="/admin/courses/new">
-          <Button className="gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70">
+          <Button className="gap-2 bg-primary hover:bg-primary/90">
             <Plus className="h-4 w-4" />
             New Course
           </Button>

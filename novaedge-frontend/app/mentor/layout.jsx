@@ -55,7 +55,7 @@ export default function MentorLayout({ children }) {
                             height={32}
                             className="h-8 w-8 object-contain shrink-0"
                         />
-                        <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
+                        <span className="text-xl font-bold text-primary">
                             NovaEdge
                         </span>
                     </Link>

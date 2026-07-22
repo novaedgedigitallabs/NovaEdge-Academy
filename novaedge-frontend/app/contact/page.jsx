@@ -56,7 +56,7 @@ export default function ContactPage() {
                 {/* Header Banner */}
                 <div className="text-center max-w-2xl mx-auto space-y-3">
                     <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-foreground">
-                        Get in Touch with <span className="bg-gradient-to-r from-primary via-purple-400 to-indigo-400 bg-clip-text text-transparent">NovaEdge</span>
+                        Get in Touch with <span className="text-primary">NovaEdge</span>
                     </h1>
                     <p className="text-xs sm:text-sm text-muted-foreground">
                         Have questions about our courses, mentorship programs, or business inquiries? We&apos;re here to help.
@@ -105,7 +105,7 @@ export default function ContactPage() {
                             </div>
                         </div>
 
-                        <div className="p-5 rounded-2xl bg-gradient-to-br from-primary/20 via-purple-900/20 to-card border border-primary/30 text-left space-y-2">
+                        <div className="p-5 rounded-2xl bg-card/60 border border-primary/30 text-left space-y-2">
                             <div className="flex items-center gap-2">
                                 <MessageSquare className="w-4 h-4 text-primary" />
                                 <h4 className="font-bold text-foreground text-xs">Need 1-on-1 Mentorship?</h4>
