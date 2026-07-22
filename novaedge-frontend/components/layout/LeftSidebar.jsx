@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -27,6 +28,14 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
+import CreatePost from "@/components/post/CreatePost";
 
 const sidebarLinks = [
     {
@@ -79,6 +88,7 @@ const sidebarLinks = [
 export default function LeftSidebar() {
     const pathname = usePathname();
     const { user, logout } = useAuth();
+    const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
 
     return (
         <section className="custom-scrollbar sticky left-0 top-0 z-20 flex h-screen w-fit flex-col justify-between overflow-y-auto border-r border-border bg-background pb-6 pt-8 max-md:hidden lg:w-[266px]">
@@ -133,10 +143,24 @@ export default function LeftSidebar() {
                     )}
                 </div>
 
-                <Button className="mt-2 w-full rounded-full text-base font-bold h-12 lg:h-13 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md shadow-primary/20">
-                    <span className="max-lg:hidden">Post</span>
-                    <PenSquare className="lg:hidden h-5 w-5" />
-                </Button>
+                <Dialog open={isPostDialogOpen} onOpenChange={setIsPostDialogOpen}>
+                    <DialogTrigger asChild>
+                        <Button className="mt-2 w-full rounded-full text-base font-bold h-12 lg:h-13 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md shadow-primary/20 cursor-pointer">
+                            <span className="max-lg:hidden">Post</span>
+                            <PenSquare className="lg:hidden h-5 w-5" />
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-xl p-0 border border-border bg-background rounded-2xl overflow-hidden shadow-2xl">
+                        <DialogHeader className="px-6 pt-5 pb-3 border-b border-border/60">
+                            <DialogTitle className="text-lg font-bold flex items-center gap-2 text-foreground">
+                                <PenSquare className="w-5 h-5 text-primary" /> Create a Post
+                            </DialogTitle>
+                        </DialogHeader>
+                        <div className="p-2">
+                            <CreatePost onPostCreated={() => setIsPostDialogOpen(false)} />
+                        </div>
+                    </DialogContent>
+                </Dialog>
             </div>
 
             {user && (
