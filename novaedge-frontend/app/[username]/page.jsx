@@ -7,9 +7,9 @@ import { getUserPosts } from "@/services/post";
 import PostCard from "@/components/post/PostCard";
 import AppLayout from "@/components/layout/AppLayout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Calendar, UserX, ArrowLeft, Mail, Award, Sparkles, Github, Linkedin, Globe, Twitter } from "lucide-react";
 import FriendActionButton from "@/components/friend/FriendActionButton";
 import { useAuth } from "@/context/auth-context";
@@ -53,7 +53,7 @@ export default function UserProfilePage() {
 
     if (loading) {
         return (
-            <AppLayout>
+            <AppLayout className="max-w-2xl xl:max-w-3xl border-r border-border p-0">
                 <div className="flex items-center justify-center py-32">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
@@ -63,7 +63,7 @@ export default function UserProfilePage() {
 
     if (error || !user) {
         return (
-            <AppLayout>
+            <AppLayout className="max-w-2xl xl:max-w-3xl border-r border-border p-0">
                 <div className="flex flex-col items-center justify-center py-20 text-center px-4">
                     <div className="h-16 w-16 bg-primary/10 border border-primary/20 rounded-full flex items-center justify-center mb-4">
                         <UserX className="w-8 h-8 text-primary" />
@@ -86,158 +86,184 @@ export default function UserProfilePage() {
         : "Student";
 
     return (
-        <AppLayout>
-            <div className="px-4 py-6 max-w-5xl mx-auto space-y-6">
-                <div className="grid md:grid-cols-3 gap-6">
-                    {/* Left Column: User Info Card */}
-                    <div className="md:col-span-1">
-                        <Card className="p-0 bg-card/40 backdrop-blur-md border border-border/60 rounded-2xl shadow-xl overflow-hidden flex flex-col">
-                            {/* Decorative Cover Header */}
-                            <div className="h-20 bg-gradient-to-r from-primary/30 via-primary/10 to-secondary/30 relative" />
+        <AppLayout className="max-w-2xl xl:max-w-3xl border-r border-border p-0 sm:pb-0">
+            {/* Top Navigation Header */}
+            <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md px-4 py-2 flex items-center gap-4 border-b border-border">
+                <Button variant="ghost" size="icon" className="rounded-full" onClick={() => router.back()}>
+                    <ArrowLeft className="w-5 h-5" />
+                </Button>
+                <div>
+                    <h1 className="text-lg font-bold leading-5">{user.name}</h1>
+                    <p className="text-xs text-muted-foreground">{posts.length} Posts · {user.certificates?.length || 0} Certificates</p>
+                </div>
+            </div>
 
-                            <div className="px-6 pb-6 pt-0 flex flex-col items-center -mt-10 text-center">
-                                <Avatar className="w-24 h-24 mb-3 border-4 border-background shadow-lg">
-                                    <AvatarImage src={user.avatar?.url || "/placeholder.svg"} alt={user.name} />
-                                    <AvatarFallback className="text-3xl font-bold bg-primary/15 text-primary">
-                                        {user.name?.charAt(0) || "U"}
-                                    </AvatarFallback>
-                                </Avatar>
+            {/* Full-width Cover Image */}
+            <div className="h-44 sm:h-52 bg-muted relative overflow-hidden">
+                {user.coverImage?.url ? (
+                    <img
+                        src={user.coverImage.url}
+                        alt="Profile Cover"
+                        className="w-full h-full object-cover object-center"
+                    />
+                ) : (
+                    <div className="absolute inset-0 bg-gradient-to-r from-purple-900/60 via-indigo-900/40 to-slate-900/80 flex items-center justify-center">
+                        <Sparkles className="w-12 h-12 text-primary/20" />
+                    </div>
+                )}
+            </div>
 
-                                <h1 className="text-xl font-bold text-foreground line-clamp-1">{user.name}</h1>
-                                {user.username && (
-                                    <p className="text-xs text-muted-foreground mb-2">@{user.username}</p>
-                                )}
-
-                                <Badge variant="secondary" className="text-xs font-semibold px-3 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 capitalize mb-4">
-                                    {displayRole}
-                                </Badge>
-
-                                {currentUser && currentUser._id !== user._id && (
-                                    <div className="w-full mb-4">
-                                        <FriendActionButton otherUserId={user._id} />
-                                    </div>
-                                )}
-
-                                {/* User Details */}
-                                <div className="w-full space-y-3 text-left border-t border-border/40 pt-4 text-xs">
-                                    <div className="flex items-center text-muted-foreground">
-                                        <Calendar className="w-4 h-4 mr-2.5 shrink-0 text-primary" />
-                                        <span>Joined {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "Recently"}</span>
-                                    </div>
-
-                                    {user.email && (
-                                        <div className="flex items-start text-muted-foreground">
-                                            <Mail className="w-4 h-4 mr-2.5 mt-0.5 shrink-0 text-primary" />
-                                            <span className="font-medium text-foreground/90 break-words line-clamp-2" title={user.email}>
-                                                {user.email}
-                                            </span>
-                                        </div>
-                                    )}
-
-                                    {user.certificates && user.certificates.length > 0 && (
-                                        <div className="flex items-center text-muted-foreground">
-                                            <Award className="w-4 h-4 mr-2.5 shrink-0 text-primary" />
-                                            <span>{user.certificates.length} {user.certificates.length === 1 ? 'Certificate' : 'Certificates'} Earned</span>
-                                        </div>
-                                    )}
-
-                                    {/* Social Links */}
-                                    {user.socialLinks && Object.values(user.socialLinks).some(Boolean) && (
-                                        <div className="pt-2 border-t border-border/40 flex flex-wrap items-center justify-center gap-2">
-                                            {user.socialLinks.github && (
-                                                <a href={user.socialLinks.github} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-secondary/40 hover:bg-primary/20 text-foreground hover:text-primary transition-colors" title="GitHub">
-                                                    <Github className="w-4 h-4" />
-                                                </a>
-                                            )}
-                                            {user.socialLinks.linkedin && (
-                                                <a href={user.socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-secondary/40 hover:bg-primary/20 text-foreground hover:text-primary transition-colors" title="LinkedIn">
-                                                    <Linkedin className="w-4 h-4" />
-                                                </a>
-                                            )}
-                                            {user.socialLinks.portfolio && (
-                                                <a href={user.socialLinks.portfolio} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-secondary/40 hover:bg-primary/20 text-foreground hover:text-primary transition-colors" title="Portfolio">
-                                                    <Globe className="w-4 h-4" />
-                                                </a>
-                                            )}
-                                            {user.socialLinks.twitter && (
-                                                <a href={user.socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-secondary/40 hover:bg-primary/20 text-foreground hover:text-primary transition-colors" title="Twitter / X">
-                                                    <Twitter className="w-4 h-4" />
-                                                </a>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </Card>
+            {/* Profile Header Details */}
+            <div className="px-4 pb-4 relative">
+                <div className="flex justify-between items-start">
+                    <div className="-mt-16 mb-3">
+                        <Avatar className="w-28 h-28 sm:w-32 sm:h-32 border-4 border-background shadow-lg overflow-hidden">
+                            <AvatarImage src={user.avatar?.url} alt={user.name} className="object-cover object-center w-full h-full" />
+                            <AvatarFallback className="text-3xl font-bold bg-primary/15 text-primary">{user.name?.charAt(0)}</AvatarFallback>
+                        </Avatar>
                     </div>
 
-                    {/* Right Column: Certificates & Activity */}
-                    <div className="md:col-span-2 space-y-6">
-                        <Card className="bg-card/40 backdrop-blur-md border border-border/60 rounded-2xl shadow-xl">
-                            <CardHeader className="pb-3 border-b border-border/40">
-                                <CardTitle className="text-base font-bold text-foreground flex items-center gap-2">
-                                    <Award className="w-4 h-4 text-primary" />
-                                    Certificates Earned
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="pt-4">
-                                {user.certificates && user.certificates.length > 0 ? (
-                                    <div className="grid gap-4 sm:grid-cols-2">
-                                        {user.certificates.map((cert) => (
-                                            <div key={cert._id} className="border border-border/50 rounded-xl p-4 flex flex-col gap-3 bg-secondary/20 hover:bg-secondary/40 transition-colors">
-                                                <div className="aspect-video relative bg-muted rounded-lg overflow-hidden border border-border/40">
-                                                    <img
-                                                        src={cert.course?.poster?.url || "/placeholder.svg"}
-                                                        alt={cert.course?.title || "Certificate"}
-                                                        className="object-cover w-full h-full"
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <h3 className="font-semibold text-sm line-clamp-1 text-foreground">{cert.course?.title || "Course Certificate"}</h3>
-                                                    <p className="text-xs text-muted-foreground mt-0.5">Issued: {cert.issueDate ? new Date(cert.issueDate).toLocaleDateString() : "N/A"}</p>
-                                                </div>
-                                                <a
-                                                    href={`${process.env.NEXT_PUBLIC_API_URL || ""}/api/v1/certificate/${cert.certificateId}/download`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="mt-auto w-full inline-flex items-center justify-center px-4 py-2 text-xs font-semibold text-primary-foreground bg-primary rounded-lg hover:bg-primary/90 transition-colors"
-                                                >
-                                                    View Certificate
-                                                </a>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <p className="text-muted-foreground text-xs text-center py-6">No certificates earned yet.</p>
-                                )}
-                            </CardContent>
-                        </Card>
+                    {/* Friend / Connect Button */}
+                    {currentUser && currentUser._id !== user._id && (
+                        <div className="mt-3">
+                            <FriendActionButton otherUserId={user._id} />
+                        </div>
+                    )}
+                </div>
 
-                        {/* User Posts */}
-                        <div className="space-y-4">
-                            <h2 className="text-base font-bold text-foreground flex items-center gap-2">
-                                <Sparkles className="w-4 h-4 text-primary" />
-                                Activity & Posts
-                            </h2>
-                            {posts.length > 0 ? (
-                                posts.map((post) => (
-                                    <PostCard
-                                        key={post._id}
-                                        post={post}
-                                        onDelete={(id) => setPosts((prev) => prev.filter((p) => p._id !== id))}
-                                    />
-                                ))
-                            ) : (
-                                <Card className="bg-card/40 backdrop-blur-md border border-border/60 rounded-2xl">
-                                    <CardContent className="p-6 text-center text-xs text-muted-foreground">
-                                        No public posts yet.
-                                    </CardContent>
-                                </Card>
+                <div className="mb-2">
+                    <h2 className="text-xl font-bold leading-6 text-foreground">{user.name}</h2>
+                    {user.username && (
+                        <p className="text-muted-foreground text-sm">@{user.username}</p>
+                    )}
+                </div>
+
+                {/* User Bio */}
+                {user.bio && (
+                    <p className="text-sm text-foreground/95 mb-3 leading-relaxed whitespace-pre-line">{user.bio}</p>
+                )}
+
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground mb-4">
+                    <span className="bg-primary/10 text-primary border border-primary/20 px-2.5 py-0.5 rounded-full text-xs font-bold capitalize">
+                        {displayRole}
+                    </span>
+
+                    <div className="flex items-center gap-1.5 text-xs">
+                        <Calendar className="w-3.5 h-3.5 text-primary" />
+                        <span>Joined {user.createdAt ? new Date(user.createdAt).toLocaleDateString(undefined, { month: 'long', year: 'numeric' }) : "Recently"}</span>
+                    </div>
+
+                    {user.email && (
+                        <div className="flex items-center gap-1.5 text-xs">
+                            <Mail className="w-3.5 h-3.5 text-primary" />
+                            <span className="truncate max-w-[220px]" title={user.email}>{user.email}</span>
+                        </div>
+                    )}
+
+                    {/* Social Links */}
+                    {user.socialLinks && Object.values(user.socialLinks).some(Boolean) && (
+                        <div className="flex items-center gap-2 ml-auto">
+                            {user.socialLinks.github && (
+                                <a href={user.socialLinks.github} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-full bg-secondary/50 hover:bg-primary/20 text-foreground hover:text-primary transition-colors" title="GitHub">
+                                    <Github className="w-4 h-4" />
+                                </a>
+                            )}
+                            {user.socialLinks.linkedin && (
+                                <a href={user.socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-full bg-secondary/50 hover:bg-primary/20 text-foreground hover:text-primary transition-colors" title="LinkedIn">
+                                    <Linkedin className="w-4 h-4" />
+                                </a>
+                            )}
+                            {user.socialLinks.portfolio && (
+                                <a href={user.socialLinks.portfolio} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-full bg-secondary/50 hover:bg-primary/20 text-foreground hover:text-primary transition-colors" title="Portfolio">
+                                    <Globe className="w-4 h-4" />
+                                </a>
+                            )}
+                            {user.socialLinks.twitter && (
+                                <a href={user.socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-full bg-secondary/50 hover:bg-primary/20 text-foreground hover:text-primary transition-colors" title="Twitter / X">
+                                    <Twitter className="w-4 h-4" />
+                                </a>
                             )}
                         </div>
+                    )}
+                </div>
+
+                <div className="flex gap-6 text-sm mb-2 border-t border-border/40 pt-3">
+                    <div className="hover:underline cursor-pointer">
+                        <span className="font-bold text-foreground">{posts.length}</span> <span className="text-muted-foreground text-xs">Posts</span>
+                    </div>
+                    <div className="hover:underline cursor-pointer">
+                        <span className="font-bold text-foreground">{user.certificates?.length || 0}</span> <span className="text-muted-foreground text-xs">Certificates</span>
                     </div>
                 </div>
             </div>
+
+            {/* Profile Content Tabs */}
+            <Tabs defaultValue="posts" className="w-full">
+                <TabsList className="w-full justify-start bg-transparent border-b border-border/60 rounded-none h-auto p-0">
+                    <TabsTrigger
+                        value="posts"
+                        className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-3 font-bold text-muted-foreground data-[state=active]:text-foreground hover:bg-muted/30 transition-colors flex items-center justify-center gap-2"
+                    >
+                        <Sparkles className="w-4 h-4 text-primary" />
+                        Posts ({posts.length})
+                    </TabsTrigger>
+                    <TabsTrigger
+                        value="certificates"
+                        className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-3 font-bold text-muted-foreground data-[state=active]:text-foreground hover:bg-muted/30 transition-colors flex items-center justify-center gap-2"
+                    >
+                        <Award className="w-4 h-4 text-primary" />
+                        Certificates ({user.certificates?.length || 0})
+                    </TabsTrigger>
+                </TabsList>
+
+                {/* Posts Tab */}
+                <TabsContent value="posts" className="p-0 m-0">
+                    {posts.length === 0 ? (
+                        <div className="text-center py-16 px-4">
+                            <Sparkles className="w-10 h-10 text-primary/40 mx-auto mb-3" />
+                            <h3 className="font-bold text-base text-foreground mb-1">No posts yet</h3>
+                            <p className="text-muted-foreground text-xs max-w-xs mx-auto">
+                                User has not published any public posts yet.
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="divide-y divide-border/60">
+                            {posts.map((post) => (
+                                <PostCard
+                                    key={post._id}
+                                    post={post}
+                                    onDelete={(id) => setPosts((prev) => prev.filter((p) => p._id !== id))}
+                                />
+                            ))}
+                        </div>
+                    )}
+                </TabsContent>
+
+                {/* Certificates Tab */}
+                <TabsContent value="certificates" className="p-4 m-0">
+                    {!user.certificates || user.certificates.length === 0 ? (
+                        <div className="text-center py-12">
+                            <p className="text-muted-foreground text-sm">No certificates earned yet.</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {user.certificates.map((cert) => (
+                                <div key={cert._id} className="flex items-center justify-between p-4 border border-border/60 rounded-xl hover:bg-muted/30 transition-colors">
+                                    <div>
+                                        <p className="font-bold text-sm text-foreground">{cert.course?.title || "Course Certificate"}</p>
+                                        <p className="text-xs text-muted-foreground mt-0.5">Issued on {new Date(cert.issueDate).toLocaleDateString()}</p>
+                                    </div>
+                                    <Button variant="outline" size="sm" asChild className="rounded-full">
+                                        <a href={`${process.env.NEXT_PUBLIC_API_URL || ""}/api/v1/certificate/${cert.certificateId}/download`} target="_blank" rel="noopener noreferrer">
+                                            Download
+                                        </a>
+                                    </Button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </TabsContent>
+            </Tabs>
         </AppLayout>
     );
 }
