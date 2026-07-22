@@ -17,11 +17,23 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "NovaEdge Academy",
   description: "Learn Cloud Computing, DevOps, and more with NovaEdge Academy.",
+  icons: {
+    icon: [
+      { url: "/logo.webp", type: "image/webp" },
+    ],
+    shortcut: "/logo.webp",
+    apple: "/logo.webp",
+  },
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className="dark" style={{ colorScheme: "dark" }} suppressHydrationWarning>
+      <head>
+        <link rel="icon" href="/logo.webp" type="image/webp" sizes="any" />
+        <link rel="shortcut icon" href="/logo.webp" type="image/webp" />
+        <link rel="apple-touch-icon" href="/logo.webp" />
+      </head>
       <body
         cz-shortcut-listen="true"
         className={`${geistSans.variable} ${geistMono.variable} antialiased app-glow-bg`}
