@@ -45,6 +45,10 @@ exports.registerUser = async (req, res, next) => {
       });
     }
 
+    // Send Welcome Email (CC: course@novaedgeacademy.in)
+    const { sendWelcomeEmail } = require("../utils/welcomeService");
+    sendWelcomeEmail({ name: user.name, email: user.email }).catch((err) => console.error("Welcome email error:", err.message));
+
     // Send the token (Log them in immediately)
     await sendToken(user, 201, res, req);
   } catch (error) {
