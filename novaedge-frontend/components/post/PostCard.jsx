@@ -42,6 +42,7 @@ export default function PostCard({ post, onDelete, onUpdate }) {
     const [isUpdating, setIsUpdating] = useState(false);
 
     const targetPostId = post._id || post.id;
+    const targetPost = post.repostOf || post;
 
     const handleLike = async (e) => {
         e.stopPropagation();
