@@ -119,6 +119,7 @@ app.use("/api/v1/posts", require("./routes/post"));
 app.use("/api/v1/comments", require("./routes/comment"));
 app.use("/api/v1", require("./routes/driveUpload"));
 app.use("/api/v1/hashtag", hashtag);
+app.use("/api/v1", require("./routes/mentors"));
 app.use(require("./middleware/error"));
 
 

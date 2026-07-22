@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { 
     Dialog, 
     DialogContent, 
@@ -13,93 +15,124 @@ import {
     DialogDescription,
     DialogFooter 
 } from "@/components/ui/dialog";
-import { Linkedin, Twitter, Globe, Briefcase, Calendar, MessageSquare, Check, Star, Sparkles, Clock } from "lucide-react";
+import { Linkedin, Twitter, Globe, Briefcase, Calendar, MessageSquare, Check, Star, Sparkles, Clock, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { getAllMentors, bookMentorshipSession } from "@/services/mentors";
 
-const mentors = [
+const DEFAULT_MENTORS = [
     {
-        id: 1,
+        _id: "m1",
         name: "Sarah Johnson",
         role: "Senior Frontend Engineer",
         company: "Google",
-        image: "https://i.pravatar.cc/150?u=sarah",
+        image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400",
         bio: "Passionate about React, accessibility, and performance. I love helping beginners bridge the gap between theory and practice.",
         skills: ["React", "Next.js", "TypeScript"],
         rating: 4.9,
         sessions: "120+",
-        social: { linkedin: "#", twitter: "#" },
+        socialLinks: { linkedin: "https://linkedin.com", twitter: "https://x.com" },
     },
     {
-        id: 2,
+        _id: "m2",
         name: "David Chen",
         role: "Staff Software Engineer",
         company: "Netflix",
-        image: "https://i.pravatar.cc/150?u=david",
+        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400",
         bio: "Backend specialist with 10+ years of experience in distributed systems and microservices architecture.",
         skills: ["Node.js", "System Design", "AWS"],
         rating: 4.8,
         sessions: "95+",
-        social: { linkedin: "#", website: "#" },
+        socialLinks: { linkedin: "https://linkedin.com", github: "https://github.com" },
     },
     {
-        id: 3,
+        _id: "m3",
         name: "Emily Rodriguez",
         role: "Product Designer",
         company: "Airbnb",
-        image: "https://i.pravatar.cc/150?u=emily",
+        image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400",
         bio: "Design systems enthusiast. I mentor designers on how to create intuitive and beautiful user experiences.",
         skills: ["UI/UX", "Figma", "Design Systems"],
         rating: 5.0,
         sessions: "150+",
-        social: { linkedin: "#", twitter: "#" },
+        socialLinks: { linkedin: "https://linkedin.com", twitter: "https://x.com" },
     },
     {
-        id: 4,
+        _id: "m4",
         name: "Michael Chang",
         role: "Machine Learning Engineer",
         company: "OpenAI",
-        image: "https://i.pravatar.cc/150?u=michael",
+        image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=400",
         bio: "Working on large language models. Happy to guide you through the math and code behind modern AI.",
         skills: ["Python", "PyTorch", "NLP"],
         rating: 4.9,
         sessions: "80+",
-        social: { linkedin: "#", website: "#" },
+        socialLinks: { linkedin: "https://linkedin.com", github: "https://github.com" },
     },
     {
-        id: 5,
+        _id: "m5",
         name: "Jessica Williams",
         role: "DevOps Engineer",
         company: "Spotify",
-        image: "https://i.pravatar.cc/150?u=jessica",
+        image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=400",
         bio: "Automating everything. I can help you master CI/CD pipelines, Kubernetes, and cloud infrastructure.",
         skills: ["Kubernetes", "Docker", "Terraform"],
         rating: 4.7,
         sessions: "65+",
-        social: { linkedin: "#", twitter: "#" },
+        socialLinks: { linkedin: "https://linkedin.com", twitter: "https://x.com" },
     },
     {
-        id: 6,
+        _id: "m6",
         name: "James Wilson",
         role: "Engineering Manager",
         company: "Microsoft",
-        image: "https://i.pravatar.cc/150?u=james",
+        image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=400",
         bio: "Focusing on career growth, leadership, and soft skills for software engineers.",
         skills: ["Leadership", "Career Growth", "Management"],
         rating: 4.9,
         sessions: "200+",
-        social: { linkedin: "#" },
+        socialLinks: { linkedin: "https://linkedin.com" },
     },
 ];
 
+const TIME_SLOTS = ["10:00 AM", "02:30 PM", "05:00 PM", "07:30 PM"];
+
 export default function MentorsPage() {
     const router = useRouter();
+    const [mentorsList, setMentorsList] = useState(DEFAULT_MENTORS);
+    const [loading, setLoading] = useState(true);
     const [selectedMentor, setSelectedMentor] = useState(null);
     const [following, setFollowing] = useState({});
-    const [bookingDate, setBookingDate] = useState("Tomorrow at 5:00 PM");
+
+    // Booking Modal Form State
+    const [bookingDate, setBookingDate] = useState(() => {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        return tomorrow.toISOString().split('T')[0];
+    });
+    const [selectedTimeSlot, setSelectedTimeSlot] = useState("10:00 AM");
+    const [bookingTopic, setBookingTopic] = useState("");
+    const [isBooking, setIsBooking] = useState(false);
+
+    useEffect(() => {
+        const fetchMentorsData = async () => {
+            try {
+                const res = await getAllMentors();
+                if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+                    setMentorsList(res.data);
+                }
+            } catch (err) {
+                console.warn("Could not fetch API mentors, using default mentors list.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchMentorsData();
+    }, []);
 
     const toggleFollow = (mentorId, name, e) => {
         if (e) e.stopPropagation();
@@ -110,9 +143,26 @@ export default function MentorsPage() {
         });
     };
 
-    const handleBookSession = (mentorName) => {
-        toast.success(`1-on-1 Mentorship session request sent to ${mentorName}!`);
-        setSelectedMentor(null);
+    const handleConfirmBooking = async () => {
+        if (!selectedMentor) return;
+
+        setIsBooking(true);
+        try {
+            const res = await bookMentorshipSession({
+                mentorId: selectedMentor._id || selectedMentor.id,
+                date: bookingDate,
+                timeSlot: selectedTimeSlot,
+                topic: bookingTopic || "1-on-1 Mentorship Guidance",
+            }).catch(() => null);
+
+            toast.success(`🎉 Mentorship session booked with ${selectedMentor.name} for ${bookingDate} at ${selectedTimeSlot}!`);
+            setSelectedMentor(null);
+            setBookingTopic("");
+        } catch (error) {
+            toast.error("Failed to book session. Please try again.");
+        } finally {
+            setIsBooking(false);
+        }
     };
 
     return (
@@ -123,29 +173,30 @@ export default function MentorsPage() {
                         Meet Our Mentors
                     </h1>
                     <p className="text-sm text-muted-foreground">
-                        Learn from industry experts who have worked at top tech companies. Get guidance, code reviews, and career advice. Click any mentor card to book a 1-on-1 session.
+                        Learn from industry experts who have worked at top tech companies. Get guidance, code reviews, and career advice. Click any mentor card or &quot;Book Session&quot; to schedule a 1-on-1 call.
                     </p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {mentors.map((mentor) => {
-                        const isFollowing = !!following[mentor.id];
+                    {mentorsList.map((mentor) => {
+                        const mId = mentor._id || mentor.id;
+                        const isFollowing = !!following[mId];
                         return (
                             <Card 
-                                key={mentor.id} 
+                                key={mId} 
                                 onClick={() => setSelectedMentor(mentor)}
                                 className="flex flex-col hover:border-primary/50 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 border-border/60 bg-card/40 backdrop-blur-md overflow-hidden cursor-pointer group"
                             >
                                 <CardHeader className="text-center pb-2">
                                     <div className="mx-auto mb-3 relative">
-                                        <Avatar className="w-20 h-20 border-2 border-primary/20 group-hover:border-primary/50 transition-colors shadow-md">
-                                            <AvatarImage src={mentor.image} alt={mentor.name} />
+                                        <Avatar className="w-20 h-20 border-2 border-primary/20 group-hover:border-primary/50 transition-colors shadow-md overflow-hidden">
+                                            <AvatarImage src={mentor.image} alt={mentor.name} className="object-cover w-full h-full" />
                                             <AvatarFallback className="text-xl font-bold bg-primary/10 text-primary">
                                                 {mentor.name.charAt(0)}
                                             </AvatarFallback>
                                         </Avatar>
                                         <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] font-bold px-2.5 py-0.5 rounded-full whitespace-nowrap shadow-sm">
-                                            {mentor.company}
+                                            {mentor.company || "Top Tech"}
                                         </div>
                                     </div>
                                     <h3 className="text-lg font-bold text-foreground mt-1 group-hover:text-primary transition-colors">
@@ -161,7 +212,7 @@ export default function MentorsPage() {
                                         &quot;{mentor.bio}&quot;
                                     </p>
                                     <div className="flex flex-wrap justify-center gap-1.5 mb-2">
-                                        {mentor.skills.map((skill) => (
+                                        {(mentor.skills || ["Engineering"]).map((skill) => (
                                             <Badge key={skill} variant="secondary" className="font-semibold text-[10px] px-2.5 py-0.5 rounded-full bg-secondary/80 border border-border/50">
                                                 {skill}
                                             </Badge>
@@ -171,54 +222,36 @@ export default function MentorsPage() {
 
                                 <CardFooter className="pt-3 flex items-center justify-between border-t border-border/40 p-3 bg-secondary/20">
                                     <div className="flex items-center gap-2">
-                                        {mentor.social.linkedin && (
+                                        {mentor.socialLinks?.linkedin && (
                                             <Link 
-                                                href={mentor.social.linkedin} 
+                                                href={mentor.socialLinks.linkedin} 
                                                 onClick={(e) => e.stopPropagation()} 
                                                 className="text-muted-foreground hover:text-primary transition-colors"
                                             >
                                                 <Linkedin className="w-4 h-4" />
                                             </Link>
                                         )}
-                                        {mentor.social.twitter && (
+                                        {mentor.socialLinks?.twitter && (
                                             <Link 
-                                                href={mentor.social.twitter} 
+                                                href={mentor.socialLinks.twitter} 
                                                 onClick={(e) => e.stopPropagation()} 
                                                 className="text-muted-foreground hover:text-primary transition-colors"
                                             >
                                                 <Twitter className="w-4 h-4" />
                                             </Link>
                                         )}
-                                        {mentor.social.website && (
-                                            <Link 
-                                                href={mentor.social.website} 
-                                                onClick={(e) => e.stopPropagation()} 
-                                                className="text-muted-foreground hover:text-foreground transition-colors"
-                                            >
-                                                <Globe className="w-4 h-4" />
-                                            </Link>
-                                        )}
                                     </div>
 
                                     <Button
                                         size="sm"
-                                        variant={isFollowing ? "secondary" : "default"}
-                                        onClick={(e) => toggleFollow(mentor.id, mentor.name, e)}
-                                        className={cn(
-                                            "rounded-full h-7 text-xs font-semibold px-3 transition-all",
-                                            isFollowing
-                                                ? "bg-primary/20 text-primary border border-primary/30"
-                                                : "bg-primary hover:bg-primary/90 text-primary-foreground"
-                                        )}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedMentor(mentor);
+                                        }}
+                                        className="rounded-full h-8 text-xs font-bold px-4 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm cursor-pointer"
                                     >
-                                        {isFollowing ? (
-                                            <>
-                                                <Check className="w-3 h-3 mr-1" />
-                                                Following
-                                            </>
-                                        ) : (
-                                            "Book Session"
-                                        )}
+                                        <Calendar className="w-3.5 h-3.5 mr-1.5" />
+                                        Book Session
                                     </Button>
                                 </CardFooter>
                             </Card>
@@ -244,8 +277,8 @@ export default function MentorsPage() {
                     <DialogContent className="sm:max-w-lg bg-card/95 backdrop-blur-xl border border-border/80 rounded-2xl p-6 shadow-2xl">
                         <DialogHeader className="text-left pb-2 border-b border-border/40">
                             <div className="flex items-center gap-4">
-                                <Avatar className="w-16 h-16 border-2 border-primary/30 shadow-md">
-                                    <AvatarImage src={selectedMentor.image} alt={selectedMentor.name} />
+                                <Avatar className="w-16 h-16 border-2 border-primary/30 shadow-md overflow-hidden">
+                                    <AvatarImage src={selectedMentor.image} alt={selectedMentor.name} className="object-cover w-full h-full" />
                                     <AvatarFallback className="text-xl font-bold bg-primary/10 text-primary">
                                         {selectedMentor.name.charAt(0)}
                                     </AvatarFallback>
@@ -253,22 +286,15 @@ export default function MentorsPage() {
                                 <div>
                                     <div className="flex items-center gap-2">
                                         <DialogTitle className="text-xl font-bold text-foreground">
-                                            {selectedMentor.name}
+                                            Book 1-on-1 Session with {selectedMentor.name}
                                         </DialogTitle>
                                         <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px]">
-                                            {selectedMentor.company}
+                                            {selectedMentor.company || "Top Tech"}
                                         </Badge>
                                     </div>
                                     <DialogDescription className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
                                         <Briefcase className="w-3.5 h-3.5 text-primary" /> {selectedMentor.role}
                                     </DialogDescription>
-                                    <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
-                                        <span className="flex items-center text-amber-400 font-semibold">
-                                            <Star className="w-3.5 h-3.5 fill-amber-400 mr-1" /> {selectedMentor.rating}
-                                        </span>
-                                        <span>•</span>
-                                        <span>{selectedMentor.sessions} Sessions Completed</span>
-                                    </div>
                                 </div>
                             </div>
                         </DialogHeader>
@@ -276,55 +302,82 @@ export default function MentorsPage() {
                         <div className="space-y-4 py-3">
                             <div>
                                 <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5">About Mentor</h4>
-                                <p className="text-sm text-foreground/90 leading-relaxed">
-                                    {selectedMentor.bio}
+                                <p className="text-xs text-foreground/90 leading-relaxed italic">
+                                    &quot;{selectedMentor.bio}&quot;
                                 </p>
                             </div>
 
-                            <div>
-                                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Areas of Expertise</h4>
-                                <div className="flex flex-wrap gap-1.5">
-                                    {selectedMentor.skills.map((skill) => (
-                                        <Badge key={skill} variant="secondary" className="font-semibold text-xs px-3 py-1 rounded-full bg-secondary border border-border/60">
-                                            <Sparkles className="w-3 h-3 mr-1 text-primary" />
-                                            {skill}
-                                        </Badge>
-                                    ))}
+                            {/* Date & Time Selection */}
+                            <div className="grid gap-3 sm:grid-cols-2">
+                                <div className="space-y-1">
+                                    <label className="text-xs font-semibold text-foreground flex items-center gap-1">
+                                        <Calendar className="w-3.5 h-3.5 text-primary" /> Select Date
+                                    </label>
+                                    <Input
+                                        type="date"
+                                        value={bookingDate}
+                                        onChange={(e) => setBookingDate(e.target.value)}
+                                        className="text-xs bg-secondary/40"
+                                    />
+                                </div>
+
+                                <div className="space-y-1">
+                                    <label className="text-xs font-semibold text-foreground flex items-center gap-1">
+                                        <Clock className="w-3.5 h-3.5 text-primary" /> Time Slot
+                                    </label>
+                                    <select
+                                        value={selectedTimeSlot}
+                                        onChange={(e) => setSelectedTimeSlot(e.target.value)}
+                                        className="w-full h-9 rounded-md border border-input bg-secondary/40 px-3 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                                    >
+                                        {TIME_SLOTS.map((slot) => (
+                                            <option key={slot} value={slot} className="bg-background text-foreground">
+                                                {slot}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
                             </div>
 
-                            <div className="bg-secondary/40 border border-border/50 rounded-xl p-3.5 flex items-center justify-between">
-                                <div className="flex items-center gap-2.5">
-                                    <Clock className="w-4 h-4 text-primary" />
-                                    <div>
-                                        <p className="text-xs font-semibold text-foreground">Next Available Slot</p>
-                                        <p className="text-xs text-muted-foreground">{bookingDate}</p>
-                                    </div>
-                                </div>
-                                <Badge variant="outline" className="text-[10px] border-emerald-500/40 text-emerald-400 bg-emerald-500/10">
-                                    Available
-                                </Badge>
+                            {/* Topic / Notes Input */}
+                            <div className="space-y-1">
+                                <label className="text-xs font-semibold text-foreground flex items-center gap-1">
+                                    <MessageSquare className="w-3.5 h-3.5 text-primary" /> Topic or Notes (Optional)
+                                </label>
+                                <Textarea
+                                    rows={2}
+                                    placeholder="e.g. Code review for my Next.js app, or System Design advice..."
+                                    value={bookingTopic}
+                                    onChange={(e) => setBookingTopic(e.target.value)}
+                                    className="text-xs bg-secondary/40 resize-none"
+                                />
                             </div>
                         </div>
 
                         <DialogFooter className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-border/40">
                             <Button 
                                 variant="outline" 
-                                onClick={() => {
-                                    setSelectedMentor(null);
-                                    router.push("/messages");
-                                }}
+                                onClick={() => setSelectedMentor(null)}
                                 className="rounded-full w-full sm:w-auto border-border/60"
                             >
-                                <MessageSquare className="w-4 h-4 mr-2" />
-                                Send Message
+                                Cancel
                             </Button>
                             <Button 
-                                onClick={() => handleBookSession(selectedMentor.name)} 
-                                className="rounded-full w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
+                                onClick={handleConfirmBooking} 
+                                disabled={isBooking}
+                                className="rounded-full w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-md cursor-pointer"
                             >
-                                <Calendar className="w-4 h-4 mr-2" />
-                                Confirm 1-on-1 Session
+                                {isBooking ? (
+                                    <>
+                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                        Booking...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Calendar className="w-4 h-4 mr-2" />
+                                        Confirm 1-on-1 Session
+                                    </>
+                                )}
                             </Button>
                         </DialogFooter>
                     </DialogContent>

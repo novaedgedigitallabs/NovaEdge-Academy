@@ -5,38 +5,38 @@ const mentorSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please add a name'],
         trim: true,
-        maxlength: [50, 'Name can not be more than 50 characters']
     },
     role: {
         type: String,
         required: [true, 'Please add a role'],
         trim: true,
-        maxlength: [50, 'Role can not be more than 50 characters']
+    },
+    company: {
+        type: String,
+        default: 'Top Tech',
     },
     bio: {
         type: String,
-        required: [true, 'Please add a bio'],
-        maxlength: [500, 'Bio can not be more than 500 characters']
+        default: '',
     },
     image: {
         type: String,
-        default: 'no-photo.jpg'
+        default: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400',
+    },
+    skills: [String],
+    socialLinks: {
+        linkedin: { type: String, default: "" },
+        twitter: { type: String, default: "" },
+        github: { type: String, default: "" },
     },
     isActive: {
         type: Boolean,
-        default: true
+        default: true,
     },
     createdAt: {
         type: Date,
-        default: Date.now
+        default: Date.now,
     }
-});
-
-mentorSchema.index({
-    name: "text",
-    bio: "text",
-    skills: "text",
-    expertise: "text"
 });
 
 module.exports = mongoose.model('Mentor', mentorSchema);

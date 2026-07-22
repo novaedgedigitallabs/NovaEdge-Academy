@@ -19,3 +19,7 @@ export async function updateMentor(id, data) {
 export async function deleteMentor(id) {
     return apiDelete(`/api/v1/mentors/${id}`);
 }
+
+export async function bookMentorshipSession(bookingData) {
+    return apiPost("/api/v1/mentors/book", bookingData);
+}
