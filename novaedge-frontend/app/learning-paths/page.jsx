@@ -56,9 +56,6 @@ export default function LearningPathsPage() {
             <div className="px-4 py-8 space-y-8">
                 {/* Hero Section */}
                 <div className="text-center max-w-2xl mx-auto space-y-3">
-                    <Badge className="bg-primary/15 text-primary border-primary/30 px-3.5 py-1 text-xs font-bold rounded-full inline-flex items-center gap-1.5 shadow-xs">
-                        <Sparkles className="w-3.5 h-3.5 text-primary" /> Career Roadmaps
-                    </Badge>
                     <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-foreground">
                         Curated Learning Paths
                     </h1>
