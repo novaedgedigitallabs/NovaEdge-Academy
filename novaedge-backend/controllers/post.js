@@ -5,10 +5,10 @@ const Hashtag = require("../models/Hashtag");
 // 1. Create a Post
 exports.createPost = async (req, res) => {
     try {
-        const { content, repostOf } = req.body;
+        const { content, repostOf, image, location, eventDate } = req.body;
 
         // Extract hashtags
-        const hashtags = content.match(/#[a-z0-9_]+/gi);
+        const hashtags = content ? content.match(/#[a-z0-9_]+/gi) : null;
         const uniqueHashtags = hashtags ? [...new Set(hashtags.map(tag => tag.toLowerCase().replace('#', '')))] : [];
 
         if (uniqueHashtags.length > 10) {
@@ -18,11 +18,33 @@ exports.createPost = async (req, res) => {
             });
         }
 
+        let postImageData = { public_id: "", url: "" };
+
+        if (image && image !== "") {
+            if (image.startsWith("http://") || image.startsWith("https://")) {
+                postImageData = { public_id: "posts/custom_url", url: image };
+            } else {
+                try {
+                    const cloudinary = require("cloudinary").v2;
+                    const uploadRes = await cloudinary.uploader.upload(image, {
+                        folder: "posts",
+                    });
+                    postImageData = { public_id: uploadRes.public_id, url: uploadRes.secure_url };
+                } catch (imgErr) {
+                    console.error("Cloudinary post image upload fallback:", imgErr.message);
+                    postImageData = { public_id: "posts/upload", url: image };
+                }
+            }
+        }
+
         const post = await Post.create({
-            content,
+            content: content || "",
             user: req.user.id,
             repostOf: repostOf || null,
             hashtags: uniqueHashtags,
+            image: postImageData,
+            location: location || "",
+            eventDate: eventDate || "",
         });
 
         // Update Hashtag Stats

@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Heart, Trash2, Pencil, MessageCircle, Repeat, Share2, BarChart2, MoreHorizontal } from "lucide-react";
+import { Heart, Trash2, Pencil, MessageCircle, Repeat, Share2, BarChart2, MoreHorizontal, MapPin, Calendar } from "lucide-react";
 import CommentSection from "./CommentSection";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
@@ -256,6 +256,35 @@ export default function PostCard({ post, onDelete, onUpdate }) {
                             return part;
                         })}
                     </div>
+
+                    {/* Location & Event Date Badges */}
+                    {(targetPost.location || targetPost.eventDate) && (
+                        <div className="mt-2 flex flex-wrap gap-2 text-xs font-semibold text-muted-foreground">
+                            {targetPost.location && (
+                                <span className="flex items-center gap-1 bg-primary/10 text-primary px-2.5 py-1 rounded-full border border-primary/20">
+                                    <MapPin className="w-3.5 h-3.5" />
+                                    {targetPost.location}
+                                </span>
+                            )}
+                            {targetPost.eventDate && (
+                                <span className="flex items-center gap-1 bg-purple-500/10 text-purple-400 px-2.5 py-1 rounded-full border border-purple-500/20">
+                                    <Calendar className="w-3.5 h-3.5" />
+                                    {targetPost.eventDate}
+                                </span>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Post Image */}
+                    {targetPost.image?.url && (
+                        <div className="mt-3 overflow-hidden rounded-2xl border border-border bg-black/20 max-h-96">
+                            <img
+                                src={targetPost.image.url}
+                                alt="Post media"
+                                className="w-full h-full object-cover max-h-96"
+                            />
+                        </div>
+                    )}
 
                     {/* Reposted Content Display */}
                     {post.repostOf && (

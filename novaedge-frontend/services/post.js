@@ -1,7 +1,10 @@
 import { apiGet, apiPost, apiPut, apiDelete } from "@/lib/api";
 
-export const createPost = async (content, repostOf = null) => {
-    return apiPost("/api/v1/posts/create", { content, repostOf });
+export const createPost = async (contentData, repostOf = null) => {
+    if (typeof contentData === "object") {
+        return apiPost("/api/v1/posts/create", { ...contentData, repostOf });
+    }
+    return apiPost("/api/v1/posts/create", { content: contentData, repostOf });
 };
 
 export const getAllPosts = async () => {

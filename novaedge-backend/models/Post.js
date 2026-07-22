@@ -24,6 +24,18 @@ const postSchema = new mongoose.Schema({
         default: null,
     },
     hashtags: [String],
+    image: {
+        public_id: { type: String, default: "" },
+        url: { type: String, default: "" },
+    },
+    location: {
+        type: String,
+        default: "",
+    },
+    eventDate: {
+        type: String,
+        default: "",
+    },
     isEdited: {
         type: Boolean,
         default: false,
