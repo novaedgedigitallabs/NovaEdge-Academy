@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -14,15 +14,16 @@ import {
     MessageSquare, 
     User, 
     Settings, 
-    MoreHorizontal, 
     PenSquare, 
     LogOut,
-    Newspaper
+    Newspaper,
+    UserPlus
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/context/auth-context";
 import { cn } from "@/lib/utils";
+import { getFriendRequests } from "@/services/friend";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -34,7 +35,6 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from "@/components/ui/dialog";
 import CreatePost from "@/components/post/CreatePost";
 
@@ -65,6 +65,12 @@ const sidebarLinks = [
         label: "Mentors",
     },
     {
+        icon: UserPlus,
+        route: "/network",
+        label: "My Network",
+        badgeKey: "requests",
+    },
+    {
         icon: Globe,
         route: "/community",
         label: "Community",
@@ -78,6 +84,7 @@ const sidebarLinks = [
         icon: MessageSquare,
         route: "/messages",
         label: "Messages",
+        badgeKey: "requests",
     },
     {
         icon: User,
@@ -95,6 +102,19 @@ export default function LeftSidebar() {
     const pathname = usePathname();
     const { user, logout } = useAuth();
     const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
+    const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
+
+    useEffect(() => {
+        if (user) {
+            getFriendRequests()
+                .then((res) => {
+                    if (res.success && Array.isArray(res.requests)) {
+                        setPendingRequestsCount(res.requests.length);
+                    }
+                })
+                .catch(() => {});
+        }
+    }, [user, pathname]);
 
     return (
         <section className="custom-scrollbar sticky left-0 top-0 z-20 flex h-screen w-fit flex-col justify-between overflow-y-auto border-r border-border bg-background pb-6 pt-8 max-md:hidden lg:w-[266px]">
@@ -117,23 +137,32 @@ export default function LeftSidebar() {
                             : pathname.startsWith(link.route);
 
                         const IconComponent = link.icon;
+                        const hasBadge = link.badgeKey === "requests" && pendingRequestsCount > 0;
 
                         return (
                             <Link
                                 href={link.route}
                                 key={link.label}
                                 className={cn(
-                                    "flex items-center justify-start gap-4 rounded-full px-4 py-3 transition-all font-medium text-muted-foreground hover:bg-secondary/60 hover:text-foreground group",
+                                    "flex items-center justify-between gap-3 rounded-full px-4 py-3 transition-all font-medium text-muted-foreground hover:bg-secondary/60 hover:text-foreground group",
                                     isActive && "bg-primary/15 text-primary font-bold hover:bg-primary/20 hover:text-primary shadow-xs"
                                 )}
                             >
-                                <IconComponent 
-                                    className={cn(
-                                        "h-6 w-6 shrink-0 transition-transform group-hover:scale-105", 
-                                        isActive ? "text-primary stroke-[2.5]" : "stroke-[1.75]"
-                                    )} 
-                                />
-                                <p className="text-base max-lg:hidden">{link.label}</p>
+                                <div className="flex items-center gap-4 min-w-0">
+                                    <IconComponent 
+                                        className={cn(
+                                            "h-6 w-6 shrink-0 transition-transform group-hover:scale-105", 
+                                            isActive ? "text-primary stroke-[2.5]" : "stroke-[1.75]"
+                                        )} 
+                                    />
+                                    <p className="text-base max-lg:hidden truncate">{link.label}</p>
+                                </div>
+
+                                {hasBadge && (
+                                    <span className="bg-primary text-primary-foreground text-xs font-extrabold px-2 py-0.5 rounded-full shadow-sm">
+                                        {pendingRequestsCount}
+                                    </span>
+                                )}
                             </Link>
                         );
                     })}
@@ -188,13 +217,17 @@ export default function LeftSidebar() {
                                         <p className="text-xs text-muted-foreground line-clamp-1">@{user.username || user.email?.split('@')[0]}</p>
                                     </div>
                                 </div>
-                                <MoreHorizontal className="h-4 w-4 text-muted-foreground max-lg:hidden flex-shrink-0" />
                             </div>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-56" align="end" forceMount>
-                            <DropdownMenuItem onClick={logout} className="text-destructive focus:text-destructive cursor-pointer">
-                                <LogOut className="mr-2 h-4 w-4" />
-                                <span>Log out @{user.username || user.email?.split('@')[0]}</span>
+                        <DropdownMenuContent align="end" className="w-56 rounded-xl">
+                            <DropdownMenuItem onClick={() => window.location.href = "/profile"}>
+                                Profile
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => window.location.href = "/settings"}>
+                                Settings
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={logout} className="text-destructive font-medium">
+                                Logout
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
