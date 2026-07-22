@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Calendar, UserX, ArrowLeft, Mail, Award, Sparkles, Github, Linkedin, Globe, Twitter } from "lucide-react";
+import { Loader2, Calendar, UserX, ArrowLeft, Mail, Award, Sparkles, Github, Linkedin, Globe, Twitter, Camera, Link as LinkIcon } from "lucide-react";
 import FriendActionButton from "@/components/friend/FriendActionButton";
 import { useAuth } from "@/context/auth-context";
 
@@ -105,6 +105,15 @@ export default function PublicProfilePage() {
         ? "Mentor"
         : "Student";
 
+    // Extract social links with fallback support
+    const socialGithub = user.socialLinks?.github || user.github;
+    const socialLinkedin = user.socialLinks?.linkedin || user.linkedin;
+    const socialPortfolio = user.socialLinks?.portfolio || user.portfolio || user.website;
+    const socialTwitter = user.socialLinks?.twitter || user.twitter;
+    const hasSocialLinks = Boolean(socialGithub || socialLinkedin || socialPortfolio || socialTwitter);
+
+    const isOwnProfile = currentUser && currentUser._id === user._id;
+
     return (
         <AppLayout className="max-w-2xl xl:max-w-3xl border-r border-border p-0 sm:pb-0">
             {/* Top Navigation Header */}
@@ -119,7 +128,7 @@ export default function PublicProfilePage() {
             </div>
 
             {/* Full-width Cover Image */}
-            <div className="h-44 sm:h-52 bg-muted relative overflow-hidden">
+            <div className="h-44 sm:h-52 bg-muted relative overflow-hidden group">
                 {user.coverImage?.url ? (
                     <img
                         src={user.coverImage.url}
@@ -127,9 +136,22 @@ export default function PublicProfilePage() {
                         className="w-full h-full object-cover object-center"
                     />
                 ) : (
-                    <div className="absolute inset-0 bg-gradient-to-r from-purple-900/60 via-indigo-900/40 to-slate-900/80 flex items-center justify-center">
-                        <Sparkles className="w-12 h-12 text-primary/20" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-950 via-purple-900 to-slate-950 flex items-center justify-center">
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(120,119,198,0.25)_0,transparent_70%)]" />
+                        <Sparkles className="w-12 h-12 text-primary/30 animate-pulse" />
                     </div>
+                )}
+
+                {isOwnProfile && (
+                    <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => router.push("/settings/profile")}
+                        className="absolute top-3 right-3 rounded-full opacity-90 hover:opacity-100 transition-opacity bg-black/60 hover:bg-black/80 text-white backdrop-blur-sm text-xs gap-1.5 cursor-pointer border border-white/10"
+                    >
+                        <Camera className="w-3.5 h-3.5" />
+                        <span>Edit Cover</span>
+                    </Button>
                 )}
             </div>
 
@@ -143,12 +165,21 @@ export default function PublicProfilePage() {
                         </Avatar>
                     </div>
 
-                    {/* Friend / Connect Button */}
-                    {currentUser && currentUser._id !== user._id && (
-                        <div className="mt-3">
-                            <FriendActionButton otherUserId={user._id} />
-                        </div>
-                    )}
+                    {/* Friend / Connect / Edit Button */}
+                    <div className="mt-3">
+                        {isOwnProfile ? (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => router.push("/settings/profile")}
+                                className="rounded-full border-primary/30 hover:bg-primary/10 text-xs font-semibold"
+                            >
+                                Edit Profile
+                            </Button>
+                        ) : (
+                            currentUser && <FriendActionButton otherUserId={user._id} />
+                        )}
+                    </div>
                 </div>
 
                 <div className="mb-2">
@@ -163,7 +194,7 @@ export default function PublicProfilePage() {
                     <p className="text-sm text-foreground/95 mb-3 leading-relaxed whitespace-pre-line">{user.bio}</p>
                 )}
 
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground mb-4">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground mb-3">
                     <span className="bg-primary/10 text-primary border border-primary/20 px-2.5 py-0.5 rounded-full text-xs font-bold capitalize">
                         {displayRole}
                     </span>
@@ -179,33 +210,60 @@ export default function PublicProfilePage() {
                             <span className="truncate max-w-[220px]" title={user.email}>{user.email}</span>
                         </div>
                     )}
-
-                    {/* Social Links */}
-                    {user.socialLinks && Object.values(user.socialLinks).some(Boolean) && (
-                        <div className="flex items-center gap-2 ml-auto">
-                            {user.socialLinks.github && (
-                                <a href={user.socialLinks.github} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-full bg-secondary/50 hover:bg-primary/20 text-foreground hover:text-primary transition-colors" title="GitHub">
-                                    <Github className="w-4 h-4" />
-                                </a>
-                            )}
-                            {user.socialLinks.linkedin && (
-                                <a href={user.socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-full bg-secondary/50 hover:bg-primary/20 text-foreground hover:text-primary transition-colors" title="LinkedIn">
-                                    <Linkedin className="w-4 h-4" />
-                                </a>
-                            )}
-                            {user.socialLinks.portfolio && (
-                                <a href={user.socialLinks.portfolio} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-full bg-secondary/50 hover:bg-primary/20 text-foreground hover:text-primary transition-colors" title="Portfolio">
-                                    <Globe className="w-4 h-4" />
-                                </a>
-                            )}
-                            {user.socialLinks.twitter && (
-                                <a href={user.socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-full bg-secondary/50 hover:bg-primary/20 text-foreground hover:text-primary transition-colors" title="Twitter / X">
-                                    <Twitter className="w-4 h-4" />
-                                </a>
-                            )}
-                        </div>
-                    )}
                 </div>
+
+                {/* Social Links Row */}
+                {hasSocialLinks && (
+                    <div className="flex flex-wrap items-center gap-2 mb-3 pt-2 border-t border-border/40">
+                        <span className="text-xs font-semibold text-muted-foreground mr-1 flex items-center gap-1">
+                            <LinkIcon className="w-3 h-3" /> Links:
+                        </span>
+                        {socialGithub && (
+                            <a
+                                href={socialGithub.startsWith('http') ? socialGithub : `https://${socialGithub}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/60 hover:bg-primary/20 border border-border/60 text-foreground hover:text-primary text-xs transition-colors"
+                            >
+                                <Github className="w-3.5 h-3.5 text-primary" />
+                                <span>GitHub</span>
+                            </a>
+                        )}
+                        {socialLinkedin && (
+                            <a
+                                href={socialLinkedin.startsWith('http') ? socialLinkedin : `https://${socialLinkedin}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/60 hover:bg-primary/20 border border-border/60 text-foreground hover:text-primary text-xs transition-colors"
+                            >
+                                <Linkedin className="w-3.5 h-3.5 text-primary" />
+                                <span>LinkedIn</span>
+                            </a>
+                        )}
+                        {socialPortfolio && (
+                            <a
+                                href={socialPortfolio.startsWith('http') ? socialPortfolio : `https://${socialPortfolio}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/60 hover:bg-primary/20 border border-border/60 text-foreground hover:text-primary text-xs transition-colors"
+                            >
+                                <Globe className="w-3.5 h-3.5 text-primary" />
+                                <span>Portfolio</span>
+                            </a>
+                        )}
+                        {socialTwitter && (
+                            <a
+                                href={socialTwitter.startsWith('http') ? socialTwitter : `https://${socialTwitter}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/60 hover:bg-primary/20 border border-border/60 text-foreground hover:text-primary transition-colors"
+                            >
+                                <Twitter className="w-3.5 h-3.5 text-primary" />
+                                <span>Twitter</span>
+                            </a>
+                        )}
+                    </div>
+                )}
 
                 <div className="flex gap-6 text-sm mb-2 border-t border-border/40 pt-3">
                     <div className="hover:underline cursor-pointer">
