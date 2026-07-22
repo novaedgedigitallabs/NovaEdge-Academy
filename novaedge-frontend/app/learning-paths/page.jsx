@@ -1,19 +1,18 @@
 "use client";
 
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
+import AppLayout from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Clock, Trophy, ArrowRight, Code, Database, Brain, Smartphone } from "lucide-react";
+import { BookOpen, Clock, Trophy, ArrowRight, Code, Database, Brain, Smartphone, Sparkles } from "lucide-react";
 import Link from "next/link";
 
 const paths = [
     {
         id: "full-stack",
         title: "Full Stack Web Developer",
-        description: "Master both frontend and backend development. Build complete web applications from scratch using modern technologies like React, Node.js, and MongoDB.",
-        icon: <Code className="w-8 h-8 text-blue-500" />,
+        description: "Master both frontend and backend development. Build complete web applications using React, Node.js, and MongoDB.",
+        icon: <Code className="w-6 h-6 text-blue-500" />,
         courses: 8,
         duration: "6 Months",
         level: "Beginner to Advanced",
@@ -22,8 +21,8 @@ const paths = [
     {
         id: "data-science",
         title: "Data Scientist",
-        description: "Learn to analyze data, build machine learning models, and derive insights. Covers Python, Pandas, Scikit-learn, and Deep Learning.",
-        icon: <Database className="w-8 h-8 text-green-500" />,
+        description: "Learn to analyze data, build machine learning models, and derive insights using Python, Pandas, and Scikit-learn.",
+        icon: <Database className="w-6 h-6 text-green-500" />,
         courses: 6,
         duration: "5 Months",
         level: "Intermediate",
@@ -32,8 +31,8 @@ const paths = [
     {
         id: "ai-engineer",
         title: "AI Engineer",
-        description: "Dive into the world of Artificial Intelligence. Master Neural Networks, NLP, Computer Vision, and Generative AI.",
-        icon: <Brain className="w-8 h-8 text-purple-500" />,
+        description: "Dive into Artificial Intelligence. Master Neural Networks, NLP, Computer Vision, and Generative AI.",
+        icon: <Brain className="w-6 h-6 text-purple-500" />,
         courses: 10,
         duration: "8 Months",
         level: "Advanced",
@@ -43,7 +42,7 @@ const paths = [
         id: "mobile-dev",
         title: "Mobile App Developer",
         description: "Build native and cross-platform mobile apps for iOS and Android using React Native and Flutter.",
-        icon: <Smartphone className="w-8 h-8 text-orange-500" />,
+        icon: <Smartphone className="w-6 h-6 text-orange-500" />,
         courses: 5,
         duration: "4 Months",
         level: "Beginner",
@@ -53,56 +52,55 @@ const paths = [
 
 export default function LearningPathsPage() {
     return (
-        <div className="min-h-screen flex flex-col">
-            <Header />
-
-            {/* Hero Section */}
-            <section className="bg-muted/30 py-20 border-b">
-                <div className="container mx-auto px-4 text-center max-w-3xl">
-                    <h1 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">
+        <AppLayout className="max-w-5xl">
+            <div className="px-4 py-8 space-y-8">
+                {/* Hero Section */}
+                <div className="text-center max-w-2xl mx-auto space-y-3">
+                    <Badge className="bg-primary/15 text-primary border-primary/30 px-3.5 py-1 text-xs font-bold rounded-full inline-flex items-center gap-1.5 shadow-xs">
+                        <Sparkles className="w-3.5 h-3.5 text-primary" /> Career Roadmaps
+                    </Badge>
+                    <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-foreground">
                         Curated Learning Paths
                     </h1>
-                    <p className="text-xl text-muted-foreground mb-8">
-                        Follow a structured roadmap to master a new skill. We've organized our courses into comprehensive paths to guide your journey.
+                    <p className="text-xs sm:text-sm text-muted-foreground">
+                        Follow structured step-by-step roadmaps to master industry skills and get job-ready.
                     </p>
                 </div>
-            </section>
 
-            {/* Paths Grid */}
-            <main className="flex-grow container mx-auto px-4 py-16">
-                <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                {/* Paths Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {paths.map((path) => (
-                        <Card key={path.id} className="flex flex-col hover:shadow-lg transition-shadow border-border/50">
-                            <CardHeader>
-                                <div className="flex items-start justify-between mb-4">
-                                    <div className={`p-3 rounded-xl ${path.color}`}>
+                        <Card key={path.id} className="flex flex-col border-border/70 bg-card/50 backdrop-blur-md hover:border-primary/50 transition-all rounded-2xl">
+                            <CardHeader className="pb-2">
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className={`p-2.5 rounded-xl ${path.color}`}>
                                         {path.icon}
                                     </div>
-                                    <Badge variant="outline" className="text-sm">
+                                    <Badge variant="outline" className="text-[10px] border-border/60">
                                         {path.level}
                                     </Badge>
                                 </div>
-                                <CardTitle className="text-2xl mb-2">{path.title}</CardTitle>
-                                <p className="text-muted-foreground">{path.description}</p>
+                                <CardTitle className="text-lg font-bold">{path.title}</CardTitle>
+                                <p className="text-xs text-muted-foreground leading-relaxed mt-1">{path.description}</p>
                             </CardHeader>
 
-                            <CardContent className="flex-grow">
-                                <div className="flex items-center gap-6 text-sm text-muted-foreground mt-2">
-                                    <div className="flex items-center gap-2">
-                                        <BookOpen className="w-4 h-4" />
+                            <CardContent className="flex-grow pt-0">
+                                <div className="flex items-center gap-4 text-xs text-muted-foreground mt-2">
+                                    <div className="flex items-center gap-1.5">
+                                        <BookOpen className="w-3.5 h-3.5 text-primary" />
                                         <span>{path.courses} Courses</span>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <Clock className="w-4 h-4" />
+                                    <div className="flex items-center gap-1.5">
+                                        <Clock className="w-3.5 h-3.5 text-primary" />
                                         <span>{path.duration}</span>
                                     </div>
                                 </div>
                             </CardContent>
 
-                            <CardFooter className="pt-0">
-                                <Button asChild className="w-full group">
+                            <CardFooter className="pt-2">
+                                <Button asChild className="w-full rounded-full text-xs font-bold h-9 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm">
                                     <Link href="/courses">
-                                        Start Path <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
+                                        Start Path <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
                                     </Link>
                                 </Button>
                             </CardFooter>
@@ -111,19 +109,17 @@ export default function LearningPathsPage() {
                 </div>
 
                 {/* Call to Action */}
-                <div className="mt-20 text-center bg-primary/5 rounded-2xl p-12 border border-primary/10">
-                    <Trophy className="w-12 h-12 text-primary mx-auto mb-4" />
-                    <h2 className="text-3xl font-bold mb-4">Ready to start your journey?</h2>
-                    <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-                        Join thousands of students who have transformed their careers through our structured learning paths.
+                <div className="text-center bg-card/40 backdrop-blur-md rounded-2xl p-6 border border-border/60 space-y-3">
+                    <Trophy className="w-8 h-8 text-amber-400 mx-auto" />
+                    <h2 className="text-lg font-bold text-foreground">Ready to start your journey?</h2>
+                    <p className="text-xs text-muted-foreground max-w-md mx-auto">
+                        Join thousands of students who have transformed their tech careers through our learning paths.
                     </p>
-                    <Button asChild size="lg">
-                        <Link href="/register">Join Now</Link>
+                    <Button asChild size="sm" className="rounded-full px-6 font-bold h-9 bg-primary text-primary-foreground">
+                        <Link href="/register">Join Free Now</Link>
                     </Button>
                 </div>
-            </main>
-
-            <Footer />
-        </div>
+            </div>
+        </AppLayout>
     );
 }
