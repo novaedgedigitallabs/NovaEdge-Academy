@@ -139,7 +139,7 @@ export function AuthProvider({ children }) {
         localStorage.removeItem("token");
       }
       setUser(null);
-      router.push("/");
+      router.push("/login");
     }
   };
 

@@ -15,6 +15,8 @@ export default function ShellLayout({ children }) {
     const isStandalonePage = 
         pathname === "/login" || 
         pathname === "/register" || 
+        pathname === "/forgot-password" ||
+        pathname?.startsWith("/reset-password") ||
         pathname?.startsWith("/admin") ||
         pathname?.startsWith("/mentor/");
 
@@ -32,7 +34,7 @@ export default function ShellLayout({ children }) {
 
     return (
         <div className="flex min-h-screen justify-center bg-background text-foreground selection:bg-primary selection:text-primary-foreground">
-            {/* Left Sidebar - Persistent across SPA route transitions */}
+            {/* Left Sidebar */}
             <LeftSidebar />
 
             {/* Main Middle Content Column */}
@@ -40,7 +42,7 @@ export default function ShellLayout({ children }) {
                 {children}
             </main>
 
-            {/* Right Sidebar - Persistent across SPA route transitions */}
+            {/* Right Sidebar */}
             <RightSidebar />
 
             {/* Mobile Bottom Navigation */}
