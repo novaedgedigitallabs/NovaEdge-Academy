@@ -8,6 +8,7 @@ const {
     updateMentor,
     deleteMentor,
     bookSession,
+    getMyBookings,
 } = require("../controllers/mentors");
 
 const { isAuthenticatedUser } = require("../middleware/auth");
@@ -15,10 +16,11 @@ const { authorizeRoles } = require("../middleware/admin");
 
 // Public routes
 router.get("/mentors", getAllMentors);
-router.get("/mentors/:id", getMentor);
 
 // Authenticated User routes
+router.get("/mentors/my-bookings", isAuthenticatedUser, getMyBookings);
 router.post("/mentors/book", isAuthenticatedUser, bookSession);
+router.get("/mentors/:id", getMentor);
 
 // Admin routes
 router.post("/mentors", isAuthenticatedUser, authorizeRoles("admin"), createMentor);

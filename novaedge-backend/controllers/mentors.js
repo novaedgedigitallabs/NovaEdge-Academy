@@ -164,3 +164,16 @@ exports.bookSession = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+
+// 7. Get My Booked Sessions
+exports.getMyBookings = async (req, res) => {
+    try {
+        const bookings = await MentorshipBooking.find({ user: req.user.id }).sort({ createdAt: -1 });
+        res.status(200).json({
+            success: true,
+            data: bookings,
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};

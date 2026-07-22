@@ -11,9 +11,9 @@ import { apiGet } from "@/lib/api";
 import { toast } from "sonner";
 
 const DEFAULT_SCHEDULE = [
-    { id: "1", title: "Advanced React Workshop", date: "Dec 30", time: "10:00 AM", type: "Live Class", href: "/courses" },
-    { id: "2", title: "UI/UX Design Review", date: "Jan 02", time: "02:30 PM", type: "Mentorship", href: "/courses" },
-    { id: "3", title: "Career Growth Seminar", date: "Jan 05", time: "04:00 PM", type: "Webinar", href: "/courses" }
+    { id: "s1", title: "Advanced React Workshop", date: "Dec 30", time: "10:00 AM", type: "Live Class", href: "/courses" },
+    { id: "s2", title: "UI/UX Design Review", date: "Jan 02", time: "02:30 PM", type: "Mentorship", href: "/courses" },
+    { id: "s3", title: "Career Growth Seminar", date: "Jan 05", time: "04:00 PM", type: "Webinar", href: "/courses" }
 ];
 
 const DEFAULT_LEADERBOARD = [
@@ -47,43 +47,51 @@ export default function RightSidebar() {
 
     // Fetch dynamic backend data & local bookings on mount
     useEffect(() => {
-        const savedBookings = typeof window !== "undefined" 
-            ? JSON.parse(localStorage.getItem("novaedge_my_bookings") || "[]") 
-            : [];
+        const loadSchedule = async () => {
+            const savedBookings = typeof window !== "undefined" 
+                ? JSON.parse(localStorage.getItem("novaedge_my_bookings") || "[]") 
+                : [];
 
-        // Fetch Live Classes / Schedule
-        apiGet("/api/v1/user/live/calendar")
-            .then((res) => {
-                let apiEvents = [];
-                if (res?.classes && Array.isArray(res.classes) && res.classes.length > 0) {
-                    apiEvents = res.classes.map((item) => {
-                        const d = new Date(item.startTime || Date.now());
+            let backendBookings = [];
+            try {
+                const res = await apiGet("/api/v1/mentors/my-bookings");
+                if (res?.success && Array.isArray(res.data)) {
+                    backendBookings = res.data.map(b => {
+                        const d = new Date(b.date);
                         return {
-                            id: item._id,
-                            title: item.title || "Live Class",
+                            id: b._id,
+                            title: `1-on-1 Session with ${b.mentorName || "Mentor"}`,
                             date: d.toLocaleDateString("en-US", { month: "short", day: "2-digit" }),
-                            time: d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
-                            type: item.type || "Live Class",
-                            href: `/courses`
+                            time: b.timeSlot,
+                            type: "Mentorship",
+                            href: "/mentors"
                         };
                     });
                 }
-                const combined = [...savedBookings, ...apiEvents];
-                if (combined.length > 0) {
-                    setSchedule(combined.slice(0, 3));
+            } catch (e) {}
+
+            const allUserBookings = [...savedBookings, ...backendBookings];
+            const uniqueBookings = [];
+            const seen = new Set();
+            for (const item of allUserBookings) {
+                const key = `${item.title}-${item.date}-${item.time}`;
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    uniqueBookings.push(item);
                 }
-            })
-            .catch(() => {
-                if (savedBookings.length > 0) {
-                    setSchedule([...savedBookings, ...DEFAULT_SCHEDULE].slice(0, 3));
-                }
-            });
+            }
+
+            const finalSchedule = [...uniqueBookings, ...DEFAULT_SCHEDULE];
+            setSchedule(finalSchedule);
+        };
+
+        loadSchedule();
 
         // Fetch Trending Hashtags
         apiGet("/api/v1/hashtag/trending")
             .then((res) => {
                 if (res?.hashtags && Array.isArray(res.hashtags) && res.hashtags.length > 0) {
-                    const formatted = res.hashtags.slice(0, 3).map((h) => ({
+                    const formatted = res.hashtags.map((h) => ({
                         tag: `#${h.tag.replace(/^#/, "")}`,
                         posts: `${h.count || 1} posts`,
                         category: h.category || "Trending"
@@ -146,13 +154,13 @@ export default function RightSidebar() {
                 )}
             </div>
 
-            {/* 2. Upcoming Schedule Widget */}
+            {/* 2. Upcoming Schedule Widget (Scrollable) */}
             <div className="flex flex-col rounded-2xl border border-border/60 bg-card/40 backdrop-blur-md overflow-hidden">
                 <div onClick={() => router.push("/courses")} className="px-4 pt-4 mb-3 cursor-pointer hover:opacity-80 transition-opacity">
                     <h3 className="text-base font-bold text-foreground">Upcoming Schedule</h3>
                 </div>
 
-                <div className="flex flex-col">
+                <div className="flex flex-col max-h-64 overflow-y-auto custom-scrollbar">
                     {schedule.map((event, i) => (
                         <div 
                             key={event.id || i} 
@@ -160,8 +168,8 @@ export default function RightSidebar() {
                             className="flex items-start gap-3 px-4 py-3 hover:bg-secondary/40 transition-colors border-t border-border/40 cursor-pointer"
                         >
                             <div className="flex flex-col items-center justify-center h-11 w-11 rounded-xl bg-primary/10 text-primary flex-shrink-0 border border-primary/20">
-                                <span className="text-[10px] font-bold uppercase">{event.date?.split(' ')?.[0] || ""}</span>
-                                <span className="text-sm font-black leading-none">{event.date?.split(' ')?.[1] || ""}</span>
+                                <span className="text-[10px] font-bold uppercase">{event.date?.split(' ')?.[0] || "JAN"}</span>
+                                <span className="text-sm font-black leading-none">{event.date?.split(' ')?.[1] || "01"}</span>
                             </div>
                             <div className="flex flex-col flex-1 min-w-0">
                                 <p className="text-sm font-semibold text-foreground line-clamp-1">{event.title}</p>
@@ -171,7 +179,7 @@ export default function RightSidebar() {
                                         {event.time}
                                     </div>
                                     <span className="h-1 w-1 rounded-full bg-muted-foreground/40" />
-                                    <span>{event.type}</span>
+                                    <span className="text-primary font-medium">{event.type}</span>
                                 </div>
                             </div>
                         </div>
@@ -189,7 +197,7 @@ export default function RightSidebar() {
                     <Trophy className="h-4 w-4 text-amber-400" />
                 </div>
 
-                <div className="flex flex-col">
+                <div className="flex flex-col max-h-56 overflow-y-auto custom-scrollbar">
                     {leaderboard.map((student, i) => (
                         <div 
                             key={student.id || i} 
@@ -233,7 +241,7 @@ export default function RightSidebar() {
                     <h3 className="text-base font-bold text-foreground">Recommended Mentors</h3>
                 </div>
 
-                <div className="flex flex-col">
+                <div className="flex flex-col max-h-56 overflow-y-auto custom-scrollbar">
                     {mentors.map((mentor, i) => {
                         const isFollowing = !!following[mentor.id];
                         const isLoading = !!loadingMentors[mentor.id];
@@ -291,7 +299,7 @@ export default function RightSidebar() {
                     <h3 className="text-base font-bold text-foreground">What&apos;s happening</h3>
                 </div>
 
-                <div className="flex flex-col">
+                <div className="flex flex-col max-h-56 overflow-y-auto custom-scrollbar">
                     {hashtags.map((item, i) => {
                         const cleanTag = item.tag.replace(/^#/, "");
                         return (
