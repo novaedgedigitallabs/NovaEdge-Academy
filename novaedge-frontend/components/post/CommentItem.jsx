@@ -14,8 +14,14 @@ import { toast } from "sonner";
 
 export default function CommentItem({ comment, postId, onDelete, replies = [] }) {
     const { user } = useAuth();
+    if (!comment) return null;
+    const author = comment.user || {};
+    const authorName = author.name || "Anonymous";
+    const authorId = author._id || "";
+    const authorAvatar = author.avatar?.url;
+
     const [likes, setLikes] = useState(comment.likes || []);
-    const [isLiked, setIsLiked] = useState(user && comment.likes.includes(user._id));
+    const [isLiked, setIsLiked] = useState(user && comment.likes?.includes(user._id));
     const [showReplyInput, setShowReplyInput] = useState(false);
     const [replyContent, setReplyContent] = useState("");
     const [localReplies, setLocalReplies] = useState(replies);
@@ -62,7 +68,7 @@ export default function CommentItem({ comment, postId, onDelete, replies = [] })
     };
 
     const handleCopy = () => {
-        navigator.clipboard.writeText(comment.content);
+        navigator.clipboard.writeText(comment.content || "");
         toast.success("Comment copied to clipboard");
     };
 
@@ -85,20 +91,20 @@ export default function CommentItem({ comment, postId, onDelete, replies = [] })
 
     return (
         <div className="flex gap-3 py-3">
-            <Link href={`/user/${comment.user._id}`}>
+            <Link href={`/user/${authorId}`}>
                 <Avatar className="w-8 h-8">
-                    <AvatarImage src={comment.user.avatar?.url} />
-                    <AvatarFallback>{comment.user.name[0]}</AvatarFallback>
+                    <AvatarImage src={authorAvatar} />
+                    <AvatarFallback>{authorName[0]}</AvatarFallback>
                 </Avatar>
             </Link>
             <div className="flex-1">
                 <div className="bg-muted/50 rounded-lg p-3">
                     <div className="flex justify-between items-start mb-1">
-                        <Link href={`/user/${comment.user._id}`} className="font-semibold text-sm hover:underline">
-                            {comment.user.name}
+                        <Link href={`/user/${authorId}`} className="font-semibold text-sm hover:underline">
+                            {authorName}
                         </Link>
                         <span className="text-xs text-muted-foreground">
-                            {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
+                            {formatDistanceToNow(new Date(comment.createdAt || Date.now()), { addSuffix: true })}
                         </span>
                     </div>
                     <p className="text-sm whitespace-pre-wrap">{comment.content}</p>
@@ -124,7 +130,7 @@ export default function CommentItem({ comment, postId, onDelete, replies = [] })
                     >
                         Copy
                     </button>
-                    {user && (user._id === comment.user._id || user.role === "admin") && (
+                    {user && authorId && (user._id === authorId || user.role === "admin") && (
                         <button
                             onClick={handleDelete}
                             className="text-xs font-medium flex items-center gap-1 hover:text-destructive transition-colors"

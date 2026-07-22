@@ -148,8 +148,8 @@ export default function RightSidebar() {
                             className="flex items-start gap-3 px-4 py-3 hover:bg-secondary/40 transition-colors border-t border-border/40 cursor-pointer"
                         >
                             <div className="flex flex-col items-center justify-center h-11 w-11 rounded-xl bg-primary/10 text-primary flex-shrink-0 border border-primary/20">
-                                <span className="text-[10px] font-bold uppercase">{event.date.split(' ')[0]}</span>
-                                <span className="text-sm font-black leading-none">{event.date.split(' ')[1] || ""}</span>
+                                <span className="text-[10px] font-bold uppercase">{event.date?.split(' ')?.[0] || ""}</span>
+                                <span className="text-sm font-black leading-none">{event.date?.split(' ')?.[1] || ""}</span>
                             </div>
                             <div className="flex flex-col flex-1 min-w-0">
                                 <p className="text-sm font-semibold text-foreground line-clamp-1">{event.title}</p>

@@ -22,14 +22,22 @@ import { toast } from "sonner";
 
 export default function PostCard({ post, onDelete, onUpdate }) {
     const { user } = useAuth();
+
+    if (!post) return null;
+    const author = post.user || {};
+    const authorName = author.name || "Anonymous";
+    const authorUsername = author.username || (author.email ? author.email.split('@')[0] : "user");
+    const authorId = author._id || "";
+    const authorAvatar = author.avatar?.url;
+
     const [likes, setLikes] = useState(post.likes || []);
     const [isLiked, setIsLiked] = useState(user && post.likes?.includes(user._id));
     const [showComments, setShowComments] = useState(false);
     const [quoteContent, setQuoteContent] = useState("");
     const [quoteDialogOpen, setQuoteDialogOpen] = useState(false);
     const [editDialogOpen, setEditDialogOpen] = useState(false);
-    const [postContent, setPostContent] = useState(post.content);
-    const [editContent, setEditContent] = useState(post.content);
+    const [postContent, setPostContent] = useState(post.content || "");
+    const [editContent, setEditContent] = useState(post.content || "");
     const [isUpdating, setIsUpdating] = useState(false);
 
     const handleLike = async (e) => {
@@ -99,7 +107,7 @@ export default function PostCard({ post, onDelete, onUpdate }) {
     };
 
     const handleRepost = async (e) => {
-        e.stopPropagation();
+        if (e) e.stopPropagation();
         if (!confirm("Repost this?")) return;
         try {
             const res = await createPost("", post._id);
@@ -132,7 +140,7 @@ export default function PostCard({ post, onDelete, onUpdate }) {
         if (typeof navigator !== "undefined" && navigator.share) {
             try {
                 await navigator.share({
-                    title: `Post by ${post.user?.name || "User"}`,
+                    title: `Post by ${authorName}`,
                     text: postContent,
                     url: postUrl,
                 });
@@ -159,31 +167,31 @@ export default function PostCard({ post, onDelete, onUpdate }) {
             {post.repostOf && (
                 <div className="mb-1 ml-8 flex items-center gap-2 text-xs font-bold text-muted-foreground">
                     <Repeat className="h-3 w-3" />
-                    <span>{post.user.name} reposted</span>
+                    <span>{authorName} reposted</span>
                 </div>
             )}
 
             <div className="flex gap-3">
-                <Link href={`/user/${post.user._id}`} onClick={(e) => e.stopPropagation()}>
+                <Link href={`/user/${authorId}`} onClick={(e) => e.stopPropagation()}>
                     <Avatar className="h-10 w-10">
-                        <AvatarImage src={post.user.avatar?.url} />
-                        <AvatarFallback>{post.user.name?.[0]}</AvatarFallback>
+                        <AvatarImage src={authorAvatar} />
+                        <AvatarFallback>{authorName[0]}</AvatarFallback>
                     </Avatar>
                 </Link>
 
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1 text-sm truncate">
-                            <Link href={`/user/${post.user._id}`} className="font-bold hover:underline" onClick={(e) => e.stopPropagation()}>
-                                {post.user.name}
+                            <Link href={`/user/${authorId}`} className="font-bold hover:underline" onClick={(e) => e.stopPropagation()}>
+                                {authorName}
                             </Link>
-                            <span className="text-muted-foreground truncate">@{post.user.username || post.user.email.split('@')[0]}</span>
+                            <span className="text-muted-foreground truncate">@{authorUsername}</span>
                             <span className="text-muted-foreground">·</span>
                             <span className="text-muted-foreground hover:underline">
-                                {formatDistanceToNow(new Date(post.createdAt))}
+                                {formatDistanceToNow(new Date(post.createdAt || Date.now()))}
                             </span>
                         </div>
-                        {user && (user._id === post.user._id || user.role === "admin") && (
+                        {user && authorId && (user._id === authorId || user.role === "admin") && (
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:bg-primary/10 hover:text-primary">
@@ -205,7 +213,7 @@ export default function PostCard({ post, onDelete, onUpdate }) {
                     </div>
 
                     <div className="mt-1 text-sm whitespace-pre-wrap leading-normal">
-                        {postContent.split(/(\s+)/).map((part, i) => {
+                        {(postContent || "").split(/(\s+)/).map((part, i) => {
                             if (part.startsWith('#') && part.length > 1) {
                                 const tag = part.substring(1); // remove #
                                 return (
@@ -241,11 +249,11 @@ export default function PostCard({ post, onDelete, onUpdate }) {
                             <div className="flex items-center gap-2 mb-1">
                                 <Avatar className="h-5 w-5">
                                     <AvatarImage src={post.repostOf.user?.avatar?.url} />
-                                    <AvatarFallback>{post.repostOf.user?.name?.[0]}</AvatarFallback>
+                                    <AvatarFallback>{post.repostOf.user?.name?.[0] || "U"}</AvatarFallback>
                                 </Avatar>
-                                <span className="font-bold text-sm">{post.repostOf.user?.name}</span>
-                                <span className="text-muted-foreground text-sm">@{post.repostOf.user?.username}</span>
-                                <span className="text-muted-foreground text-sm">· {formatDistanceToNow(new Date(post.repostOf.createdAt))}</span>
+                                <span className="font-bold text-sm">{post.repostOf.user?.name || "User"}</span>
+                                <span className="text-muted-foreground text-sm">@{post.repostOf.user?.username || (post.repostOf.user?.email ? post.repostOf.user.email.split('@')[0] : "user")}</span>
+                                <span className="text-muted-foreground text-sm">· {formatDistanceToNow(new Date(post.repostOf.createdAt || Date.now()))}</span>
                             </div>
                             <p className="text-sm">{post.repostOf.content}</p>
                         </div>
@@ -259,7 +267,6 @@ export default function PostCard({ post, onDelete, onUpdate }) {
                             onClick={(e) => { e.stopPropagation(); setShowComments(!showComments); }}
                         >
                             <MessageCircle className="h-4 w-4" />
-                            {/* <span className="ml-2 text-xs group-hover:text-blue-500">24</span> */}
                         </Button>
 
                         <DropdownMenu>
@@ -272,28 +279,29 @@ export default function PostCard({ post, onDelete, onUpdate }) {
                                 <DropdownMenuItem onClick={handleRepost}>
                                     <Repeat className="w-4 h-4 mr-2" /> Repost
                                 </DropdownMenuItem>
-                                <Dialog open={quoteDialogOpen} onOpenChange={setQuoteDialogOpen}>
-                                    <DialogTrigger asChild>
-                                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                            <MessageCircle className="w-4 h-4 mr-2" /> Quote
-                                        </DropdownMenuItem>
-                                    </DialogTrigger>
-                                    <DialogContent>
-                                        <DialogHeader>
-                                            <DialogTitle>Quote Repost</DialogTitle>
-                                        </DialogHeader>
-                                        <Textarea
-                                            value={quoteContent}
-                                            onChange={(e) => setQuoteContent(e.target.value)}
-                                            placeholder="Add a comment..."
-                                        />
-                                        <DialogFooter>
-                                            <Button onClick={handleQuoteRepost}>Post</Button>
-                                        </DialogFooter>
-                                    </DialogContent>
-                                </Dialog>
+                                <DropdownMenuItem onClick={() => setQuoteDialogOpen(true)}>
+                                    <MessageCircle className="w-4 h-4 mr-2" /> Quote
+                                </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
+
+                        {/* Separate Quote Repost Modal */}
+                        <Dialog open={quoteDialogOpen} onOpenChange={setQuoteDialogOpen}>
+                            <DialogContent onClick={(e) => e.stopPropagation()}>
+                                <DialogHeader>
+                                    <DialogTitle>Quote Repost</DialogTitle>
+                                </DialogHeader>
+                                <Textarea
+                                    value={quoteContent}
+                                    onChange={(e) => setQuoteContent(e.target.value)}
+                                    placeholder="Add a comment..."
+                                    className="min-h-[100px] bg-secondary/30 text-sm focus-visible:ring-1 focus-visible:ring-primary"
+                                />
+                                <DialogFooter>
+                                    <Button onClick={handleQuoteRepost}>Post</Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
 
                         <Button
                             variant="ghost"
