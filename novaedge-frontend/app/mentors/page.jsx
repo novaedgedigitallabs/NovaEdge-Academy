@@ -15,12 +15,11 @@ import {
     DialogDescription,
     DialogFooter 
 } from "@/components/ui/dialog";
-import { Linkedin, Twitter, Globe, Briefcase, Calendar, MessageSquare, Check, Star, Sparkles, Clock, Loader2 } from "lucide-react";
+import { Linkedin, Twitter, Briefcase, Calendar, MessageSquare, Clock, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 import { getAllMentors, bookMentorshipSession } from "@/services/mentors";
 
 const DEFAULT_MENTORS = [
@@ -105,7 +104,6 @@ export default function MentorsPage() {
     const [mentorsList, setMentorsList] = useState(DEFAULT_MENTORS);
     const [loading, setLoading] = useState(true);
     const [selectedMentor, setSelectedMentor] = useState(null);
-    const [following, setFollowing] = useState({});
 
     // Booking Modal Form State
     const [bookingDate, setBookingDate] = useState(() => {
@@ -134,30 +132,42 @@ export default function MentorsPage() {
         fetchMentorsData();
     }, []);
 
-    const toggleFollow = (mentorId, name, e) => {
-        if (e) e.stopPropagation();
-        setFollowing((prev) => {
-            const newState = !prev[mentorId];
-            toast.success(newState ? `Now following ${name}` : `Unfollowed ${name}`);
-            return { ...prev, [mentorId]: newState };
-        });
-    };
-
     const handleConfirmBooking = async () => {
         if (!selectedMentor) return;
 
         setIsBooking(true);
         try {
-            const res = await bookMentorshipSession({
+            await bookMentorshipSession({
                 mentorId: selectedMentor._id || selectedMentor.id,
                 date: bookingDate,
                 timeSlot: selectedTimeSlot,
                 topic: bookingTopic || "1-on-1 Mentorship Guidance",
             }).catch(() => null);
 
-            toast.success(`🎉 Mentorship session booked with ${selectedMentor.name} for ${bookingDate} at ${selectedTimeSlot}!`);
+            // Format date for Upcoming Schedule widget
+            const d = new Date(bookingDate);
+            const dateStr = d.toLocaleDateString("en-US", { month: "short", day: "2-digit" });
+
+            const newBooking = {
+                id: `b_${Date.now()}`,
+                title: `1-on-1 Session with ${selectedMentor.name}`,
+                date: dateStr,
+                time: selectedTimeSlot,
+                type: "Mentorship",
+                href: "/mentors"
+            };
+
+            const existing = JSON.parse(localStorage.getItem("novaedge_my_bookings") || "[]");
+            localStorage.setItem("novaedge_my_bookings", JSON.stringify([newBooking, ...existing]));
+
+            toast.success(`🎉 Session booked with ${selectedMentor.name} for ${bookingDate} at ${selectedTimeSlot}! Added to your Upcoming Schedule.`);
             setSelectedMentor(null);
             setBookingTopic("");
+
+            // Refresh schedule on UI
+            setTimeout(() => {
+                window.location.reload();
+            }, 800);
         } catch (error) {
             toast.error("Failed to book session. Please try again.");
         } finally {
@@ -180,7 +190,6 @@ export default function MentorsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                     {mentorsList.map((mentor) => {
                         const mId = mentor._id || mentor.id;
-                        const isFollowing = !!following[mId];
                         return (
                             <Card 
                                 key={mId} 
@@ -274,26 +283,26 @@ export default function MentorsPage() {
             {/* Mentor Details & Booking Modal */}
             <Dialog open={!!selectedMentor} onOpenChange={(open) => !open && setSelectedMentor(null)}>
                 {selectedMentor && (
-                    <DialogContent className="sm:max-w-lg bg-card/95 backdrop-blur-xl border border-border/80 rounded-2xl p-6 shadow-2xl">
-                        <DialogHeader className="text-left pb-2 border-b border-border/40">
-                            <div className="flex items-center gap-4">
-                                <Avatar className="w-16 h-16 border-2 border-primary/30 shadow-md overflow-hidden">
+                    <DialogContent className="sm:max-w-lg bg-card border border-border rounded-2xl p-6 shadow-2xl overflow-hidden">
+                        <DialogHeader className="text-left pb-3 border-b border-border/60">
+                            <div className="flex items-start gap-4 pr-6">
+                                <Avatar className="w-14 h-14 border-2 border-primary/30 shadow-md shrink-0 overflow-hidden">
                                     <AvatarImage src={selectedMentor.image} alt={selectedMentor.name} className="object-cover w-full h-full" />
                                     <AvatarFallback className="text-xl font-bold bg-primary/10 text-primary">
                                         {selectedMentor.name.charAt(0)}
                                     </AvatarFallback>
                                 </Avatar>
-                                <div>
-                                    <div className="flex items-center gap-2">
-                                        <DialogTitle className="text-xl font-bold text-foreground">
+                                <div className="flex flex-col gap-0.5 min-w-0">
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                        <DialogTitle className="text-lg font-bold text-foreground leading-tight">
                                             Book 1-on-1 Session with {selectedMentor.name}
                                         </DialogTitle>
-                                        <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px]">
+                                        <Badge className="bg-primary/15 text-primary border-primary/30 text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0">
                                             {selectedMentor.company || "Top Tech"}
                                         </Badge>
                                     </div>
-                                    <DialogDescription className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
-                                        <Briefcase className="w-3.5 h-3.5 text-primary" /> {selectedMentor.role}
+                                    <DialogDescription className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                                        <Briefcase className="w-3.5 h-3.5 text-primary shrink-0" /> {selectedMentor.role}
                                     </DialogDescription>
                                 </div>
                             </div>
@@ -317,7 +326,7 @@ export default function MentorsPage() {
                                         type="date"
                                         value={bookingDate}
                                         onChange={(e) => setBookingDate(e.target.value)}
-                                        className="text-xs bg-secondary/40"
+                                        className="text-xs bg-secondary/40 border-border/80"
                                     />
                                 </div>
 
@@ -328,7 +337,7 @@ export default function MentorsPage() {
                                     <select
                                         value={selectedTimeSlot}
                                         onChange={(e) => setSelectedTimeSlot(e.target.value)}
-                                        className="w-full h-9 rounded-md border border-input bg-secondary/40 px-3 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                                        className="w-full h-9 rounded-md border border-border/80 bg-secondary/40 px-3 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                                     >
                                         {TIME_SLOTS.map((slot) => (
                                             <option key={slot} value={slot} className="bg-background text-foreground">
@@ -349,7 +358,7 @@ export default function MentorsPage() {
                                     placeholder="e.g. Code review for my Next.js app, or System Design advice..."
                                     value={bookingTopic}
                                     onChange={(e) => setBookingTopic(e.target.value)}
-                                    className="text-xs bg-secondary/40 resize-none"
+                                    className="text-xs bg-secondary/40 border-border/80 resize-none"
                                 />
                             </div>
                         </div>

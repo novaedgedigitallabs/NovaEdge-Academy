@@ -45,13 +45,18 @@ export default function RightSidebar() {
     const [following, setFollowing] = useState({});
     const [loadingMentors, setLoadingMentors] = useState({});
 
-    // Fetch dynamic backend data on mount
+    // Fetch dynamic backend data & local bookings on mount
     useEffect(() => {
+        const savedBookings = typeof window !== "undefined" 
+            ? JSON.parse(localStorage.getItem("novaedge_my_bookings") || "[]") 
+            : [];
+
         // Fetch Live Classes / Schedule
         apiGet("/api/v1/user/live/calendar")
             .then((res) => {
+                let apiEvents = [];
                 if (res?.classes && Array.isArray(res.classes) && res.classes.length > 0) {
-                    const formatted = res.classes.slice(0, 3).map((item) => {
+                    apiEvents = res.classes.map((item) => {
                         const d = new Date(item.startTime || Date.now());
                         return {
                             id: item._id,
@@ -62,10 +67,17 @@ export default function RightSidebar() {
                             href: `/courses`
                         };
                     });
-                    setSchedule(formatted);
+                }
+                const combined = [...savedBookings, ...apiEvents];
+                if (combined.length > 0) {
+                    setSchedule(combined.slice(0, 3));
                 }
             })
-            .catch(() => {});
+            .catch(() => {
+                if (savedBookings.length > 0) {
+                    setSchedule([...savedBookings, ...DEFAULT_SCHEDULE].slice(0, 3));
+                }
+            });
 
         // Fetch Trending Hashtags
         apiGet("/api/v1/hashtag/trending")
