@@ -57,7 +57,7 @@ export default function Feed() {
     const activeCourse = enrollments[0]; // Assuming the first one is the most recent/active
 
     return (
-        <div className="flex w-full min-w-0 flex-col border-x border-border pb-10 sm:w-[600px] lg:w-[700px]">
+        <div className="flex w-full min-w-0 flex-col pb-10 sm:w-[600px] lg:w-[700px]">
             {/* Learning Section */}
             <div className="flex flex-col gap-6 p-6 border-b border-border bg-secondary/5">
                 <div className="flex flex-col gap-2">
