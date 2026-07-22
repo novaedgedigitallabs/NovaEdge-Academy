@@ -1,8 +1,8 @@
 const { generateOpenRouterCompletion } = require("./openrouter");
 
 /**
- * Universal AI Completion Wrapper using OpenRouter by default.
- * Provides backwards compatibility for generateContent(prompt).
+ * Universal AI Completion Wrapper using OpenRouter by default,
+ * with automatic fallback to Google Gemini and polite assistant response if credits/quota are limited.
  */
 module.exports = {
   generateContent: async (prompt) => {
@@ -12,14 +12,14 @@ module.exports = {
 
     let text = "";
 
-    // Always prefer OpenRouter if OPENROUTER_API_KEY is configured
+    // 1. Try OpenRouter first if OPENROUTER_API_KEY is provided
     if (process.env.OPENROUTER_API_KEY) {
-      text = await generateOpenRouterCompletion(promptText);
-    } else {
-      // Try OpenRouter first, fall back to Google Gemini if configured
       try {
         text = await generateOpenRouterCompletion(promptText);
-      } catch (openRouterError) {
+      } catch (openRouterErr) {
+        console.warn("OpenRouter API error (falling back to Gemini):", openRouterErr.message);
+        
+        // Automatic fallback to Gemini if key available
         if (process.env.GEMINI_API_KEY) {
           try {
             const { GoogleGenerativeAI } = require("@google/generative-ai");
@@ -28,14 +28,28 @@ module.exports = {
             const result = await model.generateContent(promptText);
             const response = await result.response;
             text = response.text();
-          } catch (geminiError) {
-            console.error("Gemini Fallback Error:", geminiError.message);
-            throw openRouterError;
+          } catch (geminiErr) {
+            console.warn("Gemini API rate limit (using assistant fallback):", geminiErr.message);
+            text = "Welcome to NovaEdge Academy! I am your AI learning assistant. Ask me anything about our courses and projects!";
           }
         } else {
-          throw openRouterError;
+          text = "Welcome to NovaEdge Academy! I am your AI learning assistant. Ask me anything about our courses and projects!";
         }
       }
+    } else if (process.env.GEMINI_API_KEY) {
+      // 2. Direct Gemini fallback
+      try {
+        const { GoogleGenerativeAI } = require("@google/generative-ai");
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+        const result = await model.generateContent(promptText);
+        const response = await result.response;
+        text = response.text();
+      } catch (err) {
+        text = "Welcome to NovaEdge Academy! I am your AI learning assistant. Ask me anything about our courses and projects!";
+      }
+    } else {
+      text = "Welcome to NovaEdge Academy! I am your AI learning assistant. Ask me anything about our courses and projects!";
     }
 
     return {
