@@ -192,7 +192,10 @@ exports.updatePost = async (req, res) => {
             return res.status(404).json({ success: false, message: "Post not found" });
         }
 
-        if (post.user.toString() !== req.user.id && req.user.role !== "admin") {
+        const userIdStr = (req.user._id || req.user.id || "").toString();
+        const postUserIdStr = (post.user._id || post.user || "").toString();
+
+        if (postUserIdStr !== userIdStr && req.user.role !== "admin") {
             return res.status(403).json({ success: false, message: "Unauthorized to edit this post" });
         }
 

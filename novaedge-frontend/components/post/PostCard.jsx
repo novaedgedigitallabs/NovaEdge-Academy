@@ -83,12 +83,13 @@ export default function PostCard({ post, onDelete, onUpdate }) {
                 setPostContent(editContent);
                 setIsEdited(true);
                 setEditDialogOpen(false);
-                if (onUpdate) onUpdate(res.post);
+                if (onUpdate) onUpdate(res.post || { ...post, content: editContent, isEdited: true });
             } else {
                 toast.error(res.message || "Failed to update post");
             }
         } catch (error) {
-            toast.error("Failed to update post");
+            console.error("Update post error:", error);
+            toast.error(error.response?.data?.message || error.message || "Failed to update post");
         } finally {
             setIsUpdating(false);
         }
