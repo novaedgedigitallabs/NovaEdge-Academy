@@ -9,11 +9,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Loader2, User, Mail, Phone, AtSign, FileText, CheckCircle, Upload, Camera, Github, Linkedin, Globe, Twitter, Link as LinkIcon } from "lucide-react";
+import { Loader2, User, Mail, Phone, AtSign, FileText, CheckCircle, Upload, Camera, Github, Linkedin, Globe, Twitter, Link as LinkIcon, LogOut } from "lucide-react";
 import { toast } from "sonner";
 
 export default function EditProfilePage() {
-    const { user, setUser } = useAuth();
+    const { user, setUser, logout } = useAuth();
     const fileInputRef = useRef(null);
     
     const [name, setName] = useState("");
@@ -353,6 +353,30 @@ export default function EditProfilePage() {
                         </Button>
                     </div>
                 </form>
+
+                {/* Logout Account Section */}
+                <div className="border-t border-border/40 pt-6 mt-8">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-destructive/10 border border-destructive/20">
+                        <div>
+                            <h4 className="text-sm font-bold text-destructive flex items-center gap-2">
+                                <LogOut className="w-4 h-4" /> Log Out of Account
+                            </h4>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                                Sign out of your current session on this browser.
+                            </p>
+                        </div>
+                        <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            onClick={logout}
+                            className="rounded-full text-xs font-semibold px-5 shadow-sm cursor-pointer"
+                        >
+                            <LogOut className="w-4 h-4 mr-1.5" />
+                            Log Out Now
+                        </Button>
+                    </div>
+                </div>
             </CardContent>
         </Card>
     );

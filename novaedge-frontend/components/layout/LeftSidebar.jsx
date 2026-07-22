@@ -121,6 +121,16 @@ export default function LeftSidebar() {
                             </Link>
                         );
                     })}
+
+                    {user && (
+                        <button
+                            onClick={logout}
+                            className="flex items-center justify-start gap-4 rounded-full px-4 py-3 transition-all font-medium text-destructive hover:bg-destructive/10 hover:text-destructive group w-full text-left cursor-pointer"
+                        >
+                            <LogOut className="h-6 w-6 shrink-0 stroke-[1.75] transition-transform group-hover:scale-105" />
+                            <p className="text-base max-lg:hidden">Logout</p>
+                        </button>
+                    )}
                 </div>
 
                 <Button className="mt-2 w-full rounded-full text-base font-bold h-12 lg:h-13 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md shadow-primary/20">

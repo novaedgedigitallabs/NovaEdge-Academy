@@ -5,7 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
-import { Shield, Smartphone, User } from "lucide-react";
+import { Shield, Smartphone, User, LogOut } from "lucide-react";
+import { useAuth } from "@/context/auth-context";
 
 const sidebarNavItems = [
     {
@@ -27,6 +28,7 @@ const sidebarNavItems = [
 
 export default function SettingsLayout({ children }) {
     const pathname = usePathname();
+    const { logout } = useAuth();
 
     return (
         <AppLayout className="max-w-5xl">
@@ -57,6 +59,16 @@ export default function SettingsLayout({ children }) {
                                         {item.title}
                                     </Link>
                                 ))}
+                                <button
+                                    onClick={logout}
+                                    className={cn(
+                                        buttonVariants({ variant: "ghost" }),
+                                        "justify-start rounded-xl text-sm text-destructive hover:bg-destructive/10 hover:text-destructive cursor-pointer mt-4"
+                                    )}
+                                >
+                                    <LogOut className="w-4 h-4 mr-2" />
+                                    Logout Account
+                                </button>
                             </nav>
                         </aside>
                         <div className="flex-1">{children}</div>
