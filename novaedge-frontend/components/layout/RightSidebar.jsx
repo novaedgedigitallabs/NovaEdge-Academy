@@ -24,78 +24,94 @@ export default function RightSidebar() {
     const [loadingMentors, setLoadingMentors] = useState({});
     const [loadingData, setLoadingData] = useState(true);
 
-    // Fetch dynamic backend data & local bookings on mount
-    useEffect(() => {
-        const loadAllData = async () => {
-            setLoadingData(true);
+    const loadAllData = async () => {
+        setLoadingData(true);
 
-            // 1. Load Bookings / Schedule
-            const savedBookings = typeof window !== "undefined" 
-                ? JSON.parse(localStorage.getItem("novaedge_my_bookings") || "[]") 
-                : [];
+        // 1. Load Bookings / Schedule
+        const savedBookings = typeof window !== "undefined" 
+            ? JSON.parse(localStorage.getItem("novaedge_my_bookings") || "[]") 
+            : [];
 
-            let backendBookings = [];
-            try {
-                const res = await apiGet("/api/v1/mentors/my-bookings");
-                if (res?.success && Array.isArray(res.data)) {
-                    backendBookings = res.data.map(b => {
-                        const d = new Date(b.date);
-                        return {
-                            id: b._id,
-                            title: `1-on-1 Session with ${b.mentorName || "Mentor"}`,
-                            date: d.toLocaleDateString("en-US", { month: "short", day: "2-digit" }),
-                            time: b.timeSlot,
-                            type: "Mentorship",
-                            href: "/mentors"
-                        };
-                    });
-                }
-            } catch (e) {}
-
-            const allUserBookings = [...savedBookings, ...backendBookings];
-            const uniqueBookings = [];
-            const seen = new Set();
-            for (const item of allUserBookings) {
-                const key = `${item.title}-${item.date}-${item.time}`;
-                if (!seen.has(key)) {
-                    seen.add(key);
-                    uniqueBookings.push(item);
-                }
+        let backendBookings = [];
+        try {
+            const res = await apiGet("/api/v1/mentors/my-bookings");
+            if (res?.success && Array.isArray(res.data)) {
+                backendBookings = res.data.map(b => {
+                    const d = new Date(b.date);
+                    return {
+                        id: b._id,
+                        title: `1-on-1 Session with ${b.mentorName || "Mentor"}`,
+                        date: d.toLocaleDateString("en-US", { month: "short", day: "2-digit" }),
+                        time: b.timeSlot,
+                        type: "Mentorship",
+                        href: "/mentors"
+                    };
+                });
             }
-            setSchedule(uniqueBookings);
+        } catch (e) {}
 
-            // 2. Load Real Mentors (with Images)
-            try {
-                const mentorRes = await apiGet("/api/v1/mentors");
-                if (mentorRes?.success && Array.isArray(mentorRes.data)) {
-                    setMentors(mentorRes.data.map(m => ({
-                        id: m._id || m.id,
-                        name: m.name,
-                        role: m.role || "Mentor",
-                        image: m.image,
-                        avatar: m.name ? m.name.substring(0, 2).toUpperCase() : "M",
-                        company: m.company
-                    })));
-                }
-            } catch (e) {}
+        const allUserBookings = [...savedBookings, ...backendBookings];
+        const uniqueBookings = [];
+        const seen = new Set();
+        for (const item of allUserBookings) {
+            const key = `${item.title}-${item.date}-${item.time}`;
+            if (!seen.has(key)) {
+                seen.add(key);
+                uniqueBookings.push(item);
+            }
+        }
+        setSchedule(uniqueBookings);
 
-            // 3. Load Dynamic Hashtags
-            try {
-                const hashRes = await apiGet("/api/v1/hashtag/trending");
-                if (hashRes?.hashtags && Array.isArray(hashRes.hashtags)) {
-                    const formatted = hashRes.hashtags.map((h) => ({
-                        tag: `#${h.tag.replace(/^#/, "")}`,
-                        posts: `${h.count || 1} posts`,
-                        category: h.category || "Trending"
-                    }));
-                    setHashtags(formatted);
-                }
-            } catch (e) {}
+        // 2. Load Real Mentors (with Images)
+        try {
+            const mentorRes = await apiGet("/api/v1/mentors");
+            if (mentorRes?.success && Array.isArray(mentorRes.data)) {
+                setMentors(mentorRes.data.map(m => ({
+                    id: m._id || m.id,
+                    name: m.name,
+                    role: m.role || "Mentor",
+                    image: m.image,
+                    avatar: m.name ? m.name.substring(0, 2).toUpperCase() : "M",
+                    company: m.company
+                })));
+            }
+        } catch (e) {}
 
-            setLoadingData(false);
+        // 3. Load Dynamic Hashtags
+        try {
+            const hashRes = await apiGet("/api/v1/hashtag/trending");
+            if (hashRes?.hashtags && Array.isArray(hashRes.hashtags)) {
+                const formatted = hashRes.hashtags.map((h) => ({
+                    tag: `#${h.tag.replace(/^#/, "")}`,
+                    posts: `${h.count || 1} posts`,
+                    category: h.category || "Trending"
+                }));
+                setHashtags(formatted);
+            }
+        } catch (e) {}
+
+        setLoadingData(false);
+    };
+
+    // Fetch dynamic backend data & listen to local booking updates
+    useEffect(() => {
+        loadAllData();
+
+        const handleBookingUpdate = () => {
+            loadAllData();
         };
 
-        loadAllData();
+        if (typeof window !== "undefined") {
+            window.addEventListener("novaedge_booking_updated", handleBookingUpdate);
+            window.addEventListener("storage", handleBookingUpdate);
+        }
+
+        return () => {
+            if (typeof window !== "undefined") {
+                window.removeEventListener("novaedge_booking_updated", handleBookingUpdate);
+                window.removeEventListener("storage", handleBookingUpdate);
+            }
+        };
     }, []);
 
     const executeSearch = () => {
@@ -152,8 +168,13 @@ export default function RightSidebar() {
 
             {/* 2. Upcoming Schedule Widget */}
             <div className="flex flex-col rounded-2xl border border-border/60 bg-card/40 backdrop-blur-md overflow-hidden">
-                <div onClick={() => router.push("/courses")} className="px-4 pt-4 mb-3 cursor-pointer hover:opacity-80 transition-opacity">
+                <div onClick={() => router.push("/community")} className="px-4 pt-4 mb-3 flex items-center justify-between cursor-pointer hover:opacity-80 transition-opacity">
                     <h3 className="text-base font-bold text-foreground">Upcoming Schedule</h3>
+                    {schedule.length > 0 && (
+                        <span className="text-[10px] font-extrabold bg-primary/20 text-primary px-2 py-0.5 rounded-full border border-primary/30">
+                            {schedule.length} {schedule.length === 1 ? "Event" : "Events"}
+                        </span>
+                    )}
                 </div>
 
                 {schedule.length > 0 ? (
@@ -161,12 +182,12 @@ export default function RightSidebar() {
                         {schedule.map((event, i) => (
                             <div 
                                 key={event.id || i} 
-                                onClick={() => router.push(event.href || "/courses")}
+                                onClick={() => router.push(event.href || "/community")}
                                 className="flex items-start gap-3 px-4 py-3 hover:bg-secondary/40 transition-colors border-t border-border/40 cursor-pointer"
                             >
                                 <div className="flex flex-col items-center justify-center h-11 w-11 rounded-xl bg-primary/10 text-primary flex-shrink-0 border border-primary/20">
-                                    <span className="text-[10px] font-bold uppercase">{event.date?.split(' ')?.[0] || "JAN"}</span>
-                                    <span className="text-sm font-black leading-none">{event.date?.split(' ')?.[1] || "01"}</span>
+                                    <span className="text-[10px] font-bold uppercase">{event.date?.split(' ')?.[0] || "DEC"}</span>
+                                    <span className="text-sm font-black leading-none">{event.date?.split(' ')?.[1]?.replace(',', '') || "11"}</span>
                                 </div>
                                 <div className="flex flex-col flex-1 min-w-0">
                                     <p className="text-sm font-semibold text-foreground line-clamp-1">{event.title}</p>
@@ -186,13 +207,13 @@ export default function RightSidebar() {
                     <div className="p-5 text-center flex flex-col items-center justify-center gap-2 border-t border-border/40">
                         <Calendar className="w-7 h-7 text-muted-foreground/40" />
                         <p className="text-xs font-semibold text-foreground">No upcoming sessions</p>
-                        <p className="text-[11px] text-muted-foreground">Book a 1-on-1 session with a mentor to get started.</p>
+                        <p className="text-[11px] text-muted-foreground">Book a 1-on-1 session or register for workshops.</p>
                         <Button 
                             size="sm" 
-                            onClick={() => router.push("/mentors")} 
+                            onClick={() => router.push("/community")} 
                             className="mt-1 rounded-full h-7 text-xs px-3 bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20"
                         >
-                            Book Session
+                            Explore Events
                         </Button>
                     </div>
                 )}

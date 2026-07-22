@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare, Calendar, Github, Plus, CheckCircle2, Clock, User, Loader2, Sparkles } from "lucide-react";
+import { MessageSquare, Calendar, Github, Plus, CheckCircle2, Clock, User, Loader2, Sparkles, ExternalLink, Video } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/context/auth-context";
@@ -20,6 +20,7 @@ const DEFAULT_EVENTS = [
         time: "7:00 PM IST",
         category: "Workshop",
         speaker: "Sarah Johnson",
+        joinUrl: "https://discord.gg/novaedge-live-stage"
     },
     {
         id: "evt-2",
@@ -29,6 +30,7 @@ const DEFAULT_EVENTS = [
         time: "6:00 PM IST",
         category: "Masterclass",
         speaker: "David Chen",
+        joinUrl: "https://meet.google.com/novaedge-system-design"
     },
     {
         id: "evt-3",
@@ -38,6 +40,7 @@ const DEFAULT_EVENTS = [
         time: "8:00 PM IST",
         category: "Webinar",
         speaker: "Alex Rivera",
+        joinUrl: "https://discord.gg/novaedge-ai-workshop"
     }
 ];
 
@@ -46,6 +49,7 @@ export default function CommunityPage() {
     const [events, setEvents] = useState(DEFAULT_EVENTS);
     const [registeredEvents, setRegisteredEvents] = useState({});
     const [loadingRegister, setLoadingRegister] = useState({});
+    const [selectedEvent, setSelectedEvent] = useState(null);
 
     // Modal state for adding a new event
     const [isAddEventOpen, setIsAddEventOpen] = useState(false);
@@ -71,10 +75,13 @@ export default function CommunityPage() {
     }, []);
 
     // Handle Event Registration
-    const handleRegister = (event) => {
+    const handleRegister = (event, e) => {
+        if (e) e.stopPropagation();
         const eventId = event.id;
+
         if (registeredEvents[eventId]) {
-            toast.info(`You are already registered for "${event.title}"!`);
+            // Already registered - open Event Details modal
+            setSelectedEvent(event);
             return;
         }
 
@@ -82,16 +89,14 @@ export default function CommunityPage() {
 
         setTimeout(() => {
             // Update local state
-            setRegisteredEvents((prev) => {
-                const updated = { ...prev, [eventId]: true };
-                localStorage.setItem("novaedge_event_registrations", JSON.stringify(updated));
-                return updated;
-            });
+            const updatedRegs = { ...registeredEvents, [eventId]: true };
+            setRegisteredEvents(updatedRegs);
+            localStorage.setItem("novaedge_event_registrations", JSON.stringify(updatedRegs));
 
             // Save to Upcoming Schedule in RightSidebar!
             const currentBookings = JSON.parse(localStorage.getItem("novaedge_my_bookings") || "[]");
             const newBookingItem = {
-                id: `evt-reg-${Date.now()}`,
+                id: `evt-reg-${eventId}`,
                 title: event.title,
                 date: event.date,
                 time: event.time,
@@ -105,9 +110,12 @@ export default function CommunityPage() {
             setLoadingRegister((prev) => ({ ...prev, [eventId]: false }));
             toast.success(`🎉 Registered for "${event.title}"! Added to your Upcoming Schedule.`);
             
-            // Dispatch storage event for instant RightSidebar sync
-            window.dispatchEvent(new Event("storage"));
-        }, 500);
+            // Dispatch custom event for real-time RightSidebar sync
+            if (typeof window !== "undefined") {
+                window.dispatchEvent(new Event("novaedge_booking_updated"));
+                window.dispatchEvent(new Event("storage"));
+            }
+        }, 300);
     };
 
     // Handle Adding New Event
@@ -129,6 +137,7 @@ export default function CommunityPage() {
                 category: newEventCategory,
                 description: newEventDescription.trim(),
                 speaker: newEventSpeaker.trim() || user?.name || "Community Host",
+                joinUrl: "https://discord.gg/novaedge-live-stage"
             };
 
             const updatedEvents = [createdEvent, ...events];
@@ -234,7 +243,8 @@ export default function CommunityPage() {
                             return (
                                 <div 
                                     key={event.id} 
-                                    className="group relative overflow-hidden rounded-2xl border border-border/70 bg-card/50 backdrop-blur-md hover:border-primary/50 transition-all flex flex-col justify-between shadow-lg"
+                                    onClick={() => setSelectedEvent(event)}
+                                    className="group relative overflow-hidden rounded-2xl border border-border/70 bg-card/50 backdrop-blur-md hover:border-primary/50 transition-all flex flex-col justify-between shadow-lg cursor-pointer"
                                 >
                                     <div className="p-5 space-y-3">
                                         <div className="flex items-center justify-between">
@@ -267,11 +277,14 @@ export default function CommunityPage() {
                                         </div>
                                     </div>
 
-                                    <div className="p-4 border-t border-border/40 bg-secondary/20 flex justify-end">
+                                    <div className="p-4 border-t border-border/40 bg-secondary/20 flex items-center justify-between">
+                                        <span className="text-[10px] font-semibold text-muted-foreground">
+                                            {isRegistered ? "Click to view link" : "Seats available"}
+                                        </span>
                                         <Button 
                                             size="sm"
                                             disabled={isLoading}
-                                            onClick={() => handleRegister(event)}
+                                            onClick={(e) => handleRegister(event, e)}
                                             className={`rounded-full text-xs font-bold px-4 h-8 transition-all cursor-pointer flex items-center gap-1.5 ${
                                                 isRegistered 
                                                     ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30" 
@@ -298,6 +311,78 @@ export default function CommunityPage() {
                     </div>
                 </div>
             </div>
+
+            {/* View Event Details & Join Live Stream Modal */}
+            <Dialog open={!!selectedEvent} onOpenChange={() => setSelectedEvent(null)}>
+                {selectedEvent && (
+                    <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-2xl border-border/80 shadow-2xl rounded-2xl">
+                        <DialogHeader className="border-b border-border/60 pb-3">
+                            <div className="flex items-center gap-2 mb-1">
+                                <Badge className="bg-primary/20 text-primary border-primary/30 text-[10px] font-bold">
+                                    {selectedEvent.category || "Live Event"}
+                                </Badge>
+                                {registeredEvents[selectedEvent.id] && (
+                                    <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[10px] font-bold">
+                                        Registered ✓
+                                    </Badge>
+                                )}
+                            </div>
+                            <DialogTitle className="text-lg font-bold leading-snug">
+                                {selectedEvent.title}
+                            </DialogTitle>
+                            <DialogDescription className="text-xs text-muted-foreground pt-1">
+                                Hosted by <span className="text-foreground font-semibold">{selectedEvent.speaker || "NovaEdge Mentor"}</span>
+                            </DialogDescription>
+                        </DialogHeader>
+
+                        <div className="space-y-4 py-2">
+                            <p className="text-xs text-muted-foreground leading-relaxed">
+                                {selectedEvent.description}
+                            </p>
+
+                            <div className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-secondary/40 border border-border/60 text-xs">
+                                <div>
+                                    <span className="text-[10px] font-bold text-muted-foreground uppercase">Date</span>
+                                    <p className="font-semibold text-foreground mt-0.5">{selectedEvent.date}</p>
+                                </div>
+                                <div>
+                                    <span className="text-[10px] font-bold text-muted-foreground uppercase">Time</span>
+                                    <p className="font-semibold text-primary mt-0.5">{selectedEvent.time}</p>
+                                </div>
+                            </div>
+
+                            {registeredEvents[selectedEvent.id] ? (
+                                <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 space-y-2">
+                                    <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs">
+                                        <Video className="w-4 h-4" /> Live Session Stream Access
+                                    </div>
+                                    <p className="text-[11px] text-muted-foreground leading-relaxed">
+                                        You are registered for this event. Click below to join the live stream session when it starts.
+                                    </p>
+                                    <Button 
+                                        onClick={() => window.open(selectedEvent.joinUrl || "https://discord.gg", "_blank")}
+                                        className="w-full mt-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-9 text-xs gap-2 shadow-md cursor-pointer"
+                                    >
+                                        <ExternalLink className="w-3.5 h-3.5" /> Join Live Workshop Stream
+                                    </Button>
+                                </div>
+                            ) : (
+                                <div className="p-4 rounded-xl bg-primary/10 border border-primary/20 space-y-2 text-center">
+                                    <p className="text-xs text-muted-foreground">Register now to reserve your seat and unlock the live stream link.</p>
+                                    <Button 
+                                        onClick={(e) => {
+                                            handleRegister(selectedEvent, e);
+                                        }}
+                                        className="w-full rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-9 text-xs shadow-md cursor-pointer"
+                                    >
+                                        Register For Free Now
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
+                    </DialogContent>
+                )}
+            </Dialog>
 
             {/* Add Event Modal Dialog */}
             <Dialog open={isAddEventOpen} onOpenChange={setIsAddEventOpen}>
