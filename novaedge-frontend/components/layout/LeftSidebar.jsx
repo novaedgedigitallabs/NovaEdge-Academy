@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { 
     LayoutDashboard, 
@@ -82,8 +83,15 @@ export default function LeftSidebar() {
     return (
         <section className="custom-scrollbar sticky left-0 top-0 z-20 flex h-screen w-fit flex-col justify-between overflow-y-auto border-r border-border bg-background pb-6 pt-8 max-md:hidden lg:w-[266px]">
             <div className="flex w-full flex-1 flex-col gap-6 px-6">
-                <Link href="/" className="flex items-center gap-4 px-3">
-                    <span className="text-2xl font-black tracking-tight text-foreground">NovaEdge</span>
+                <Link href="/" className="flex items-center gap-3 px-3">
+                    <Image
+                        src="/Header_logo.webp"
+                        alt="NovaEdge Logo"
+                        width={36}
+                        height={36}
+                        className="h-9 w-9 object-contain shrink-0"
+                    />
+                    <span className="text-2xl font-black tracking-tight text-foreground max-lg:hidden">NovaEdge</span>
                 </Link>
 
                 <div className="flex flex-col gap-1.5">

@@ -26,14 +26,14 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-2 font-bold text-xl tracking-tight">
-            {/* <Image
+          <Link href="/" className="flex items-center gap-3 font-bold text-xl tracking-tight">
+            <Image
               src="/Header_logo.webp"
               alt="NovaEdge Academy Logo"
-              width={32}
-              height={32}
-              className="h-8 w-8 rounded-lg object-contain"
-            /> */}
+              width={36}
+              height={36}
+              className="h-9 w-9 object-contain"
+            />
             <span>NovaEdge Academy</span>
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">

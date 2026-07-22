@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import {
     LayoutDashboard,
@@ -46,8 +47,14 @@ export default function MentorLayout({ children }) {
             {/* Sidebar */}
             <aside className="w-64 border-r border-white/10 bg-zinc-950 hidden md:flex flex-col">
                 <div className="p-6 border-b border-white/10">
-                    <Link href="/" className="flex items-center gap-2">
-                        <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600"></div>
+                    <Link href="/" className="flex items-center gap-3">
+                        <Image
+                            src="/Header_logo.webp"
+                            alt="NovaEdge Logo"
+                            width={32}
+                            height={32}
+                            className="h-8 w-8 object-contain shrink-0"
+                        />
                         <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
                             NovaEdge
                         </span>

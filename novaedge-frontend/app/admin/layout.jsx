@@ -4,6 +4,7 @@
 import { useAuth } from "@/context/auth-context";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -79,20 +80,39 @@ export default function AdminLayout({ children }) {
           {/* Logo Area */}
           <div className="flex items-center justify-between px-4 h-16 shrink-0">
             <AnimatePresence mode="wait">
-              {!collapsed && (
+              {!collapsed ? (
                 <motion.div
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -10 }}
                   transition={{ duration: 0.15 }}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2.5"
                 >
-                  <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-                    <Sparkles className="h-4 w-4 text-white" />
-                  </div>
+                  <Image
+                    src="/logo.webp"
+                    alt="NovaEdge Admin Logo"
+                    width={32}
+                    height={32}
+                    className="h-8 w-8 object-contain shrink-0"
+                  />
                   <span className="font-heading text-sm font-bold tracking-tight text-foreground">
                     NovaEdge Admin
                   </span>
+                </motion.div>
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="mx-auto"
+                >
+                  <Image
+                    src="/logo.webp"
+                    alt="NovaEdge Admin Logo"
+                    width={28}
+                    height={28}
+                    className="h-7 w-7 object-contain"
+                  />
                 </motion.div>
               )}
             </AnimatePresence>
