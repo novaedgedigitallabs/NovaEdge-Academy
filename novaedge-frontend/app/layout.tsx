@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { Toaster } from "@/components/ui/sonner";
+import ShellLayout from "@/components/layout/ShellLayout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,8 +19,6 @@ export const metadata = {
   description: "Learn Cloud Computing, DevOps, and more with NovaEdge Academy.",
 };
 
-
-
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className="dark" style={{ colorScheme: "dark" }} suppressHydrationWarning>
@@ -28,7 +27,9 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased app-glow-bg`}
       >
         <Providers>
-          {children}
+          <ShellLayout>
+            {children}
+          </ShellLayout>
           <Toaster />
         </Providers>
       </body>
