@@ -99,7 +99,7 @@ export default function LeftSidebar() {
                         alt="NovaEdge Academy"
                         width={180}
                         height={40}
-                        className="h-10 w-auto object-contain"
+                        className="h-auto w-auto object-contain"
                         priority
                     />
                 </Link>
