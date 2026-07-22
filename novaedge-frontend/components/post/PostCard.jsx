@@ -183,20 +183,23 @@ export default function PostCard({ post, onDelete, onUpdate }) {
                 </div>
             )}
 
-            <div className="flex gap-3">
-                <Link href={`/user/${authorId}`} onClick={(e) => e.stopPropagation()}>
-                    <Avatar className="h-10 w-10">
-                        <AvatarImage src={authorAvatar} />
-                        <AvatarFallback>{authorName[0]}</AvatarFallback>
-                    </Avatar>
-                </Link>
+            const authorProfileLink = authorUsername ? `/${authorUsername}` : (authorId ? `/${authorId}` : "/profile");
 
-                <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1.5 text-sm truncate">
-                            <Link href={`/user/${authorId}`} className="font-bold hover:underline" onClick={(e) => e.stopPropagation()}>
-                                {authorName}
-                            </Link>
+            return (
+                <div className="flex gap-3">
+                    <Link href={authorProfileLink} onClick={(e) => e.stopPropagation()}>
+                        <Avatar className="h-10 w-10">
+                            <AvatarImage src={authorAvatar} />
+                            <AvatarFallback>{authorName[0]}</AvatarFallback>
+                        </Avatar>
+                    </Link>
+
+                    <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-1.5 text-sm truncate">
+                                <Link href={authorProfileLink} className="font-bold hover:underline" onClick={(e) => e.stopPropagation()}>
+                                    {authorName}
+                                </Link>
                             <span className="text-muted-foreground truncate">@{authorUsername}</span>
                             <span className="text-muted-foreground">·</span>
                             <span className="text-muted-foreground hover:underline">

@@ -89,9 +89,12 @@ export default function CommentItem({ comment, postId, onDelete, replies = [] })
         }
     };
 
+    const authorUsername = author.username || (author.email ? author.email.split('@')[0] : null) || (author.name ? author.name.toLowerCase().replace(/\s+/g, '') : null);
+    const authorProfileLink = authorUsername ? `/${authorUsername}` : (authorId ? `/${authorId}` : "/profile");
+
     return (
         <div className="flex gap-3 py-3">
-            <Link href={`/user/${authorId}`}>
+            <Link href={authorProfileLink}>
                 <Avatar className="w-8 h-8">
                     <AvatarImage src={authorAvatar} />
                     <AvatarFallback>{authorName[0]}</AvatarFallback>
@@ -100,7 +103,7 @@ export default function CommentItem({ comment, postId, onDelete, replies = [] })
             <div className="flex-1">
                 <div className="bg-muted/50 rounded-lg p-3">
                     <div className="flex justify-between items-start mb-1">
-                        <Link href={`/user/${authorId}`} className="font-semibold text-sm hover:underline">
+                        <Link href={authorProfileLink} className="font-semibold text-sm hover:underline">
                             {authorName}
                         </Link>
                         <span className="text-xs text-muted-foreground">

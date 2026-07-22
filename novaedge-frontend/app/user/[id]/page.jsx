@@ -27,7 +27,11 @@ export default function PublicProfilePage() {
         const fetchUser = async () => {
             try {
                 const res = await apiGet(`/api/v1/user/${id}`);
-                if (res.success) {
+                if (res.success && res.user) {
+                    if (res.user.username && id !== res.user.username) {
+                        router.replace(`/${res.user.username}`);
+                        return;
+                    }
                     setUser({ ...res.user, certificates: res.certificates || [] });
                 } else {
                     setError(res.message || "User not found");
