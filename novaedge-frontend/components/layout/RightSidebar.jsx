@@ -3,6 +3,7 @@
 import { Search, Trophy, TrendingUp, Clock, X, Check, Loader2, Calendar, Users, Hash } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -14,7 +15,7 @@ export default function RightSidebar() {
     const router = useRouter();
     const [query, setQuery] = useState("");
     
-    // Dynamic states initialized empty (NO dummy data)
+    // Dynamic states initialized empty
     const [schedule, setSchedule] = useState([]);
     const [leaderboard, setLeaderboard] = useState([]);
     const [mentors, setMentors] = useState([]);
@@ -63,7 +64,7 @@ export default function RightSidebar() {
             }
             setSchedule(uniqueBookings);
 
-            // 2. Load Real Mentors
+            // 2. Load Real Mentors (with Images)
             try {
                 const mentorRes = await apiGet("/api/v1/mentors");
                 if (mentorRes?.success && Array.isArray(mentorRes.data)) {
@@ -71,6 +72,7 @@ export default function RightSidebar() {
                         id: m._id || m.id,
                         name: m.name,
                         role: m.role || "Mentor",
+                        image: m.image,
                         avatar: m.name ? m.name.substring(0, 2).toUpperCase() : "M",
                         company: m.company
                     })));
@@ -251,9 +253,12 @@ export default function RightSidebar() {
                                     onClick={() => router.push("/mentors")}
                                     className="flex items-center gap-3 px-4 py-3 hover:bg-secondary/40 transition-colors border-t border-border/40 cursor-pointer"
                                 >
-                                    <div className="h-9 w-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold border border-primary/20 flex-shrink-0">
-                                        {mentor.avatar}
-                                    </div>
+                                    <Avatar className="h-9 w-9 border border-primary/30 flex-shrink-0 overflow-hidden shadow-xs">
+                                        <AvatarImage src={mentor.image} alt={mentor.name} className="object-cover w-full h-full" />
+                                        <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
+                                            {mentor.avatar}
+                                        </AvatarFallback>
+                                    </Avatar>
                                     <div className="flex flex-col flex-1 min-w-0">
                                         <p className="text-sm font-semibold text-foreground line-clamp-1">{mentor.name}</p>
                                         <p className="text-xs text-muted-foreground line-clamp-1">{mentor.role}</p>
