@@ -78,7 +78,7 @@ export default function UserProfilePage() {
 
     if (error || !user) {
         return (
-            <AppLayout className="max-w-2xl xl:max-w-3xl border-r border-border p-0">
+            <AppLayout className="w-full border-r border-border p-0">
                 <div className="flex flex-col items-center justify-center py-20 text-center px-4">
                     <div className="h-16 w-16 bg-primary/10 border border-primary/20 rounded-full flex items-center justify-center mb-4">
                         <UserX className="w-8 h-8 text-primary" />
@@ -113,7 +113,7 @@ export default function UserProfilePage() {
     const isOwnProfile = currentUser && currentUser._id === user._id;
 
     return (
-        <AppLayout className="max-w-2xl xl:max-w-3xl border-r border-border p-0 sm:pb-0">
+        <AppLayout className="w-full border-r border-border p-0 sm:pb-0">
             {/* Top Navigation Header */}
             <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md px-4 py-2 flex items-center gap-4 border-b border-border">
                 <Button variant="ghost" size="icon" className="rounded-full" onClick={() => router.back()}>

@@ -102,7 +102,7 @@ export default function ProfilePage() {
     : "Student";
 
   return (
-    <AppLayout className="max-w-2xl xl:max-w-3xl border-r border-border p-0 sm:pb-0">
+    <AppLayout className="w-full border-r border-border p-0 sm:pb-0">
       {/* Header / Back button */}
       <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md px-4 py-2 flex items-center gap-4 border-b border-border">
         <Button variant="ghost" size="icon" className="rounded-full" onClick={() => router.back()}>

@@ -33,12 +33,12 @@ export default function ShellLayout({ children }) {
     }
 
     return (
-        <div className="flex min-h-screen justify-center bg-transparent text-foreground selection:bg-primary selection:text-primary-foreground">
+        <div className="flex min-h-screen w-full justify-between bg-transparent text-foreground selection:bg-primary selection:text-primary-foreground">
             {/* Left Sidebar */}
             <LeftSidebar />
 
             {/* Main Middle Content Column */}
-            <main className="flex w-full min-w-0 flex-col pb-20 sm:pb-10 max-w-2xl xl:max-w-3xl">
+            <main className="flex-1 w-full min-w-0 flex flex-col pb-20 sm:pb-10 max-w-4xl 2xl:max-w-6xl 3xl:max-w-7xl mx-auto px-2 sm:px-4">
                 {children}
             </main>
 
