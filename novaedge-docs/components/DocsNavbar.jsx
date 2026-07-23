@@ -28,7 +28,7 @@ export default function DocsNavbar({ onToggleMobileSidebar }) {
               alt="NovaEdge Academy Docs"
               width={130}
               height={30}
-              className="h-auto sm:h-7 w-auto object-contain"
+              className="h-auto sm:h-auto w-auto object-contain"
               priority
             />
             <span className="bg-primary/20 text-primary text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider border border-primary/30 shrink-0">
