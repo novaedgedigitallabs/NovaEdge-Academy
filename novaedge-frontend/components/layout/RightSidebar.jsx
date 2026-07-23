@@ -1,14 +1,15 @@
 "use client";
 
-import { Search, Trophy, TrendingUp, Clock, X, Check, Loader2, Calendar, Users, Hash } from "lucide-react";
+import { Search, Trophy, TrendingUp, Clock, X, Check, Loader2, Calendar, Users, Hash, BookOpen, FileText, ArrowRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { apiGet } from "@/lib/api";
+import { globalSearch } from "@/services/search";
 import { toast } from "sonner";
 
 export default function RightSidebar() {
@@ -114,8 +115,55 @@ export default function RightSidebar() {
         };
     }, []);
 
+    // Autocomplete Search States
+    const [suggestions, setSuggestions] = useState([]);
+    const [searchingSuggestions, setSearchingSuggestions] = useState(false);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const searchContainerRef = useRef(null);
+
+    // Live Debounced Autocomplete Search (250ms)
+    useEffect(() => {
+        if (!query.trim()) {
+            setSuggestions([]);
+            setShowSuggestions(false);
+            setSearchingSuggestions(false);
+            return;
+        }
+
+        setSearchingSuggestions(true);
+        setShowSuggestions(true);
+
+        const timer = setTimeout(() => {
+            globalSearch(query.trim(), null, 1)
+                .then((res) => {
+                    if (res?.success && Array.isArray(res.data)) {
+                        setSuggestions(res.data.slice(0, 6));
+                    } else {
+                        setSuggestions([]);
+                    }
+                })
+                .catch(() => setSuggestions([]))
+                .finally(() => setSearchingSuggestions(false));
+        }, 250);
+
+        return () => clearTimeout(timer);
+    }, [query]);
+
+    // Close suggestions dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (searchContainerRef.current && !searchContainerRef.current.contains(e.target)) {
+                setShowSuggestions(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
     const executeSearch = () => {
         if (query.trim()) {
+            setShowSuggestions(false);
             router.push(`/search?q=${encodeURIComponent(query.trim())}`);
         }
     };
@@ -123,6 +171,8 @@ export default function RightSidebar() {
     const handleKeyDown = (e) => {
         if (e.key === "Enter") {
             executeSearch();
+        } else if (e.key === "Escape") {
+            setShowSuggestions(false);
         }
     };
 
@@ -142,27 +192,107 @@ export default function RightSidebar() {
 
     return (
         <section className="custom-scrollbar glass-sidebar sticky right-0 top-0 z-20 flex h-screen w-[350px] flex-col gap-6 overflow-y-auto border-l px-6 py-6 max-xl:hidden">
-            {/* 1. Search Bar */}
-            <div className="relative">
+            {/* 1. Search Bar with Autocomplete Suggestions Dropdown */}
+            <div ref={searchContainerRef} className="relative z-30">
                 <Search 
                     className="absolute left-4 top-3.5 h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
                     onClick={executeSearch}
                 />
                 <Input
-                    placeholder="Search NovaEdge"
+                    placeholder="Search users, courses, blogs..."
                     className="rounded-full bg-secondary/50 border border-border/50 pl-11 pr-9 h-11 text-sm focus-visible:ring-1 focus-visible:ring-primary focus-visible:ring-offset-0 text-foreground placeholder:text-muted-foreground"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
+                    onFocus={() => { if (query.trim()) setShowSuggestions(true); }}
                     onKeyDown={handleKeyDown}
                 />
-                {query && (
+                {query ? (
                     <button
-                        onClick={() => setQuery("")}
+                        onClick={() => { setQuery(""); setSuggestions([]); setShowSuggestions(false); }}
                         className="absolute right-3.5 top-3.5 text-muted-foreground hover:text-foreground transition-colors"
                         aria-label="Clear search"
                     >
                         <X className="h-4 w-4" />
                     </button>
+                ) : null}
+
+                {/* Autocomplete Dropdown Popup */}
+                {showSuggestions && query.trim() && (
+                    <div className="absolute top-full left-0 right-0 mt-2 rounded-2xl glass-panel border border-white/10 shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                        {searchingSuggestions ? (
+                            <div className="p-4 text-center flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                                <span>Searching NovaEdge...</span>
+                            </div>
+                        ) : suggestions.length > 0 ? (
+                            <div className="flex flex-col py-1.5 divide-y divide-white/5 max-h-80 overflow-y-auto custom-scrollbar">
+                                {suggestions.map((item, idx) => (
+                                    <div
+                                        key={item._id || idx}
+                                        onClick={() => {
+                                            setShowSuggestions(false);
+                                            setQuery("");
+                                            if (item.type === "user") {
+                                                router.push(`/${item.username || item._id}`);
+                                            } else if (item.type === "mentor") {
+                                                router.push(`/mentors`);
+                                            } else if (item.type === "course") {
+                                                router.push(`/courses/${item.slug || item._id}`);
+                                            } else if (item.type === "blog") {
+                                                router.push(`/blog/${item.slug || item._id}`);
+                                            } else {
+                                                router.push(`/search?q=${encodeURIComponent(query.trim())}`);
+                                            }
+                                        }}
+                                        className="flex items-center gap-3 px-4 py-2.5 hover:bg-white/10 transition-colors cursor-pointer"
+                                    >
+                                        {item.type === "user" || item.type === "mentor" ? (
+                                            <Avatar className="h-8 w-8 border border-primary/30 flex-shrink-0">
+                                                <AvatarImage src={item.avatar?.url || item.image} alt={item.name} className="object-cover" />
+                                                <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
+                                                    {item.name?.[0] || "U"}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                        ) : item.type === "course" ? (
+                                            <div className="h-8 w-8 rounded-lg bg-primary/15 text-primary flex items-center justify-center flex-shrink-0 border border-primary/20">
+                                                <BookOpen className="h-4 w-4" />
+                                            </div>
+                                        ) : (
+                                            <div className="h-8 w-8 rounded-lg bg-blue-500/15 text-blue-400 flex items-center justify-center flex-shrink-0 border border-blue-500/20">
+                                                <FileText className="h-4 w-4" />
+                                            </div>
+                                        )}
+
+                                        <div className="flex flex-col flex-1 min-w-0">
+                                            <p className="text-xs font-bold text-foreground truncate">{item.name || item.title}</p>
+                                            <p className="text-[11px] text-muted-foreground truncate">
+                                                {item.type === "user" ? `@${item.username || "user"}` : item.type === "mentor" ? (item.role || "Mentor") : item.category || item.type}
+                                            </p>
+                                        </div>
+
+                                        <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/30 shrink-0">
+                                            {item.type}
+                                        </span>
+                                    </div>
+                                ))}
+
+                                <div
+                                    onClick={() => {
+                                        setShowSuggestions(false);
+                                        executeSearch();
+                                    }}
+                                    className="px-4 py-2.5 text-xs font-semibold text-primary hover:bg-primary/15 transition-colors cursor-pointer flex items-center justify-between"
+                                >
+                                    <span>Search for &quot;{query}&quot;</span>
+                                    <ArrowRight className="h-3.5 w-3.5" />
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="p-4 text-center text-xs text-muted-foreground">
+                                No matching results found for &quot;{query}&quot;
+                            </div>
+                        )}
+                    </div>
                 )}
             </div>
 
