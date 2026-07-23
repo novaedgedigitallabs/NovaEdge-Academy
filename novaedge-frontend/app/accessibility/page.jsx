@@ -9,8 +9,8 @@ export const metadata = {
 
 export default function AccessibilityPage() {
     return (
-        <AppLayout className="max-w-5xl">
-            <div className="px-4 py-8 max-w-4xl mx-auto space-y-8">
+        <AppLayout className="w-full">
+            <div className="px-4 py-8 w-full space-y-8">
                 <div className="flex items-center gap-3 border-b border-border/40 pb-6">
                     <div className="h-12 w-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
                         <Eye className="h-6 w-6" />
