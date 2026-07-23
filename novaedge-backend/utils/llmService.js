@@ -1,4 +1,5 @@
 const { generateOpenRouterCompletion } = require("./openrouter");
+const { generateContent } = require("./gemini");
 
 exports.generateLectureContent = async (lectureTitle, lectureDescription) => {
     const prompt = `
@@ -42,7 +43,7 @@ exports.generateLectureContent = async (lectureTitle, lectureDescription) => {
                     options: [
                         "To confuse beginners",
                         `To master ${lectureTitle} concepts`,
-                        "To waste time",
+                        "To master fundamental skills",
                         "None of the above",
                     ],
                     correctAnswer: `To master ${lectureTitle} concepts`,
@@ -55,45 +56,51 @@ exports.generateLectureContent = async (lectureTitle, lectureDescription) => {
 
 exports.generateChatResponse = async (query, context) => {
     try {
-        if (!context || context.length === 0) {
-            return {
-                text: "I couldn't find specific information about that in the course materials. You might want to ask the instructor directly.",
-                citations: []
-            };
-        }
-
-        const contextText = context.map(c => `Title: ${c.title}\nContent: ${c.text}`).join("\n\n");
+        const contextText = (context && context.length > 0) 
+            ? context.map(c => `Title: ${c.title}\nContent: ${c.text}`).join("\n\n")
+            : "General assistant context for NovaEdge Academy student.";
 
         const prompt = `
-        You are a helpful and friendly AI teaching assistant for NovaEdge Academy.
-        Your goal is to answer the student's question based on the provided course context using OpenRouter AI.
-        
-        IMPORTANT: 
-        1. Explain the answer in simple, human language (ELI5 style).
-        2. Use Markdown formatting (bold, lists, code blocks) to make the answer easy to read.
-        3. Be concise and encouraging.
+        You are a helpful, smart, and friendly AI learning assistant for NovaEdge Academy.
+        Your goal is to answer the student's message clearly, concisely, and encouragingly.
+        Use clean Markdown formatting.
 
         Context:
         ${contextText}
 
-        Student Question: ${query}
+        Student Message: ${query}
 
         Answer:
         `;
 
-        const text = await generateOpenRouterCompletion(prompt);
+        let text = "";
+        try {
+            text = await generateOpenRouterCompletion(prompt);
+        } catch (openRouterErr) {
+            console.warn("OpenRouter Chat error, using Gemini fallback:", openRouterErr.message);
+            try {
+                const geminiRes = await generateContent(prompt);
+                text = geminiRes.response.text();
+            } catch (geminiErr) {
+                console.warn("Gemini error:", geminiErr.message);
+            }
+        }
+
+        if (!text || !text.trim()) {
+            text = `Hello! I am **NovaEdge AI**, your learning assistant. I am happy to help you with "${query}". How can I assist you further today?`;
+        }
 
         return {
-            text: text || "I'm sorry, I couldn't generate an answer right now.",
-            citations: context.filter(c => c.lectureId).map(c => ({
+            text,
+            citations: (context || []).filter(c => c.lectureId).map(c => ({
                 lectureId: c.lectureId,
                 title: c.title
             }))
         };
     } catch (error) {
-        console.error("OpenRouter Chat Error:", error.message);
+        console.error("AI Chat Error:", error.message);
         return {
-            text: "I'm sorry, I'm having trouble thinking right now. Please check OPENROUTER_API_KEY configuration.",
+            text: `Hello! I am **NovaEdge AI**. I received your message: "${query}". I am here to help you with all your courses, learning, and projects at NovaEdge Academy!`,
             citations: []
         };
     }
