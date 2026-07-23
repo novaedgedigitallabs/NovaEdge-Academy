@@ -18,6 +18,7 @@ import { Loader2, Send, MessageSquare, Bot, ArrowLeft, UserCheck, UserX, UserPlu
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import MarkdownRenderer from "@/components/ui/markdown-renderer";
 import { toast } from "sonner";
 
 import { Suspense } from "react";
@@ -389,21 +390,23 @@ function MessagesContent() {
                                         return (
                                             <div key={i} className={cn("flex", isMe && !isAi ? "justify-end" : "justify-start")}>
                                                 <div className={cn(
-                                                    "max-w-[85%] rounded-2xl px-4 py-2 text-sm shadow-sm",
-                                                    isAi ? "bg-secondary text-secondary-foreground border border-primary/20" :
+                                                    "max-w-[90%] md:max-w-[85%] rounded-2xl px-4 py-3 text-sm shadow-md transition-all",
+                                                    isAi ? "bg-card/90 text-foreground border border-primary/30 backdrop-blur-sm" :
                                                         isMe ? "bg-primary text-primary-foreground rounded-br-none" : "bg-muted text-foreground rounded-bl-none"
                                                 )}>
                                                     {isAi && (
-                                                        <div className="flex items-center gap-2 mb-1 font-bold text-xs text-primary">
-                                                            <Bot className="w-3 h-3" /> NovaEdge AI
+                                                        <div className="flex items-center gap-2 mb-2 pb-1.5 border-b border-primary/15 font-bold text-xs text-primary">
+                                                            <Bot className="w-4 h-4" /> NovaEdge AI
                                                         </div>
                                                     )}
-                                                    <div className="prose dark:prose-invert text-sm max-w-none break-words">
-                                                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                                            {msg.message.replace("**NovaEdge AI:**", "").trim()}
-                                                        </ReactMarkdown>
-                                                    </div>
-                                                    <p className={cn("text-[10px] mt-1 opacity-70 text-right", isMe && !isAi ? "text-primary-foreground" : "text-muted-foreground")}>
+                                                    {isAi ? (
+                                                        <MarkdownRenderer content={msg.message} />
+                                                    ) : (
+                                                        <div className="whitespace-pre-wrap break-words leading-relaxed">
+                                                            {msg.message}
+                                                        </div>
+                                                    )}
+                                                    <p className={cn("text-[10px] mt-1.5 opacity-70 text-right font-medium", isMe && !isAi ? "text-primary-foreground" : "text-muted-foreground")}>
                                                         {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                     </p>
                                                 </div>

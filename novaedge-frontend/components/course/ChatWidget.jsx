@@ -7,8 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MessageSquare, Send, X, Loader2, Bot, Maximize2, Minimize2 } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import MarkdownRenderer from "@/components/ui/markdown-renderer";
 
 export default function ChatWidget({ courseId, lectureId }) {
     const { user } = useAuth();
@@ -122,24 +121,13 @@ export default function ChatWidget({ courseId, lectureId }) {
                                         : "bg-muted rounded-bl-none"
                                         }`}
                                 >
-                                    <div className="prose dark:prose-invert max-w-none prose-sm prose-p:leading-relaxed prose-pre:bg-black/10 prose-pre:p-2 prose-pre:rounded">
-                                        <ReactMarkdown
-                                            remarkPlugins={[remarkGfm]}
-                                            components={{
-                                                p: ({ node, ...props }) => <p className="mb-1 last:mb-0" {...props} />,
-                                                a: ({ node, ...props }) => <a className="underline font-medium" target="_blank" rel="noopener noreferrer" {...props} />,
-                                                code: ({ node, inline, className, children, ...props }) => {
-                                                    return inline ? (
-                                                        <code className="bg-black/10 px-1 py-0.5 rounded font-mono text-xs" {...props}>{children}</code>
-                                                    ) : (
-                                                        <code className="block bg-black/10 p-2 rounded font-mono text-xs overflow-x-auto my-2" {...props}>{children}</code>
-                                                    )
-                                                }
-                                            }}
-                                        >
+                                    {msg.role === "user" ? (
+                                        <div className="whitespace-pre-wrap leading-relaxed">
                                             {msg.content}
-                                        </ReactMarkdown>
-                                    </div>
+                                        </div>
+                                    ) : (
+                                        <MarkdownRenderer content={msg.content} />
+                                    )}
 
                                     {msg.citations && msg.citations.length > 0 && (
                                         <div className="mt-2 pt-2 border-t border-primary/20 text-xs opacity-80">

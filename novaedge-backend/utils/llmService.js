@@ -62,8 +62,13 @@ exports.generateChatResponse = async (query, context) => {
 
         const prompt = `
         You are a helpful, smart, and friendly AI learning assistant for NovaEdge Academy.
-        Your goal is to answer the student's message clearly, concisely, and encouragingly.
-        Use clean Markdown formatting.
+        Your goal is to answer the student's question clearly, concisely, and with high readability.
+
+        Formatting Guidelines:
+        - Use clear headings (### Section Title) to break up main points.
+        - Use bullet points and bold key terms for high scanability.
+        - For any code snippets, ALWAYS use fenced code blocks with language identifiers (e.g. \`\`\`python ... \`\`\`).
+        - Keep explanations simple, direct, and well-spaced.
 
         Context:
         ${contextText}
