@@ -54,6 +54,11 @@ exports.generateLectureContent = async (lectureTitle, lectureDescription) => {
     }
 };
 
+function stripEmojis(str) {
+    if (!str) return "";
+    return str.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
+}
+
 exports.generateChatResponse = async (query, context) => {
     try {
         const contextText = (context && context.length > 0) 
@@ -61,22 +66,23 @@ exports.generateChatResponse = async (query, context) => {
             : "General assistant context for NovaEdge Academy student.";
 
         const prompt = `
-        You are a helpful, smart, and friendly AI learning assistant for NovaEdge Academy.
-        Your goal is to answer the student's question clearly, concisely, and with high readability.
+You are NovaEdge AI, a highly experienced, friendly, and direct human-like mentor at NovaEdge Academy.
 
-        Formatting Guidelines:
-        - Use clear headings (### Section Title) to break up main points.
-        - Use bullet points and bold key terms for high scanability.
-        - For any code snippets, ALWAYS use fenced code blocks with language identifiers (e.g. \`\`\`python ... \`\`\`).
-        - Keep explanations simple, direct, and well-spaced.
+STRICT INSTRUCTIONS FOR YOUR RESPONSE:
+1. ABSOLUTELY NO EMOJIS: Do not include any emojis or emoji icons anywhere in your response.
+2. NO GENERIC OR ROBOTIC AI BUZZWORDS: Avoid cliché AI phrases and buzzwords such as "delve", "tapestry", "testament", "realm", "moreover", "furthermore", "leverage", "robust", "in conclusion", "supercharge", "beacon", "dive deep", "game changer", "unlock your potential".
+3. HUMANIZE YOUR TONE: Write in a simple, direct, conversational human tone as if an experienced software engineer and mentor is explaining the topic directly to a developer or student.
+4. FORMATTING:
+   - Use clean, well-spaced Markdown (### Headings, clear bullet points).
+   - For any code snippets, ALWAYS use fenced code blocks with language identifiers (e.g. \`\`\`python).
 
-        Context:
-        ${contextText}
+Context:
+${contextText}
 
-        Student Message: ${query}
+Student Message: ${query}
 
-        Answer:
-        `;
+Answer:
+`;
 
         let text = "";
         try {
@@ -92,8 +98,11 @@ exports.generateChatResponse = async (query, context) => {
         }
 
         if (!text || !text.trim()) {
-            text = `Hello! I am **NovaEdge AI**, your learning assistant. I am happy to help you with "${query}". How can I assist you further today?`;
+            text = `Hello! I am NovaEdge AI, your learning mentor. How can I help you with your question about "${query}"?`;
         }
+
+        // Post-process to ensure no emojis
+        text = stripEmojis(text);
 
         return {
             text,
@@ -105,7 +114,7 @@ exports.generateChatResponse = async (query, context) => {
     } catch (error) {
         console.error("AI Chat Error:", error.message);
         return {
-            text: `Hello! I am **NovaEdge AI**. I received your message: "${query}". I am here to help you with all your courses, learning, and projects at NovaEdge Academy!`,
+            text: `Hello! I am NovaEdge AI. I received your message: "${query}". How can I assist you with your learning today?`,
             citations: []
         };
     }
