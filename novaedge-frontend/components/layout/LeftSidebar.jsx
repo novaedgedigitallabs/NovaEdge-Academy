@@ -201,36 +201,25 @@ export default function LeftSidebar() {
             </div>
 
             {user && (
-                <div className="mt-6 px-4">
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <div className="flex cursor-pointer items-center justify-between gap-2.5 rounded-full p-2 hover:bg-secondary/50 transition-colors border border-transparent hover:border-border/50">
-                                <div className="flex items-center gap-2.5 min-w-0">
-                                    <Avatar className="h-9 w-9 border border-primary/20 flex-shrink-0 overflow-hidden">
-                                        <AvatarImage src={user.avatar?.url} alt={user.name} className="object-cover object-center w-full h-full" />
-                                        <AvatarFallback className="bg-primary/10 text-primary text-sm font-bold">
-                                            {user.name?.[0] || "U"}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                    <div className="flex flex-col min-w-0">
-                                        <p className="text-xs font-bold line-clamp-1 text-foreground leading-tight">{user.name}</p>
-                                        <p className="text-[11px] text-muted-foreground line-clamp-1">@{user.username || user.email?.split('@')[0]}</p>
-                                    </div>
-                                </div>
+                <div className="mt-4 px-4 pt-3 border-t border-border/40">
+                    <Link
+                        href="/profile"
+                        className="flex cursor-pointer items-center justify-between gap-2.5 rounded-full p-2 hover:bg-secondary/50 transition-colors border border-transparent hover:border-border/50 group"
+                        title="View Profile"
+                    >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                            <Avatar className="h-9 w-9 border border-primary/20 flex-shrink-0 overflow-hidden group-hover:border-primary/50 transition-colors">
+                                <AvatarImage src={user.avatar?.url} alt={user.name} className="object-cover object-center w-full h-full" />
+                                <AvatarFallback className="bg-primary/10 text-primary text-sm font-bold">
+                                    {user.name?.[0] || "U"}
+                                </AvatarFallback>
+                            </Avatar>
+                            <div className="flex flex-col min-w-0">
+                                <p className="text-xs font-bold line-clamp-1 text-foreground leading-tight group-hover:text-primary transition-colors">{user.name}</p>
+                                <p className="text-[11px] text-muted-foreground line-clamp-1">@{user.username || user.email?.split('@')[0]}</p>
                             </div>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-56 rounded-xl">
-                            <DropdownMenuItem onClick={() => window.location.href = "/profile"}>
-                                Profile
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => window.location.href = "/settings"}>
-                                Settings
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={logout} className="text-destructive font-medium">
-                                Logout
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                        </div>
+                    </Link>
                 </div>
             )}
         </section>
