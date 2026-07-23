@@ -433,7 +433,7 @@ export default function Feed() {
                             </div>
 
                             <DialogFooter>
-                                <Link href={`/courses/${activeCourse._id}`} className="w-full">
+                                <Link href={`/courses/${activeCourse._id}`} className="w-full" onClick={() => setIsSessionOpen(false)}>
                                     <Button 
                                         className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-full h-11 font-bold gap-2 text-sm shadow-md shadow-blue-600/20"
                                     >
@@ -448,12 +448,19 @@ export default function Feed() {
                             <p className="text-xs text-muted-foreground leading-relaxed px-4">
                                 You have no upcoming scheduled sessions or enrolled courses. Browse our course catalog to start learning and schedule live lectures!
                             </p>
-                            <DialogFooter className="sm:justify-center">
-                                <Link href="/courses" className="w-full">
+                            <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:justify-center">
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setIsSessionOpen(false)}
+                                    className="w-full rounded-full h-10 text-xs font-semibold border-border"
+                                >
+                                    Close
+                                </Button>
+                                <Link href="/courses" className="w-full" onClick={() => setIsSessionOpen(false)}>
                                     <Button 
-                                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-full h-11 font-bold gap-2 text-sm shadow-md"
+                                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-full h-10 font-bold gap-2 text-xs shadow-md"
                                     >
-                                        <FontAwesomeIcon icon={faGraduationCap} className="w-4 h-4" />
+                                        <FontAwesomeIcon icon={faGraduationCap} className="w-3.5 h-3.5" />
                                         Explore Available Courses
                                     </Button>
                                 </Link>
