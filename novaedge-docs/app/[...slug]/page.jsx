@@ -7,6 +7,7 @@ import { DOCS_ARTICLES, DOCS_NAV } from "@/lib/docsData";
 import CodeBlock from "@/components/CodeBlock";
 import TableOfContents from "@/components/TableOfContents";
 import FeedbackWidget from "@/components/FeedbackWidget";
+import FormattedContent from "@/components/FormattedContent";
 import { ArrowLeft, ArrowRight, BookOpen, ChevronRight, Sparkles } from "lucide-react";
 
 export default function DocArticlePage({ params: paramsPromise }) {
@@ -80,11 +81,7 @@ export default function DocArticlePage({ params: paramsPromise }) {
                 {sec.title}
               </h2>
 
-              {sec.content && (
-                <div className="text-xs sm:text-sm text-slate-300 leading-relaxed whitespace-pre-line space-y-2">
-                  {sec.content}
-                </div>
-              )}
+              {sec.content && <FormattedContent content={sec.content} />}
 
               {sec.code && <CodeBlock code={sec.code} language="javascript" />}
             </section>
