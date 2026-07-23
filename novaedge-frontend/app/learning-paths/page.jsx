@@ -52,7 +52,7 @@ const paths = [
 
 export default function LearningPathsPage() {
     return (
-        <AppLayout className="max-w-5xl">
+        <AppLayout className="w-full">
             <div className="px-4 py-8 space-y-8">
                 {/* Hero Section */}
                 <div className="text-center max-w-2xl mx-auto space-y-3">

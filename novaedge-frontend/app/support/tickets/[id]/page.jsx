@@ -12,8 +12,8 @@ export default function UserTicketPage({ params }) {
     const id = resolvedParams.id;
 
     return (
-        <AppLayout>
-            <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+        <AppLayout className="w-full">
+            <div className="w-full px-4 py-6 space-y-6">
                 <Link href="/help-center">
                     <Button variant="ghost" size="sm" className="mb-4">
                         <ArrowLeft className="mr-2 h-4 w-4" /> Back to Help Center

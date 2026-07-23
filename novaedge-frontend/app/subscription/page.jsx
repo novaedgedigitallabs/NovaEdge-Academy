@@ -39,7 +39,7 @@ export default function SubscriptionPage() {
     };
 
     return (
-        <AppLayout className="max-w-5xl">
+        <AppLayout className="w-full">
             <div className="px-4 py-8 space-y-8">
                 <div className="flex flex-col gap-2">
                     <h1 className="text-2xl font-bold tracking-tight text-foreground">

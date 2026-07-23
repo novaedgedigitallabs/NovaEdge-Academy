@@ -9,7 +9,7 @@ import Link from "next/link";
 
 export default function BusinessPage() {
     return (
-        <AppLayout className="max-w-5xl">
+        <AppLayout className="w-full">
             <div className="px-4 py-8 space-y-12">
                 {/* Hero Section */}
                 <div className="text-center max-w-2xl mx-auto space-y-4">

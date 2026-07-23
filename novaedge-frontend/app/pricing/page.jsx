@@ -96,7 +96,7 @@ export default function PricingPage() {
     };
 
     return (
-        <AppLayout className="max-w-5xl">
+        <AppLayout className="w-full">
             <Script src="https://checkout.razorpay.com/v1/checkout.js" />
             <div className="px-4 py-8 space-y-8">
                 {/* Header Banner */}
