@@ -448,23 +448,23 @@ export default function Feed() {
                             <p className="text-xs text-muted-foreground leading-relaxed px-4">
                                 You have no upcoming scheduled sessions or enrolled courses. Browse our course catalog to start learning and schedule live lectures!
                             </p>
-                            <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:justify-center">
-                                <Button
-                                    variant="outline"
-                                    onClick={() => setIsSessionOpen(false)}
-                                    className="w-full rounded-full h-10 text-xs font-semibold border-border"
-                                >
-                                    Close
-                                </Button>
+                            <div className="flex flex-col gap-2.5 pt-2 w-full">
                                 <Link href="/courses" className="w-full" onClick={() => setIsSessionOpen(false)}>
                                     <Button 
-                                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-full h-10 font-bold gap-2 text-xs shadow-md"
+                                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-full h-10 font-bold gap-2 text-xs shadow-md cursor-pointer"
                                     >
                                         <FontAwesomeIcon icon={faGraduationCap} className="w-3.5 h-3.5" />
                                         Explore Available Courses
                                     </Button>
                                 </Link>
-                            </DialogFooter>
+                                <Button
+                                    variant="ghost"
+                                    onClick={() => setIsSessionOpen(false)}
+                                    className="w-full rounded-full h-9 text-xs font-medium text-muted-foreground hover:text-foreground cursor-pointer"
+                                >
+                                    Close
+                                </Button>
+                            </div>
                         </div>
                     )}
                 </DialogContent>
