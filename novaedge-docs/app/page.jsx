@@ -62,7 +62,7 @@ const quickCards = [
 
 export default function DocsHomePage() {
   return (
-    <div className="space-y-12 max-w-4xl">
+    <div className="space-y-12 w-full">
       {/* Hero Header */}
       <div className="relative p-8 rounded-3xl bg-gradient-to-br from-primary/20 via-secondary/30 to-background border border-primary/20 shadow-2xl overflow-hidden">
         <div className="absolute top-0 right-0 w-80 h-80 bg-primary/20 rounded-full blur-[100px] pointer-events-none" />

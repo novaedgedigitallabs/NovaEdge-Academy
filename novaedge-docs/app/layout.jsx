@@ -25,13 +25,13 @@ export default function RootLayout({ children }) {
         />
 
         {/* Main Body Grid */}
-        <div className="flex-1 flex w-full max-w-7xl mx-auto">
+        <div className="flex-1 flex w-full justify-between">
           <DocsSidebar
             mobileOpen={mobileSidebarOpen}
             onCloseMobile={() => setMobileSidebarOpen(false)}
           />
 
-          <main className="flex-1 min-w-0 px-4 sm:px-8 py-8">
+          <main className="flex-1 min-w-0 px-4 sm:px-8 py-8 border-r border-white/10">
             {children}
           </main>
         </div>

@@ -40,9 +40,9 @@ export default function DocArticlePage({ params: paramsPromise }) {
   const nextArticle = currentIndex < flatNav.length - 1 ? flatNav[currentIndex + 1] : null;
 
   return (
-    <div className="flex gap-8">
+    <div className="flex w-full gap-8 justify-between">
       {/* Article Core Content */}
-      <article className="flex-1 min-w-0 space-y-8 max-w-3xl">
+      <article className="flex-1 min-w-0 space-y-8">
         {/* Breadcrumb */}
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <Link href="/" className="hover:text-foreground">
