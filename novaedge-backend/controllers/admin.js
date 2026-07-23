@@ -52,11 +52,16 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
-// --- 3. UPDATE USER ROLE (Promote/Demote) ---
+// --- 3. UPDATE USER ROLE ---
 exports.updateUserRole = async (req, res) => {
   try {
     const { id } = req.params;
-    const { role } = req.body; // e.g., "admin" or "user"
+    const { role } = req.body;
+
+    const validRoles = ["user", "admin", "mentor", "agent"];
+    if (!role || !validRoles.includes(role)) {
+      return res.status(400).json({ success: false, message: "Invalid role specified" });
+    }
 
     const user = await User.findById(id);
 

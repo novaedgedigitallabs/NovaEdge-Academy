@@ -276,15 +276,30 @@ export default function AdminUsersPage() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge
-                            variant="outline"
-                            className={`text-xs capitalize ${roleBadgeColors[user.role] || "text-muted-foreground"}`}
+                          <Select
+                            value={user.role || "user"}
+                            onValueChange={(newRole) => updateRole(id, newRole)}
                           >
-                            {user.role === "admin" && (
-                              <Crown className="h-3 w-3 mr-1" />
-                            )}
-                            {user.role || "user"}
-                          </Badge>
+                            <SelectTrigger className={`h-8 w-28 text-xs font-semibold capitalize border ${roleBadgeColors[user.role] || "bg-muted text-muted-foreground border-border"}`}>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="glass-panel border-border/50">
+                              <SelectItem value="admin">
+                                <span className="flex items-center gap-1.5 font-semibold text-amber-400">
+                                  <Crown className="h-3 w-3" /> Admin
+                                </span>
+                              </SelectItem>
+                              <SelectItem value="mentor">
+                                <span className="font-semibold text-emerald-400">Mentor</span>
+                              </SelectItem>
+                              <SelectItem value="agent">
+                                <span className="font-semibold text-purple-400">Agent</span>
+                              </SelectItem>
+                              <SelectItem value="user">
+                                <span className="font-semibold text-blue-400">User</span>
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
                           {user.createdAt
@@ -293,34 +308,14 @@ export default function AdminUsersPage() {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-1">
-                            {user.role !== "admin" ? (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-7 text-xs gap-1 hover:bg-amber-500/10 hover:text-amber-400"
-                                onClick={() => updateRole(id, "admin")}
-                              >
-                                <Shield className="h-3 w-3" />
-                                Promote
-                              </Button>
-                            ) : (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-7 text-xs gap-1 hover:bg-blue-500/10 hover:text-blue-400"
-                                onClick={() => updateRole(id, "user")}
-                              >
-                                <ShieldOff className="h-3 w-3" />
-                                Demote
-                              </Button>
-                            )}
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-7 w-7 hover:bg-red-500/10 hover:text-red-400"
+                              className="h-8 w-8 text-muted-foreground hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"
                               onClick={() => setDeleteTarget(id)}
+                              title="Delete Account"
                             >
-                              <Trash2 className="h-3.5 w-3.5" />
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
                         </TableCell>

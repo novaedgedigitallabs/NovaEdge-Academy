@@ -29,7 +29,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import AdminGuard from "@/components/admin/AdminGuard";
+import AdminGuard, { hasRoutePermission } from "@/components/admin/AdminGuard";
 
 const navItems = [
   { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
@@ -47,6 +47,12 @@ const navItems = [
   { label: "Audit Logs", href: "/admin/audit", icon: Shield },
 ];
 
+const roleBadgeStyles = {
+  admin: "bg-amber-500/15 text-amber-400 border-amber-500/30",
+  mentor: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+  agent: "bg-purple-500/15 text-purple-400 border-purple-500/30",
+};
+
 const premiumSpring = {
   type: "spring",
   stiffness: 300,
@@ -58,6 +64,10 @@ export default function AdminLayout({ children }) {
   const { user, logout } = useAuth();
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+
+  const visibleNavItems = navItems.filter((item) =>
+    hasRoutePermission(user?.role || "user", item.href)
+  );
 
   const initials = user?.name
     ? user.name
@@ -134,7 +144,7 @@ export default function AdminLayout({ children }) {
 
           {/* Navigation */}
           <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
-            {navItems.map((item) => {
+            {visibleNavItems.map((item) => {
               const isActive =
                 pathname === item.href ||
                 (item.href !== "/admin/dashboard" &&
@@ -203,9 +213,11 @@ export default function AdminLayout({ children }) {
                     <p className="text-sm font-medium truncate">
                       {user?.name || "Admin"}
                     </p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {user?.email || "admin@novaedge.in"}
-                    </p>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <span className={`inline-block px-1.5 py-0.2 rounded text-[10px] font-bold uppercase tracking-wider border ${roleBadgeStyles[user?.role] || "bg-muted text-muted-foreground border-border"}`}>
+                        {user?.role || "user"}
+                      </span>
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>

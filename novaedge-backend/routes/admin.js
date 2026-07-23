@@ -14,37 +14,25 @@ const {
 const { isAuthenticatedUser } = require("../middleware/auth");
 const { authorizeRoles } = require("../middleware/admin");
 
-// --- GLOBAL ADMIN PROTECTION ---
-// We can apply middleware to ALL routes in this file at once!
-// Now we don't have to write it for every single line.
-router.use(isAuthenticatedUser, authorizeRoles("admin"));
+// --- GLOBAL ADMIN PANEL PROTECTION ---
+router.use(isAuthenticatedUser, authorizeRoles("admin", "mentor", "agent"));
 
-// --- DASHBOARD ---
-// URL: /api/v1/admin/stats
+// --- DASHBOARD STATS ---
 router.route("/stats").get(getDashboardStats);
 
 // --- USER MANAGEMENT ---
+router.route("/users").get(authorizeRoles("admin", "agent"), getAllUsers);
 
-// Get list of all users
-// URL: /api/v1/admin/users
-router.route("/users").get(getAllUsers);
-
-// Manage specific user (Promote/Demote/Ban)
-// URL: /api/v1/admin/user/:id
 router
   .route("/user/:id")
-  .put(updateUserRole) // PUT = Update data (Role)
-  .delete(deleteUser); // DELETE = Remove user
+  .put(authorizeRoles("admin"), updateUserRole)
+  .delete(authorizeRoles("admin"), deleteUser);
 
 // --- CERTIFICATE MANAGEMENT ---
 const { adminGenerateCertificate } = require("../controllers/certificate");
-
-// Generate Certificate for a user
-// URL: /api/v1/admin/certificate/generate
-router.route("/certificate/generate").post(adminGenerateCertificate);
+router.route("/certificate/generate").post(authorizeRoles("admin", "mentor", "agent"), adminGenerateCertificate);
 
 // --- COURSE PERFORMANCE ---
-// URL: /api/v1/admin/course-performance
-router.route("/course-performance").get(getCoursePerformance);
+router.route("/course-performance").get(authorizeRoles("admin", "mentor"), getCoursePerformance);
 
 module.exports = router;
