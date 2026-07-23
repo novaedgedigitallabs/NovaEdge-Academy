@@ -162,8 +162,8 @@ export default function CommunityPage() {
         <AppLayout className="max-w-5xl">
             <div className="px-4 py-6 space-y-8">
                 {/* Hero Section */}
-                <div className="relative overflow-hidden rounded-3xl bg-card/60 border border-border/70 p-8 md:p-12 text-center backdrop-blur-xl shadow-xl">
-                    <div className="absolute right-6 top-6 h-32 w-32 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
+                <div className="relative overflow-hidden rounded-3xl glass-panel p-8 md:p-12 text-center shadow-2xl">
+                    <div className="absolute right-6 top-6 h-32 w-32 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
                     
 
                     <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-foreground mb-3 leading-tight">
@@ -183,7 +183,7 @@ export default function CommunityPage() {
                         </Button>
                         <Button 
                             variant="outline" 
-                            className="rounded-full px-6 gap-2 border-border/70 hover:bg-secondary font-semibold text-xs h-10 cursor-pointer"
+                            className="rounded-full px-6 gap-2 border-white/10 glass-card hover:bg-white/10 font-semibold text-xs h-10 cursor-pointer"
                             onClick={() => window.open("https://github.com", "_blank")}
                         >
                             <Github className="w-4 h-4" />
@@ -193,7 +193,7 @@ export default function CommunityPage() {
                 </div>
 
                 {/* Stats Section */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6 rounded-2xl bg-card/40 border border-border/60 text-center backdrop-blur-md">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6 rounded-2xl glass-card text-center border border-white/10">
                     <div>
                         <div className="text-2xl sm:text-3xl font-black text-primary">10k+</div>
                         <div className="text-xs text-muted-foreground font-medium mt-0.5">Active Members</div>
@@ -214,7 +214,7 @@ export default function CommunityPage() {
 
                 {/* Upcoming Events Section */}
                 <div className="space-y-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/50 pb-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
                         <div>
                             <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
                                 <Calendar className="w-5 h-5 text-primary" /> Upcoming Events
@@ -241,7 +241,7 @@ export default function CommunityPage() {
                                 <div 
                                     key={event.id} 
                                     onClick={() => setSelectedEvent(event)}
-                                    className="group relative overflow-hidden rounded-2xl border border-border/70 bg-card/50 backdrop-blur-md hover:border-primary/50 transition-all flex flex-col justify-between shadow-lg cursor-pointer"
+                                    className="group relative overflow-hidden rounded-2xl glass-card border border-white/10 flex flex-col justify-between cursor-pointer"
                                 >
                                     <div className="p-5 space-y-3">
                                         <div className="flex items-center justify-between">

@@ -4,17 +4,17 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { 
-    LayoutDashboard, 
-    BookOpen, 
-    GraduationCap, 
-    Award, 
-    Users, 
-    Globe, 
-    MessageSquare, 
-    User, 
-    Settings, 
-    PenSquare, 
+import {
+    LayoutDashboard,
+    BookOpen,
+    GraduationCap,
+    Award,
+    Users,
+    Globe,
+    MessageSquare,
+    User,
+    Settings,
+    PenSquare,
     LogOut,
     Newspaper,
     UserPlus
@@ -112,12 +112,12 @@ export default function LeftSidebar() {
                         setPendingRequestsCount(res.requests.length);
                     }
                 })
-                .catch(() => {});
+                .catch(() => { });
         }
     }, [user, pathname]);
 
     return (
-        <section className="custom-scrollbar sticky left-0 top-0 z-20 flex h-screen w-fit flex-col justify-between overflow-y-auto border-r border-border bg-background pb-6 pt-8 max-md:hidden lg:w-[266px]">
+        <section className="custom-scrollbar glass-sidebar sticky left-0 top-0 z-20 flex h-screen w-fit flex-col justify-between overflow-y-auto border-r pb-6 pt-8 max-md:hidden lg:w-[266px]">
             <div className="flex w-full flex-1 flex-col gap-6 px-6">
                 <Link href="/" className="flex items-center px-3 py-1">
                     <Image
@@ -132,8 +132,8 @@ export default function LeftSidebar() {
 
                 <div className="flex flex-col gap-1.5">
                     {sidebarLinks.map((link) => {
-                        const isActive = link.route === "/" 
-                            ? pathname === "/" 
+                        const isActive = link.route === "/"
+                            ? pathname === "/"
                             : pathname.startsWith(link.route);
 
                         const IconComponent = link.icon;
@@ -149,11 +149,11 @@ export default function LeftSidebar() {
                                 )}
                             >
                                 <div className="flex items-center gap-4 min-w-0">
-                                    <IconComponent 
+                                    <IconComponent
                                         className={cn(
-                                            "h-6 w-6 shrink-0 transition-transform group-hover:scale-105", 
+                                            "h-6 w-6 shrink-0 transition-transform group-hover:scale-105",
                                             isActive ? "text-primary stroke-[2.5]" : "stroke-[1.75]"
-                                        )} 
+                                        )}
                                     />
                                     <p className="text-base max-lg:hidden truncate">{link.label}</p>
                                 </div>
@@ -179,7 +179,7 @@ export default function LeftSidebar() {
                 </div>
 
                 <Dialog open={isPostDialogOpen} onOpenChange={setIsPostDialogOpen}>
-                    <Button 
+                    <Button
                         type="button"
                         onClick={() => setIsPostDialogOpen(true)}
                         className="mt-2 w-full rounded-full text-base font-bold h-12 lg:h-13 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md shadow-primary/20 cursor-pointer"

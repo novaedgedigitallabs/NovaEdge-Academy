@@ -62,20 +62,61 @@
   }
 }
 
+.app-glow-bg {
+  background-color: #070B14;
+  background-image: 
+    radial-gradient(circle at 15% 20%, rgba(147, 51, 234, 0.22) 0%, rgba(124, 58, 237, 0.08) 35%, transparent 65%),
+    radial-gradient(circle at 85% 80%, rgba(59, 130, 246, 0.18) 0%, rgba(147, 51, 234, 0.08) 35%, transparent 65%),
+    radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 28px 28px;
+  background-position: top left, bottom right, center center;
+  background-attachment: fixed;
+}
+
 .glass-panel {
-  background: rgba(13, 17, 30, 0.45);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  background: rgba(13, 17, 30, 0.55);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
 }
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.035);
+  backdrop-filter: blur(24px) saturate(190%);
+  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.065);
+  border-color: rgba(168, 85, 247, 0.35);
+  box-shadow: 0 16px 48px 0 rgba(147, 51, 234, 0.18), inset 0 1px 0 0 rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+}
+
+.glass-sidebar {
+  background: rgba(10, 14, 26, 0.55) !important;
+  backdrop-filter: blur(24px) saturate(190%);
+  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+/* Universal Glassmorphism Override for Static Block Components */
+.bg-card, 
+.bg-card\/60,
+.bg-card\/50,
+.bg-card\/40,
+.bg-secondary\/50,
+.bg-secondary\/40 {
+  background-color: rgba(255, 255, 255, 0.035) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border-color: rgba(255, 255, 255, 0.09) !important;
+  box-shadow: 0 10px 30px 0 rgba(0, 0, 0, 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 0.12) !important;
 }
 
 /* Scrollbar customizations */

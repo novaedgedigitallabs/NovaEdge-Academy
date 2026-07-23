@@ -33,7 +33,7 @@ export default function ShellLayout({ children }) {
     }
 
     return (
-        <div className="flex min-h-screen justify-center bg-background text-foreground selection:bg-primary selection:text-primary-foreground">
+        <div className="flex min-h-screen justify-center bg-transparent text-foreground selection:bg-primary selection:text-primary-foreground">
             {/* Left Sidebar */}
             <LeftSidebar />
 

@@ -205,7 +205,7 @@ function MessagesContent() {
 
                 {/* Left Sidebar Column - Friends & Requests */}
                 <div className={cn(
-                    "flex flex-col border-r border-border h-full overflow-hidden bg-background",
+                    "flex flex-col border-r border-white/10 h-full overflow-hidden glass-panel rounded-none",
                     selectedFriend ? "hidden md:flex" : "flex"
                 )}>
                     {/* Header with Navigation Tabs */}
@@ -341,7 +341,7 @@ function MessagesContent() {
 
                 {/* Right Chat Area */}
                 <div className={cn(
-                    "md:col-span-2 flex flex-col h-full bg-background overflow-hidden relative",
+                    "md:col-span-2 flex flex-col h-full glass-panel rounded-none border-0 overflow-hidden relative",
                     !selectedFriend ? "hidden md:flex" : "flex"
                 )}>
                     {selectedFriend ? (

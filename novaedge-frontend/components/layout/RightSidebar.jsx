@@ -141,7 +141,7 @@ export default function RightSidebar() {
     };
 
     return (
-        <section className="custom-scrollbar sticky right-0 top-0 z-20 flex h-screen w-[350px] flex-col gap-6 overflow-y-auto border-l border-border bg-background px-6 py-6 max-xl:hidden">
+        <section className="custom-scrollbar glass-sidebar sticky right-0 top-0 z-20 flex h-screen w-[350px] flex-col gap-6 overflow-y-auto border-l px-6 py-6 max-xl:hidden">
             {/* 1. Search Bar */}
             <div className="relative">
                 <Search 
@@ -167,7 +167,7 @@ export default function RightSidebar() {
             </div>
 
             {/* 2. Upcoming Schedule Widget */}
-            <div className="flex flex-col rounded-2xl border border-border/60 bg-card/40 backdrop-blur-md overflow-hidden">
+            <div className="flex flex-col rounded-2xl glass-card border border-white/10 overflow-hidden">
                 <div onClick={() => router.push("/community")} className="px-4 pt-4 mb-3 flex items-center justify-between cursor-pointer hover:opacity-80 transition-opacity">
                     <h3 className="text-base font-bold text-foreground">Upcoming Schedule</h3>
                     {schedule.length > 0 && (
@@ -220,7 +220,7 @@ export default function RightSidebar() {
             </div>
 
             {/* 3. Leaderboard Widget */}
-            <div className="flex flex-col rounded-2xl border border-border/60 bg-card/40 backdrop-blur-md overflow-hidden">
+            <div className="flex flex-col rounded-2xl glass-card border border-white/10 overflow-hidden">
                 <div onClick={() => router.push("/community")} className="px-4 pt-4 mb-3 flex items-center justify-between cursor-pointer hover:opacity-80 transition-opacity">
                     <h3 className="text-base font-bold text-foreground">Leaderboard</h3>
                     <Trophy className="h-4 w-4 text-amber-400" />
@@ -257,7 +257,7 @@ export default function RightSidebar() {
             </div>
 
             {/* 4. Recommended Mentors */}
-            <div className="flex flex-col rounded-2xl border border-border/60 bg-card/40 backdrop-blur-md overflow-hidden">
+            <div className="flex flex-col rounded-2xl glass-card border border-white/10 overflow-hidden">
                 <div onClick={() => router.push("/mentors")} className="px-4 pt-4 mb-3 cursor-pointer hover:opacity-80 transition-opacity">
                     <h3 className="text-base font-bold text-foreground">Recommended Mentors</h3>
                 </div>
@@ -323,7 +323,7 @@ export default function RightSidebar() {
             </div>
 
             {/* 5. Trending in Community */}
-            <div className="flex flex-col rounded-2xl border border-border/60 bg-card/40 backdrop-blur-md overflow-hidden">
+            <div className="flex flex-col rounded-2xl glass-card border border-white/10 overflow-hidden">
                 <div onClick={() => router.push("/community")} className="px-4 pt-4 mb-3 cursor-pointer hover:opacity-80 transition-opacity">
                     <h3 className="text-base font-bold text-foreground">What&apos;s happening</h3>
                 </div>
