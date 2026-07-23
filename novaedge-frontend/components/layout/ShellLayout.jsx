@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import MobileHeader from "@/components/layout/MobileHeader";
 import LeftSidebar from "@/components/layout/LeftSidebar";
 import RightSidebar from "@/components/layout/RightSidebar";
 import MobileNav from "@/components/layout/MobileNav";
@@ -33,7 +34,10 @@ export default function ShellLayout({ children }) {
     }
 
     return (
-        <div className="flex min-h-screen w-full justify-between bg-transparent text-foreground selection:bg-primary selection:text-primary-foreground">
+        <div className="flex min-h-screen w-full flex-col md:flex-row justify-between bg-transparent text-foreground selection:bg-primary selection:text-primary-foreground">
+            {/* Mobile Top Header */}
+            <MobileHeader />
+
             {/* Left Sidebar */}
             <LeftSidebar />
 
