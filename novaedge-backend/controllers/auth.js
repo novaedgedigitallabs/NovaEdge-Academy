@@ -431,3 +431,102 @@ exports.resetPassword = async (req, res, next) => {
   }
 };
 
+// --- 11. GOOGLE LOGIN / REGISTER ---
+exports.googleLogin = async (req, res, next) => {
+  try {
+    const { credential, idToken, googleId, email, name, picture } = req.body;
+
+    let userEmail = email;
+    let userName = name;
+    let userPicture = picture;
+    let userGoogleId = googleId;
+
+    // Verify Google ID token if provided
+    const tokenToVerify = credential || idToken;
+    if (tokenToVerify) {
+      try {
+        const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+        const googleRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${tokenToVerify}`);
+        if (googleRes.ok) {
+          const payload = await googleRes.json();
+          if (payload && payload.email) {
+            userEmail = payload.email;
+            userName = payload.name || userName || payload.given_name;
+            userPicture = payload.picture || userPicture;
+            userGoogleId = payload.sub || userGoogleId;
+          }
+        }
+      } catch (err) {
+        console.warn("Google ID token verification notice:", err.message);
+      }
+    }
+
+    if (!userEmail) {
+      return res.status(400).json({
+        success: false,
+        message: "Google authentication failed. Email is required.",
+      });
+    }
+
+    userEmail = userEmail.toLowerCase().trim();
+
+    // Find existing user by email or googleId
+    let user = await User.findOne({
+      $or: [{ email: userEmail }, ...(userGoogleId ? [{ googleId: userGoogleId }] : [])],
+    });
+
+    if (!user) {
+      // Auto-register new user with Google profile
+      const newReferralCode = crypto.randomBytes(4).toString("hex").toUpperCase();
+      const randomPassword = crypto.randomBytes(16).toString("hex") + "Aa1!";
+      const generatedUsername =
+        userEmail.split("@")[0].replace(/[^a-zA-Z0-9]/g, "") +
+        Math.floor(1000 + Math.random() * 9000);
+
+      user = await User.create({
+        name: userName || "Google User",
+        email: userEmail,
+        password: randomPassword,
+        username: generatedUsername,
+        googleId: userGoogleId || "",
+        avatar: {
+          public_id: "avatars/google_avatar",
+          url: userPicture || "https://res.cloudinary.com/demo/image/upload/v123456/avatar.jpg",
+        },
+        referralCode: newReferralCode,
+        isVerified: true,
+      });
+
+      // Send Welcome Email
+      const { sendWelcomeEmail } = require("../utils/welcomeService");
+      sendWelcomeEmail({ name: user.name, email: user.email }).catch((err) =>
+        console.error("Welcome email notice:", err.message)
+      );
+    } else {
+      // Update googleId / avatar if missing
+      let isUpdated = false;
+      if (!user.googleId && userGoogleId) {
+        user.googleId = userGoogleId;
+        isUpdated = true;
+      }
+      if (
+        userPicture &&
+        (!user.avatar || !user.avatar.url || user.avatar.url.includes("cloudinary.com/demo"))
+      ) {
+        user.avatar = { public_id: "avatars/google_avatar", url: userPicture };
+        isUpdated = true;
+      }
+      if (isUpdated) {
+        await user.save({ validateBeforeSave: false });
+      }
+    }
+
+    // Return JWT token and log user in
+    await sendToken(user, 200, res, req);
+  } catch (error) {
+    console.error("Google Login Controller Error:", error);
+    res.status(500).json({ success: false, message: error.message || "Google Authentication failed" });
+  }
+};
+
+

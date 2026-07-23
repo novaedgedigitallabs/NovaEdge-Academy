@@ -59,6 +59,11 @@ const userSchema = new mongoose.Schema({
       default: "",
     },
   },
+  googleId: {
+    type: String,
+    default: "",
+    index: true,
+  },
   role: {
     type: String,
     enum: ["user", "admin", "mentor", "agent"], // You can add 'instructor' here later if needed

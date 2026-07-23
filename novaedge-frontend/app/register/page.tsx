@@ -9,6 +9,7 @@ import { useAuth } from "@/context/auth-context";
 import { Loader2 } from "lucide-react";
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
 
 export function RegisterForm() {
   const [name, setName] = useState("");
@@ -180,13 +181,7 @@ export function RegisterForm() {
                 </span>
               </div>
             </div>
-            <Button
-              variant="outline"
-              className="w-full bg-transparent"
-              type="button"
-            >
-              Google
-            </Button>
+            <GoogleSignInButton text="Sign Up with Google" />
           </div>
 
           <div className="text-center text-sm text-muted-foreground">

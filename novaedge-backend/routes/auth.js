@@ -12,6 +12,7 @@ const {
   lookupUser,
   forgotPassword,
   resetPassword,
+  googleLogin,
 } = require("../controllers/auth");
 
 // Import the Security Guard (Middleware)
@@ -24,6 +25,9 @@ router.route("/register").post(registerUser);
 
 // Path: /api/v1/login
 router.route("/login").post(loginUser);
+
+// Path: /api/v1/google-login
+router.route("/google-login").post(googleLogin);
 
 // Path: /api/v1/logout
 router.route("/logout").get(logout);

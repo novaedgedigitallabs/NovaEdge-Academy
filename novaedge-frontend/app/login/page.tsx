@@ -12,6 +12,7 @@ import { Loader2 } from "lucide-react";
 import Image from "next/image";
 
 import TwoFactorVerify from "@/components/auth/TwoFactorVerify";
+import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -135,13 +136,7 @@ export default function LoginPage() {
               ) : null}
               Sign In
             </Button>
-            <Button
-              variant="outline"
-              className="w-full bg-transparent"
-              type="button"
-            >
-              Sign In with Google
-            </Button>
+            <GoogleSignInButton text="Sign In with Google" />
           </div>
 
           <div className="text-center text-sm text-muted-foreground">
