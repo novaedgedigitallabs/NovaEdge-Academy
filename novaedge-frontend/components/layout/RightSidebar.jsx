@@ -218,7 +218,7 @@ export default function RightSidebar() {
 
                 {/* Autocomplete Dropdown Popup */}
                 {showSuggestions && query.trim() && (
-                    <div className="absolute top-full left-0 right-0 mt-2 rounded-2xl glass-panel border border-white/10 shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                    <div className="absolute top-full left-0 right-0 mt-2 rounded-2xl bg-[#0b0e17] border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.9)] overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150">
                         {searchingSuggestions ? (
                             <div className="p-4 text-center flex items-center justify-center gap-2 text-xs text-muted-foreground">
                                 <Loader2 className="h-4 w-4 animate-spin text-primary" />
