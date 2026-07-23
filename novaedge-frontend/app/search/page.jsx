@@ -76,7 +76,7 @@ function SearchContent() {
     };
 
     return (
-        <AppLayout className="max-w-5xl">
+        <AppLayout className="w-full">
             <div className="px-4 py-6 space-y-6">
                 {/* Search Bar Input */}
                 <div className="relative">

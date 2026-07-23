@@ -31,7 +31,7 @@ export default function SettingsLayout({ children }) {
     const { logout } = useAuth();
 
     return (
-        <AppLayout className="max-w-5xl">
+        <AppLayout className="w-full">
             <div className="px-4 py-6">
                 <div className="space-y-6">
                     <div className="space-y-0.5">

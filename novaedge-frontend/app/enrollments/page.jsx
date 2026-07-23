@@ -77,7 +77,7 @@ export default function EnrollmentsPage() {
   if (authLoading || !user) return null;
 
   return (
-    <AppLayout className="max-w-5xl">
+    <AppLayout className="w-full">
       <div className="px-4 py-6">
         <div className="flex items-center justify-between mb-8">
           <div>

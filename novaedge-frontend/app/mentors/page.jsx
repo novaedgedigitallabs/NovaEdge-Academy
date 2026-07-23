@@ -176,7 +176,7 @@ export default function MentorsPage() {
     };
 
     return (
-        <AppLayout className="max-w-5xl">
+        <AppLayout className="w-full">
             <div className="px-4 py-6">
                 <div className="flex flex-col gap-2 mb-8">
                     <h1 className="text-2xl font-bold tracking-tight text-foreground">
