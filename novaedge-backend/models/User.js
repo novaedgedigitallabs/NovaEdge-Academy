@@ -127,6 +127,16 @@ const userSchema = new mongoose.Schema({
     portfolio: { type: String, default: "" },
     twitter: { type: String, default: "" },
   },
+  location: {
+    city: { type: String, default: "" },
+    state: { type: String, default: "" },
+    country: { type: String, default: "" },
+    countryCode: { type: String, default: "" },
+    timezone: { type: String, default: "" },
+    lat: { type: Number },
+    lng: { type: Number },
+    formatted: { type: String, default: "" },
+  },
 });
 
 // --- SMART METHODS (The Brains) ---

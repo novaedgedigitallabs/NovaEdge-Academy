@@ -235,6 +235,14 @@ export default function PostCard({ post, onDelete, onUpdate }) {
                         {postContent}
                     </div>
 
+                    {/* Post Location Badge (CityKit Tag) */}
+                    {post.location && (
+                        <div className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-primary bg-primary/10 border border-primary/20 px-2.5 py-0.5 rounded-full">
+                            <MapPin className="w-3.5 h-3.5" />
+                            <span>{post.location}</span>
+                        </div>
+                    )}
+
                     {/* Media Attachments */}
                     {post.images && post.images.length > 0 && (
                         <div className={cn(

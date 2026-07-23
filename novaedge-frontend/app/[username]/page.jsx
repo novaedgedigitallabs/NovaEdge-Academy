@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Calendar, UserX, ArrowLeft, Mail, Award, Sparkles, Github, Linkedin, Globe, Twitter, Camera, Link as LinkIcon } from "lucide-react";
+import { Loader2, Calendar, UserX, ArrowLeft, Mail, Award, Sparkles, Github, Linkedin, Globe, Twitter, Camera, Link as LinkIcon, MapPin } from "lucide-react";
 import FriendActionButton from "@/components/friend/FriendActionButton";
 import { useAuth } from "@/context/auth-context";
 
@@ -189,6 +189,13 @@ export default function UserProfilePage() {
                     <span className="bg-primary/10 text-primary border border-primary/20 px-2.5 py-0.5 rounded-full text-xs font-bold capitalize">
                         {displayRole}
                     </span>
+
+                    {user.location && (user.location.city || user.location.formatted) && (
+                        <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground bg-secondary/50 border border-border/50 px-2.5 py-0.5 rounded-full" title={`CityKit Verified: ${user.location.timezone || ''}`}>
+                            <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
+                            <span>{user.location.formatted || `${user.location.city}${user.location.country ? `, ${user.location.country}` : ''}`}</span>
+                        </div>
+                    )}
 
                     <div className="flex items-center gap-1.5 text-xs">
                         <Calendar className="w-3.5 h-3.5 text-primary" />

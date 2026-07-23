@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Loader2, Image as ImageIcon, Smile, Calendar, MapPin, X, Navigation } from "lucide-react";
+import CityPicker from "@/components/ui/CityPicker";
 import { toast } from "sonner";
 
 const QUICK_EMOJIS = [
@@ -202,43 +203,36 @@ export default function CreatePost({ onPostCreated }) {
                     </div>
                 )}
 
-                {/* Location Input & GPS */}
+                {/* Location Input powered by @novaedgedigitallabs/citykit */}
                 {showLocationInput && (
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-2 bg-card border border-border rounded-xl shadow-sm">
-                        <div className="flex-1 flex items-center gap-2">
-                            <MapPin className="w-4 h-4 text-primary shrink-0 ml-1" />
-                            <Input
-                                type="text"
-                                placeholder="Enter location (e.g. New Delhi, Remote)..."
-                                value={location}
-                                onChange={(e) => setLocation(e.target.value)}
-                                className="text-xs bg-secondary/30 border-none h-8"
-                            />
-                        </div>
-                        <div className="flex items-center gap-1">
-                            <Button
-                                size="sm"
-                                variant="secondary"
-                                onClick={handleGetLocation}
-                                disabled={gettingLocation}
-                                className="h-7 text-xs gap-1.5 rounded-full"
-                            >
-                                {gettingLocation ? (
-                                    <Loader2 className="w-3 h-3 animate-spin" />
-                                ) : (
-                                    <Navigation className="w-3 h-3" />
-                                )}
-                                GPS
-                            </Button>
+                    <div className="p-2.5 bg-card border border-border rounded-xl shadow-md space-y-2">
+                        <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-bold text-primary flex items-center gap-1">
+                                <MapPin className="w-3 h-3" /> Select Location (CityKit)
+                            </span>
                             <Button
                                 size="sm"
                                 variant="ghost"
                                 onClick={() => setShowLocationInput(false)}
-                                className="h-7 text-xs px-2"
+                                className="h-6 text-[10px] px-2 text-muted-foreground hover:text-foreground"
                             >
                                 Done
                             </Button>
                         </div>
+
+                        <CityPicker
+                            selectedValue={location}
+                            onSelectCity={(cityData) => {
+                                if (cityData) {
+                                    setLocation(cityData.formatted || `${cityData.city}, ${cityData.country}`);
+                                    setShowLocationInput(false);
+                                    toast.success("Location tagged!");
+                                } else {
+                                    setLocation("");
+                                }
+                            }}
+                            placeholder="Search 49,900+ global cities (e.g. Bhopal, London)..."
+                        />
                     </div>
                 )}
 

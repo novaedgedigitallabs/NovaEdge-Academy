@@ -9,7 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Loader2, User, Mail, Phone, AtSign, FileText, CheckCircle, Upload, Camera, Github, Linkedin, Globe, Twitter, Link as LinkIcon, LogOut } from "lucide-react";
+import { Loader2, User, Mail, Phone, AtSign, FileText, CheckCircle, Upload, Camera, Github, Linkedin, Globe, Twitter, Link as LinkIcon, LogOut, MapPin } from "lucide-react";
+import CityPicker from "@/components/ui/CityPicker";
 import { toast } from "sonner";
 
 export default function EditProfilePage() {
@@ -22,6 +23,7 @@ export default function EditProfilePage() {
     const [email, setEmail] = useState("");
     const [phoneNumber, setPhoneNumber] = useState("");
     const [bio, setBio] = useState("");
+    const [location, setLocation] = useState(null);
     const [avatarUrl, setAvatarUrl] = useState("");
     const [coverUrl, setCoverUrl] = useState("");
     
@@ -40,6 +42,7 @@ export default function EditProfilePage() {
             setEmail(user.email || "");
             setPhoneNumber(user.phoneNumber || "");
             setBio(user.bio || "");
+            setLocation(user.location || null);
             setAvatarUrl(user.avatar?.url || "");
             setCoverUrl(user.coverImage?.url || "");
 
@@ -99,6 +102,7 @@ export default function EditProfilePage() {
                 email: email.trim(),
                 phoneNumber: phoneNumber.trim(),
                 bio: bio.trim(),
+                location: location || null,
                 socialLinks: {
                     github: github.trim(),
                     linkedin: linkedin.trim(),
@@ -333,6 +337,47 @@ export default function EditProfilePage() {
                             placeholder="Tell the community about yourself, your learning goals, and background..."
                             className="bg-secondary/30 text-sm resize-none"
                         />
+                    </div>
+
+                    {/* Location / City Selection powered by @novaedgedigitallabs/citykit */}
+                    <div className="space-y-2 border-t border-border/40 pt-5">
+                        <div className="flex items-center justify-between">
+                            <Label htmlFor="city" className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                                <MapPin className="w-3.5 h-3.5 text-primary" /> Location / City (Powered by CityKit)
+                            </Label>
+                            <span className="text-[10px] font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">
+                                @novaedgedigitallabs/citykit
+                            </span>
+                        </div>
+                        
+                        <CityPicker
+                            selectedValue={location}
+                            onSelectCity={(cityData) => setLocation(cityData)}
+                            placeholder="Type to search 49,900+ verified global cities (e.g. Bhopal, New Delhi)..."
+                        />
+
+                        {location && (location.city || location.formatted) && (
+                            <div className="mt-2 p-2.5 rounded-xl bg-primary/5 border border-primary/20 text-xs flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-base">📍</span>
+                                    <div>
+                                        <p className="font-bold text-foreground">{location.formatted || `${location.city}, ${location.country}`}</p>
+                                        <p className="text-[10px] text-muted-foreground">
+                                            {location.state ? `${location.state} • ` : ""}{location.countryCode ? `${location.countryCode} • ` : ""}{location.timezone || "Global"}
+                                        </p>
+                                    </div>
+                                </div>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setLocation(null)}
+                                    className="h-7 text-[10px] text-destructive hover:text-destructive"
+                                >
+                                    Remove
+                                </Button>
+                            </div>
+                        )}
                     </div>
 
                     {/* Social & Web Links */}

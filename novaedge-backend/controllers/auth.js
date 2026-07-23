@@ -217,6 +217,19 @@ exports.updateProfile = async (req, res) => {
       };
     }
 
+    if (req.body.location) {
+      newUserData.location = {
+        city: req.body.location.city || "",
+        state: req.body.location.state || "",
+        country: req.body.location.country || "",
+        countryCode: req.body.location.countryCode || "",
+        timezone: req.body.location.timezone || "",
+        lat: req.body.location.lat || null,
+        lng: req.body.location.lng || null,
+        formatted: req.body.location.formatted || "",
+      };
+    }
+
     // Update Avatar
     if (req.body.avatar && req.body.avatar !== "") {
       const user = await User.findById(req.user.id);

@@ -118,6 +118,7 @@ app.use("/api/v1/messages", require("./routes/message"));
 app.use("/api/v1/posts", require("./routes/post"));
 app.use("/api/v1/comments", require("./routes/comment"));
 app.use("/api/v1", require("./routes/driveUpload"));
+app.use("/api/v1", require("./routes/city"));
 app.use("/api/v1/hashtag", hashtag);
 app.use("/api/v1", require("./routes/mentors"));
 app.use(require("./middleware/error"));
