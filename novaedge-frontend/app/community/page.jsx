@@ -159,7 +159,7 @@ export default function CommunityPage() {
     };
 
     return (
-        <AppLayout className="max-w-5xl">
+        <AppLayout className="w-full">
             <div className="px-4 py-6 space-y-8">
                 {/* Hero Section */}
                 <div className="relative overflow-hidden rounded-3xl glass-panel p-8 md:p-12 text-center shadow-2xl">
