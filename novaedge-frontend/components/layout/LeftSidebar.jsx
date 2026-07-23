@@ -117,7 +117,7 @@ export default function LeftSidebar() {
     }, [user, pathname]);
 
     return (
-        <section className="custom-scrollbar glass-sidebar sticky left-0 top-0 z-20 flex h-screen w-fit flex-col justify-between overflow-y-auto border-r pb-6 pt-8 max-md:hidden lg:w-[266px]">
+        <section className="custom-scrollbar glass-sidebar sticky left-0 top-0 z-20 flex h-screen w-[240px] xl:w-[266px] shrink-0 flex-col justify-between overflow-y-auto border-r pb-6 pt-8 max-md:hidden">
             <div className="flex w-full flex-1 flex-col gap-6 px-6">
                 <Link href="/" className="flex items-center px-3 py-1">
                     <Image
@@ -148,14 +148,14 @@ export default function LeftSidebar() {
                                     isActive && "bg-primary/15 text-primary font-bold hover:bg-primary/20 hover:text-primary shadow-xs"
                                 )}
                             >
-                                <div className="flex items-center gap-4 min-w-0">
+                                <div className="flex items-center gap-3.5 min-w-0">
                                     <IconComponent
                                         className={cn(
-                                            "h-6 w-6 shrink-0 transition-transform group-hover:scale-105",
+                                            "h-5 w-5 shrink-0 transition-transform group-hover:scale-105",
                                             isActive ? "text-primary stroke-[2.5]" : "stroke-[1.75]"
                                         )}
                                     />
-                                    <p className="text-base max-lg:hidden truncate">{link.label}</p>
+                                    <p className="text-sm font-semibold truncate">{link.label}</p>
                                 </div>
 
                                 {hasBadge && (
@@ -170,10 +170,10 @@ export default function LeftSidebar() {
                     {user && (
                         <button
                             onClick={logout}
-                            className="flex items-center justify-start gap-4 rounded-full px-4 py-3 transition-all font-medium text-destructive hover:bg-destructive/10 hover:text-destructive group w-full text-left cursor-pointer"
+                            className="flex items-center justify-start gap-3.5 rounded-full px-4 py-3 transition-all font-medium text-destructive hover:bg-destructive/10 hover:text-destructive group w-full text-left cursor-pointer"
                         >
-                            <LogOut className="h-6 w-6 shrink-0 stroke-[1.75] transition-transform group-hover:scale-105" />
-                            <p className="text-base max-lg:hidden">Logout</p>
+                            <LogOut className="h-5 w-5 shrink-0 stroke-[1.75] transition-transform group-hover:scale-105" />
+                            <p className="text-sm font-semibold">Logout</p>
                         </button>
                     )}
                 </div>
@@ -182,10 +182,10 @@ export default function LeftSidebar() {
                     <Button
                         type="button"
                         onClick={() => setIsPostDialogOpen(true)}
-                        className="mt-2 w-full rounded-full text-base font-bold h-12 lg:h-13 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md shadow-primary/20 cursor-pointer"
+                        className="mt-2 w-full rounded-full text-sm font-bold h-11 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md shadow-primary/20 cursor-pointer flex items-center justify-center gap-2"
                     >
-                        <span className="max-lg:hidden">Post</span>
-                        <PenSquare className="lg:hidden h-5 w-5" />
+                        <PenSquare className="h-4 w-4" />
+                        <span>Post</span>
                     </Button>
                     <DialogContent className="sm:max-w-xl p-0 border border-border bg-background rounded-2xl overflow-hidden shadow-2xl">
                         <DialogHeader className="px-6 pt-5 pb-3 border-b border-border/60">
@@ -201,20 +201,20 @@ export default function LeftSidebar() {
             </div>
 
             {user && (
-                <div className="mt-6 px-6">
+                <div className="mt-6 px-4">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <div className="flex cursor-pointer items-center justify-between gap-3 rounded-full p-2.5 hover:bg-secondary/50 transition-colors border border-transparent hover:border-border/50">
-                                <div className="flex items-center gap-3 min-w-0">
+                            <div className="flex cursor-pointer items-center justify-between gap-2.5 rounded-full p-2 hover:bg-secondary/50 transition-colors border border-transparent hover:border-border/50">
+                                <div className="flex items-center gap-2.5 min-w-0">
                                     <Avatar className="h-9 w-9 border border-primary/20 flex-shrink-0 overflow-hidden">
                                         <AvatarImage src={user.avatar?.url} alt={user.name} className="object-cover object-center w-full h-full" />
                                         <AvatarFallback className="bg-primary/10 text-primary text-sm font-bold">
                                             {user.name?.[0] || "U"}
                                         </AvatarFallback>
                                     </Avatar>
-                                    <div className="flex flex-col max-lg:hidden min-w-0">
-                                        <p className="text-sm font-bold line-clamp-1 text-foreground leading-tight">{user.name}</p>
-                                        <p className="text-xs text-muted-foreground line-clamp-1">@{user.username || user.email?.split('@')[0]}</p>
+                                    <div className="flex flex-col min-w-0">
+                                        <p className="text-xs font-bold line-clamp-1 text-foreground leading-tight">{user.name}</p>
+                                        <p className="text-[11px] text-muted-foreground line-clamp-1">@{user.username || user.email?.split('@')[0]}</p>
                                     </div>
                                 </div>
                             </div>

@@ -18,8 +18,8 @@ const navLinks = [
     },
     {
         icon: Bell,
-        route: "/notifications",
-        label: "Notifications",
+        route: "/network",
+        label: "Network",
     },
     {
         icon: Mail,
@@ -32,21 +32,23 @@ export default function MobileNav() {
     const pathname = usePathname();
 
     return (
-        <section className="fixed bottom-0 z-50 w-full border-t border-border bg-background/80 backdrop-blur-md md:hidden">
-            <div className="flex items-center justify-between px-6 py-3">
+        <section className="fixed bottom-0 z-50 w-full border-t border-border bg-background/90 backdrop-blur-md md:hidden">
+            <div className="flex items-center justify-around px-4 py-2.5">
                 {navLinks.map((link) => {
-                    const isActive = (pathname.includes(link.route) && link.route.length > 1) || pathname === link.route;
+                    const isActive = link.route === "/" 
+                        ? pathname === "/" 
+                        : pathname.startsWith(link.route);
 
                     return (
                         <Link
                             href={link.route}
                             key={link.label}
                             className={cn(
-                                "flex flex-col items-center gap-1 p-2 transition-colors",
-                                isActive && "text-primary"
+                                "flex flex-col items-center gap-1 p-2 transition-colors rounded-full",
+                                isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
                             )}
                         >
-                            <link.icon className={cn("h-6 w-6", isActive ? "fill-current" : "")} />
+                            <link.icon className={cn("h-5 w-5 transition-transform", isActive ? "stroke-[2.5]" : "stroke-[1.75]")} />
                         </Link>
                     );
                 })}
