@@ -197,15 +197,15 @@ function MessagesContent() {
             showRightSidebar={false}
             hideMobileNav={!!selectedFriend}
             className={cn(
-                "max-w-5xl border-r border-border pb-0 sm:pb-0",
+                "w-full pb-0 sm:pb-0",
                 selectedFriend ? "h-[100dvh]" : "h-[calc(100dvh-65px)] sm:h-screen"
             )}
         >
-            <div className="grid grid-cols-1 md:grid-cols-3 h-full">
+            <div className="flex w-full h-full">
 
                 {/* Left Sidebar Column - Friends & Requests */}
                 <div className={cn(
-                    "flex flex-col border-r border-white/10 h-full overflow-hidden glass-panel rounded-none",
+                    "w-full md:w-80 shrink-0 flex flex-col border-r border-border h-full overflow-hidden bg-card/20",
                     selectedFriend ? "hidden md:flex" : "flex"
                 )}>
                     {/* Header with Navigation Tabs */}
@@ -341,7 +341,7 @@ function MessagesContent() {
 
                 {/* Right Chat Area */}
                 <div className={cn(
-                    "md:col-span-2 flex flex-col h-full glass-panel rounded-none border-0 overflow-hidden relative",
+                    "flex-1 min-w-0 flex flex-col h-full bg-transparent overflow-hidden relative",
                     !selectedFriend ? "hidden md:flex" : "flex"
                 )}>
                     {selectedFriend ? (
