@@ -1,100 +1,63 @@
-# NovaEdge Frontend
+# NovaEdge Web Frontend (`novaedge-frontend`)
 
-The frontend application for the NovaEdge Academy LMS. Built with Next.js 14, Tailwind CSS, and Shadcn UI, it delivers a modern, responsive, and immersive learning experience.
+The responsive web application for the **NovaEdge Academy** EdTech Platform, built with Next.js 16 (App Router), React 19, and Tailwind CSS 4.
+
+---
 
 ## 🚀 Tech Stack
 
-- **Framework:** Next.js 14 (App Router)
-- **Language:** JavaScript / React
-- **Styling:** Tailwind CSS
-- **UI Components:** Shadcn UI, Radix UI
-- **Icons:** Lucide React
-- **State Management:** React Context / Hooks
-- **Form Handling:** React Hook Form + Zod
+- **Framework:** Next.js 16 (App Router)
+- **Library:** React 19
+- **Styling:** Tailwind CSS 4, CSS Modules
+- **UI Components:** Shadcn UI (Radix Primitives), Lucide React
+- **Form Handling:** React Hook Form + Zod validation
 - **HTTP Client:** Axios (via custom API wrapper)
-- **Theming:** next-themes (Dark/Light mode)
+- **State & Utils:** Date-fns, CLSX, Tailwind Merge
+
+---
 
 ## ✨ Features
 
-- **Modern UI/UX:**
-  - Dark/Light Mode Toggle
-  - Responsive Design for all devices
-  - Glassmorphism and premium aesthetics
+- **Student Learning Portal:**
+  - Course Catalog with search and category filters.
+  - Interactive lecture player with downloadable notes and curriculum.
+  - AI Assistant for lecture summaries, quizzes, and instant Q&A.
+  - My Learning dashboard & profile management.
 
-- **Student Portal:**
-  - Course Catalog with Search & Filtering
-  - Detailed Course Landing Pages
-  - "My Learning" Dashboard
-  - Interactive Video Player
-  - **AI Assistant:** Smart Summaries, Practice Quizzes, and Chat
-  - Profile Management
+- **Community & Social:**
+  - Community Feed for creating, liking, and commenting on posts.
+  - Direct messaging and friends network.
+  - Public student profile pages with badge achievements and certificates.
 
-- **Social Community:**
-  - **Network:** Manage friends and connection requests.
-  - **Chat:** Real-time messaging with friends and AI integration.
-  - **Feed:** Create and view posts, comments, and reposts.
-  - **Public Profiles:** View user achievements, certificates, and posts.
+- **Instructor & Mentor Portal:**
+  - Course creation & lecture management.
+  - Student progress monitoring and assignment grading.
 
-- **Mentor Dashboard:**
-  - Course Creation & Management
-  - Student Progress Views
-  - Assignment Grading
-  - Q&A Management
+- **Admin Panel (`/admin`):**
+  - Platform analytics dashboard (users, enrollments, sales).
+  - User management, course approvals, content moderation, support ticket queues, and audit logs.
 
-- **Admin Panel:**
-  - User & Mentor Management
-  - Course Approval & Editing
-  - System-wide Settings
+---
 
-- **Authentication:**
-  - Secure Login & Registration
-  - Protected Routes
-  - Session Management
+## 🛠️ Setup & Execution
 
-## 🛠️ Installation & Setup
+1. **Install Dependencies:**
+   ```bash
+   npm install
+   ```
 
-1.  **Clone the repository:**
-    ```bash
-    git clone <repository-url>
-    cd novaedge-frontend
-    ```
+2. **Environment Variables (`.env.local`):**
+   ```env
+   NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1
+   ```
 
-2.  **Install dependencies:**
-    ```bash
-    npm install
-    ```
+3. **Run Development Server:**
+   ```bash
+   npm run dev
+   ```
+   Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-3.  **Environment Variables:**
-    Create a `.env.local` file in the root directory and add the following:
+---
 
-    ```env
-    NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1
-    ```
-
-4.  **Run the development server:**
-    ```bash
-    npm run dev
-    ```
-
-    Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-## 📂 Project Structure
-
-- `app/`: Next.js App Router pages and layouts.
-  - `(auth)/`: Authentication routes (login, register).
-  - `admin/`: Admin dashboard routes.
-  - `mentor/`: Mentor dashboard routes.
-  - `courses/`: Course browsing and viewing routes.
-- `components/`: Reusable UI components (buttons, inputs, cards).
-- `lib/`: Utility functions and API configuration (`api.js`).
-- `services/`: API service functions organized by feature (auth, courses, etc.).
-- `hooks/`: Custom React hooks.
-- `context/`: Global state providers.
-
-## 🤝 Contributing
-
-1.  Fork the repository.
-2.  Create a new branch (`git checkout -b feature/amazing-feature`).
-3.  Commit your changes (`git commit -m 'Add some amazing feature'`).
-4.  Push to the branch (`git push origin feature/amazing-feature`).
-5.  Open a Pull Request.
+## 📝 License
+Proprietary — NovaEdge Academy.

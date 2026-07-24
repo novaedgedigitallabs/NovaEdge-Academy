@@ -1,140 +1,99 @@
-# NovaEdge Backend
+# NovaEdge Backend API Server (`novaedge-backend`)
 
-The backend API for the NovaEdge Academy Learning Management System (LMS). Built with Node.js, Express, and MongoDB, it provides a robust and scalable foundation for managing users, courses, enrollments, and more.
+The core RESTful API backend for the **NovaEdge Academy** EdTech Platform. Built with Node.js, Express.js, and MongoDB, it serves both the Next.js Web Frontend (`novaedge-frontend`) and the Flutter Mobile Application (`novaedge-app`).
+
+---
 
 ## 🚀 Tech Stack
 
-- **Runtime:** Node.js
+- **Runtime:** Node.js (v18+)
 - **Framework:** Express.js
-- **Database:** MongoDB (with Mongoose)
-- **Authentication:** JWT (JSON Web Tokens), Cookies
-- **File Storage:** Cloudinary
-- **Payments:** Razorpay
-- **Email:** Nodemailer
-- **AI:** Google Gemini (Generative AI)
-- **Validation:** Joi / Custom Middleware
-- **Environment Management:** `@novaedgedigitallabs/envkit` & Zod
+- **Database:** MongoDB (with Mongoose ORM)
+- **Authentication:** JWT (JSON Web Tokens) with Cookie-Parser & Bearer Header support
+- **Media Storage:** Cloudinary & Google Drive API integration
+- **Payment Gateway:** Razorpay API (Orders & Signature Verification)
+- **Email Delivery:** Nodemailer (SMTP)
+- **AI Integration:** Google Gemini Generative AI (Lecture Summaries & Quizzes)
+- **PDF Generation:** PDFKit (Automated Course Completion Certificates)
 
-## ✨ Features
+---
 
-- **Authentication & Authorization:**
-  - User Registration & Login
-  - Role-Based Access Control (Student, Mentor, Admin)
-  - Two-Factor Authentication (2FA)
-  - Password Reset & Recovery
+## ✨ API Features & Modules
 
-- **Course Management:**
-  - Create, Read, Update, Delete (CRUD) Courses
-  - Lecture & Video Management
-  - Course Categories & Search
+- **Authentication & User Profiles:**
+  - Registration, Login, Google Auth, Logout
+  - Profile Retrieval (`GET /me`) and Profile Update (`PUT /me/update`)
+  - Role-Based Access Control (`student`, `mentor`, `admin`)
 
-- **Learning Experience:**
-  - Enrollment System
-  - Progress Tracking
-  - Quizzes & Assessments
-  - Assignments & Grading
-  - Certificate Generation
+- **Course Catalog & Video Progress:**
+  - Course CRUD operations & Lecture Management
+  - Progress Tracking endpoint (`POST /progress/:courseId`) recording watched duration, last position seconds, and completion state.
 
-- **Mentor Features:**
-  - Dedicated Mentor Dashboard
-  - Student Performance Analytics
-  - Q&A / Discussion Management
+- **Payments & Enrollment:**
+  - Razorpay order creation (`POST /checkout`) and verification (`POST /paymentverification`)
+  - Free course auto-enrollment for zero-amount checkout.
+  - Enrolled courses list (`GET /enrollments`).
 
-- **Admin Features:**
-  - User Management
-  - Audit Logs
-  - Content Moderation
-  - System Analytics
+- **Certificates & Verification:**
+  - PDF certificate generation (`POST /certificate/generate/:courseId`)
+  - Certificate list with QR verification code (`GET /my/certificates`).
 
-- **Engagement & Social:**
-  - Reviews & Ratings
-  - Discussion Forums
-  - Real-time Chat (Socket.io/Polling)
-  - Friend System (Requests, Connections)
-  - User Posts & Feed
-  - Comments & Reposts
-  - Badges & Gamification
-  - Wishlist
+- **Engagement & Community:**
+  - Wishlist toggle (`POST /wishlist/:courseId/toggle`) and list (`GET /wishlist`).
+  - Course Reviews (`GET /course/:courseId/reviews`, `POST /course/:courseId/review`).
+  - Notifications list (`GET /notifications`) and Mark Read (`PUT /notifications/read-all`).
+  - Community Feed posts (`GET /posts/all`, `POST /posts/create`, `PUT /posts/:id/like`).
+  - Blogs & Articles (`GET /blogs`).
+  - Mentors Directory (`GET /mentors`).
+  - Careers & Jobs (`GET /careers`).
 
-- **AI Integration:**
-  - Automated Lecture Summaries
-  - AI-Generated Practice Quizzes
-  - Context-Aware Chat Assistant (RAG)
+---
 
-- **Support:**
-  - Helpdesk / Support Ticket System
+## 🛠️ Setup & Execution
 
-## ️ Installation & Setup
+1. **Install Dependencies:**
+   ```bash
+   npm install
+   ```
 
-1.  **Clone the repository:**
-    ```bash
-    git clone <repository-url>
-    cd novaedge-backend
-    ```
+2. **Configure Environment (`.env`):**
+   ```env
+   PORT=5000
+   FRONTEND_URL=http://localhost:3000
+   MONGO_URI=your_mongodb_connection_string
+   JWT_SECRET=your_jwt_secret
+   JWT_EXPIRE=7d
+   COOKIE_EXPIRE=7
 
-2.  **Install dependencies:**
-    ```bash
-    npm install
-    ```
+   # Cloudinary
+   CLOUDINARY_CLOUD_NAME=your_cloud_name
+   CLOUDINARY_API_KEY=your_api_key
+   CLOUDINARY_API_SECRET=your_api_secret
 
-3.  **Environment Variables:**
-    Create a `.env` file in the root directory and add the following variables. (You can also run `npx envkit generate` to auto-generate `.env.example` from the schema):
+   # Razorpay
+   RAZORPAY_KEY_ID=your_razorpay_key_id
+   RAZORPAY_KEY_SECRET=your_razorpay_key_secret
 
-    ```env
-    PORT=5000
-    MONGO_URI=<your_mongodb_connection_string>
-    FRONTEND_URL=<frontend_application_url>
-    
-    # Authentication
-    JWT_SECRET=<your_jwt_secret>
-    JWT_EXPIRE=7d
-    COOKIE_EXPIRE=7
-    
-    # Cloudinary (File Uploads)
-    CLOUDINARY_CLOUD_NAME=<your_cloud_name>
-    CLOUDINARY_API_KEY=<your_api_key>
-    CLOUDINARY_API_SECRET=<your_api_secret>
-    
-    # Razorpay (Payments)
-    RAZORPAY_API_KEY=<your_key_id>
-    RAZORPAY_API_SECRET=<your_key_secret>
-    
-    # Email (Nodemailer)
-    SMTP_HOST=<smtp_host>
-    SMTP_PORT=<smtp_port>
-    SMTP_EMAIL=<your_email>
-    SMTP_PASSWORD=<your_password>
+   # SMTP Email
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=465
+   SMTP_EMAIL=your_email@gmail.com
+   SMTP_PASSWORD=your_app_password
 
-    # AI (Google Gemini)
-    GEMINI_API_KEY=<your_gemini_api_key>
-    ```
+   # AI (Google Gemini)
+   GEMINI_API_KEY=your_gemini_api_key
+   ```
 
-4.  **Run the server:**
-    ```bash
-    # Development mode (with nodemon)
-    npm run dev
+3. **Run Server:**
+   ```bash
+   # Development
+   npm run dev
 
-    # Production mode
-    npm start
-    ```
+   # Production
+   npm start
+   ```
 
-## � API Endpoints
+---
 
-The API is prefixed with `/api/v1`. Key endpoints include:
-
-- **Auth:** `/api/v1/register`, `/api/v1/login`, `/api/v1/me`
-- **Courses:** `/api/v1/courses`
-- **Mentors:** `/api/v1/mentor`
-- **Admin:** `/api/v1/admin`
-- **Payments:** `/api/v1/payment`
-- **Enrollment:** `/api/v1/enrollment`
-- **Support:** `/api/v1/support`
-- **Social:** `/api/v1/friends`, `/api/v1/messages`, `/api/v1/posts`, `/api/v1/comments`
-
-## 🤝 Contributing
-
-1.  Fork the repository.
-2.  Create a new branch (`git checkout -b feature/amazing-feature`).
-3.  Commit your changes (`git commit -m 'Add some amazing feature'`).
-4.  Push to the branch (`git push origin feature/amazing-feature`).
-5.  Open a Pull Request.
+## 📝 License
+Proprietary — NovaEdge Academy.

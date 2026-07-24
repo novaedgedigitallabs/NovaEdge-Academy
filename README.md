@@ -1,10 +1,21 @@
-# NovaEdge Academy - Full Stack LMS
+# NovaEdge Academy - Full Stack & Mobile EdTech Platform
 
-NovaEdge Academy is a comprehensive Learning Management System (LMS) designed to provide a premium educational experience. It features a robust backend API built with Node.js and Express, and a modern, dynamic frontend built with Next.js 16 and Tailwind CSS.
+NovaEdge Academy is a comprehensive, enterprise-grade Learning Management System (LMS) designed to deliver a premium academic edtech experience across Web and Mobile. It features a robust Node.js/Express REST backend, a modern Next.js 16 web application, and a cross-platform Flutter mobile application.
+
+---
 
 ## 🚀 Technologies Used
 
-### Frontend (`novaedge-frontend`)
+### 📱 Mobile Application (`novaedge-app`)
+- **Framework:** Flutter 3.35.7 (Dart)
+- **State Management:** Flutter Riverpod (`flutter_riverpod`)
+- **Routing:** GoRouter (`go_router`)
+- **HTTP & Storage:** Dio HTTP Client with Auth Bearer Interceptor (`dio`), Flutter Secure Storage (`flutter_secure_storage`)
+- **Video Engine:** Dual Video Player (`youtube_player_flutter` for YouTube, `chewie` + `video_player` for Cloudinary MP4 streams)
+- **Payments:** Razorpay Flutter SDK (`razorpay_flutter`)
+- **UI & Typography:** Google Fonts, Cached Network Image, Custom Dark Academic Design Tokens (`#08080E` base, `#0E0E18` surface, `#9333EA` primary purple, `#06B6D4` cyan, `#F59E0B` gold accent)
+
+### 💻 Web Application (`novaedge-frontend`)
 - **Framework:** Next.js 16 (App Router)
 - **Library:** React 19
 - **Styling:** Tailwind CSS 4, CSS Modules
@@ -14,64 +25,70 @@ NovaEdge Academy is a comprehensive Learning Management System (LMS) designed to
 - **Notifications:** Sonner
 - **Utilities:** Date-fns, CLSX, Tailwind Merge
 
-### Backend (`novaedge-backend`)
+### ⚙️ Backend API (`novaedge-backend`)
 - **Runtime:** Node.js
 - **Framework:** Express.js
 - **Database:** MongoDB (with Mongoose)
 - **Authentication:** JWT (JSON Web Tokens), Cookie-Parser
-- **File Storage:** Cloudinary
-- **Payments:** Razorpay
+- **File Storage:** Cloudinary, Google Drive API
+- **Payments:** Razorpay API
 - **Email:** Nodemailer
-- **PDF/Certificates:** PDFKit
+- **PDF & Certificates:** PDFKit
 - **Utilities:** Multer, BcryptJS, QR-Image
 
 ---
 
-## ✨ Features
+## ✨ Key Features
 
-### User Features
-- **Course Catalog:** Browse and search for courses with advanced filtering.
-- **Student Dashboard:** Track progress, view enrolled courses, and manage profile.
-- **Learning Experience:** Watch video lectures, read materials, and track completion.
-- **Gamification:** Earn badges for course completion and streaks. View achievements on profile.
-- **Testimonials:** Submit video and text testimonials for courses.
-- **Support:** Submit support tickets and track their status.
-- **Assessments:** Take quizzes and assessments to test knowledge.
-- **Certificates:** Auto-generate PDF certificates upon course completion.
-- **Blog & Careers:** Read educational articles and explore career opportunities.
-- **Mentorship:** Connect with mentors (view mentor profiles).
-- **AI Assistant:** Smart lecture summaries, interactive quizzes, and a 24/7 AI Chat Assistant (powered by Gemini) to answer questions in simple language.
-- **Social Network:** Connect with other learners, send friend requests, and manage your network.
-- **Community Feed:** Create posts, share thoughts, comment, like, and repost content.
-- **Real-time Chat:** Message friends directly and interact with the AI assistant in the same interface.
+### 🎓 Learning & Course Experience
+- **Course Catalog & Search:** Advanced search, category filters (App Dev, Full Stack, DSA, Backend, UI/UX), level badges, and price filters with full guest browsing support.
+- **Course Curriculum & Materials:** Lecture unlock hierarchy, AI-generated lecture summaries, downloadable PDF notes, and tech stack chips.
+- **Dual Video Player Engine:** Automatic detection and playback of both YouTube video links and direct Cloudinary MP4 streams.
+- **Real-Time Progress Tracking:** Synchronized progress updates (`/progress/:courseId`) capturing position seconds, total duration, and completion status.
+- **Certificates System:** Automated PDF certificate generation upon 100% course completion, featuring verification QR codes and download links.
 
-### Admin Features
-- **Dashboard:** Overview of platform statistics (users, sales, courses).
-- **Course Management:** Create, update, and delete courses and lectures.
-- **User Management:** Manage student and instructor accounts.
-- **Enrollment Management:** View and manage student enrollments.
-- **Content Management:** Manage blogs, career listings, and mentors.
-- **Gamification Management:** Create and manage badges and rules.
-- **Testimonial Moderation:** Review, approve, reject, and feature user testimonials.
-- **Support Desk:** Manage support tickets, queues, and SLAs.
-- **Audit Logs:** View immutable logs of all admin actions for security and compliance.
+### 💳 Payments & Checkout
+- **Razorpay Integration:** Full Razorpay checkout flow with backend payment signature verification.
+- **Coupon Engine:** Real-time coupon validation (`finalAmount` calculations).
+- **Free Auto-Enrollment:** Seamless instant enrollment for zero-price courses.
+
+### 🤝 Engagement & Community
+- **Community Discussion Feed:** 4th main navigation tab for posting questions, code snippets, liking discussions, and student interaction.
+- **Course Reviews & Ratings:** Star rating distribution and interactive "Write a Review" modal dialog for enrolled students.
+- **Wishlist Management:** Heart icon quick toggle on course cards and detail screens.
+- **Notifications Desk:** System and course alerts with "Mark All Read" action.
+- **Blogs & Articles:** Platform news, tutorials, and tech articles.
+- **Industry Mentors Directory:** Connect with expert instructors, view company affiliations, and ratings.
+- **Careers & Opportunities:** Browse open software engineering roles and internships.
+
+### 🛡️ Admin & Control Panel
+- **Analytics Dashboard:** Overview of platform statistics (users, revenue, course enrollments).
+- **Course & User Management:** Comprehensive CRUD operations for courses, lectures, students, and mentors.
+- **Content & Support Moderation:** Blog management, career listings, testimonial approval, support ticket queues, and immutable audit logs.
 
 ---
 
 ## 📂 Project Structure
 
 ```
-novaedge/
-├── novaedge-backend/       # Express.js API Server
-│   ├── config/             # DB and Cloudinary config
-│   ├── controllers/        # Request handlers
-│   ├── middleware/         # Auth and error handling
+novaedgeacademy-in/
+├── novaedge-app/           # Cross-Platform Flutter Mobile App
+│   ├── lib/
+│   │   ├── core/           # Theme, Network (Dio + Auth Interceptor), Storage, Router
+│   │   └── features/       # Auth, Courses, Payment, Profile, Certificates, 
+│   │                       # Notifications, Wishlist, Reviews, Community, Blogs, Mentors, Careers
+│   └── test/               # Unit tests (UserModel, CourseModel JSON parsing)
+│
+├── novaedge-backend/       # Node.js & Express.js REST API Server
+│   ├── config/             # DB and Cloudinary configuration
+│   ├── controllers/        # Request handlers & logic
+│   ├── middleware/         # Auth, admin, and error handling
 │   ├── models/             # Mongoose schemas
-│   ├── routes/             # API route definitions
+│   ├── routes/             # REST route definitions
 │   └── server.js           # Entry point
 │
-└── novaedge-frontend/      # Next.js Client
-    ├── app/                # App Router pages
+└── novaedge-frontend/      # Next.js Web Client
+    ├── app/                # App Router pages and layouts
     ├── components/         # Reusable UI components
     ├── lib/                # API wrapper and utils
     └── services/           # API service calls
@@ -83,96 +100,31 @@ novaedge/
 
 ### Prerequisites
 - Node.js (v18+ recommended)
+- Flutter SDK (v3.35+ recommended)
 - MongoDB (Local or Atlas URI)
 - Cloudinary Account
 - Razorpay Account (for payments)
 
-### 1. Backend Setup
+### 1. Backend Setup (`novaedge-backend`)
+```bash
+cd novaedge-backend
+npm install
+npm run dev
+```
 
-1. Navigate to the backend directory:
-   ```bash
-   cd novaedge-backend
-   ```
+### 2. Web Frontend Setup (`novaedge-frontend`)
+```bash
+cd novaedge-frontend
+npm install
+npm run dev
+```
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Create a `.env` file in `novaedge-backend/` with the following variables:
-   ```env
-   PORT=5000
-   FRONTEND_URL=http://localhost:3000
-   MONGO_URI=your_mongodb_connection_string
-   JWT_SECRET=your_jwt_secret_key
-   JWT_EXPIRE=7d
-   COOKIE_EXPIRE=7
-
-   # Cloudinary
-   CLOUDINARY_CLOUD_NAME=your_cloud_name
-   CLOUDINARY_API_KEY=your_api_key
-   CLOUDINARY_API_SECRET=your_api_secret
-
-   # Razorpay
-   RAZORPAY_KEY_ID=your_razorpay_key_id
-   RAZORPAY_KEY_SECRET=your_razorpay_key_secret
-
-   # SMTP (Email)
-   SMTP_HOST=smtp.gmail.com
-   SMTP_PORT=465
-   SMTP_EMAIL=your_email@gmail.com
-   SMTP_PASSWORD=your_email_password
-   SMTP_FROM_EMAIL=noreply@novaedge.com
-   SMTP_FROM_NAME=NovaEdge
-
-   # AI (Google Gemini)
-   GEMINI_API_KEY=your_gemini_api_key
-
-   # Google Drive Upload (Option 1: OAuth2 - Recommended for Personal Accounts)
-   # 1. Create OAuth2 Credentials in Google Cloud Console (Web Application).
-   # 2. Add "https://developers.google.com/oauthplayground" to Authorized Redirect URIs.
-   # 3. Run: node scripts/getRefreshToken.js <CLIENT_ID> <CLIENT_SECRET>
-   # 4. Follow instructions to get Refresh Token.
-   GOOGLE_CLIENT_ID=your_client_id
-   GOOGLE_CLIENT_SECRET=your_client_secret
-   GOOGLE_REFRESH_TOKEN=your_refresh_token
-   GOOGLE_REDIRECT_URI=https://developers.google.com/oauthplayground
-   
-   # Google Drive Upload (Option 2: Service Account - For Workspace/Shared Drives)
-   # GOOGLE_APPLICATION_CREDENTIALS=./path/to/service-account.json
-   
-   DRIVE_FOLDER_ID=your_drive_folder_id
-   MAX_UPLOAD_BYTES=52428800 # 50MB
-   ```
-
-4. Start the server:
-   ```bash
-   npm run dev
-   ```
-
-### 2. Frontend Setup
-
-1. Navigate to the frontend directory:
-   ```bash
-   cd novaedge-frontend
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Create a `.env.local` file in `novaedge-frontend/` with the following variable:
-   ```env
-   NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1
-   ```
-
-4. Start the development server:
-   ```bash
-   npm run dev
-   ```
-
-5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+### 3. Mobile App Setup (`novaedge-app`)
+```bash
+cd novaedge-app
+flutter pub get
+flutter run
+```
 
 ---
 
@@ -180,78 +132,18 @@ novaedge/
 
 Base URL: `/api/v1`
 
-### Authentication
-- `POST /register` - Register a new user
-- `POST /login` - Login user
-- `GET /logout` - Logout user
-- `GET /me` - Get current user profile
-
-### Courses
-- `GET /courses` - Get all courses
-- `GET /course/:id` - Get single course details
-- `POST /course/new` - Create a new course (Admin)
-- `PUT /course/:id` - Update course (Admin)
-- `DELETE /course/:id` - Delete course (Admin)
-- `GET /course/:id/lectures` - Get course lectures (Enrolled/Admin)
-- `POST /course/:id` - Add lecture to course (Admin)
-
-### Enrollment
-- `GET /enrollments/me` - Get logged-in user's enrollments
-- `GET /enrollment/check/:courseId` - Check if user is enrolled in a course
-- `GET /admin/enrollments` - Get all enrollments (Admin)
-
-### Payment
-- `POST /payment/process` - Process payment
-- `GET /payment/key` - Get Razorpay API key
-
-### Other Resources
-- **Blogs:** `/blogs` (GET, POST, PUT, DELETE)
-- **Careers:** `/careers` (GET, POST, PUT, DELETE)
-- **Mentors:** `/mentors` (GET, POST, PUT, DELETE)
-- **Badges:** `/badges` (GET, POST, PUT)
-- **Testimonials:** `/testimonials` (GET, POST, PUT, DELETE)
-- **Support:** `/support` (Tickets, Queues, SLAs)
-- **Audit:** `/admin/audit` (GET, POST)
-- **Contact:** `/contact` (POST)
-- **Upload:** `/upload` (POST - for file uploads)
-- **Friends:** `/friends` (Request, Accept, Reject, List)
-- **Messages:** `/messages` (Send, Get History)
-- **Posts:** `/posts` (Create, Feed, Like, Delete)
-- **Comments:** `/comments` (Add, Reply, Like, Delete)
-
----
-
-## 🖥️ Frontend Pages & Flow
-
-### Public Flow
-- **Home (`/`)**: Landing page with hero section, featured courses, and testimonials.
-- **Courses (`/courses`)**: Grid view of all available courses with search and filters.
-- **Course Details (`/courses/[id]`)**: Detailed view of a course, including curriculum and instructor info.
-- **About (`/about`)**: Information about NovaEdge Academy.
-- **Contact (`/contact`)**: Contact form for inquiries.
-- **Blog (`/blog`)**: Educational articles and updates.
-- **Careers (`/careers`)**: Job openings at NovaEdge.
-
-### Student Flow
-- **Authentication**: Login (`/login`) and Register (`/register`) pages.
-- **Dashboard (`/profile`)**: User profile management.
-- **My Learning (`/enrollments`)**: Access to purchased courses.
-- **My Learning (`/enrollments`)**: Access to purchased courses.
-- **Checkout (`/checkout`)**: Secure checkout page for purchasing courses.
-- **Network (`/network`)**: Manage friends and requests.
-- **Messages (`/messages`)**: Chat with friends and AI.
-- **Public Profile (`/user/[id]` or `/@username`)**: View user profiles, certificates, and posts.
-
-### Admin Flow
-- **Admin Panel (`/admin`)**: Protected route for administrators.
-    - Manage Courses
-    - Manage Users
-    - Manage Content (Blogs, Careers, Mentors)
-    - Gamification (Badges)
-    - Testimonials
-    - Support Desk
-    - Audit Logs
-    - View Analytics
+- **Auth:** `POST /register`, `POST /login`, `GET /logout`, `GET /me`, `PUT /me/update`
+- **Courses:** `GET /courses`, `GET /course/:id`, `POST /course/new`, `PUT /course/:id`, `DELETE /course/:id`
+- **Progress:** `POST /progress/:courseId`
+- **Payments & Enrollments:** `POST /checkout`, `POST /paymentverification`, `GET /enrollments`
+- **Certificates:** `GET /my/certificates`, `POST /certificate/generate/:courseId`
+- **Notifications:** `GET /notifications`, `PUT /notifications/read-all`
+- **Wishlist:** `GET /wishlist`, `POST /wishlist/:courseId/toggle`
+- **Reviews:** `GET /course/:courseId/reviews`, `POST /course/:courseId/review`
+- **Community:** `GET /posts/all`, `POST /posts/create`, `PUT /posts/:id/like`
+- **Blogs:** `GET /blogs`
+- **Mentors:** `GET /mentors`
+- **Careers:** `GET /careers`
 
 ---
 
