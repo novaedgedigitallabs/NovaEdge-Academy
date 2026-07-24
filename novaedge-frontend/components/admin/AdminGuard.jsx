@@ -30,7 +30,6 @@ export const ROLE_PERMISSIONS = {
     "/admin/certificates",
     "/admin/testimonials",
     "/admin/blogs",
-    "/admin/mentors",
   ],
   agent: [
     "/admin/dashboard",

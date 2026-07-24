@@ -14,12 +14,15 @@ import { getAllMentors, deleteMentor } from "@/services/mentors";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useAuth } from "@/context/auth-context";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 
 export default function AdminMentorsPage() {
+    const { user } = useAuth();
     const [mentors, setMentors] = useState([]);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
+    const isAdmin = user?.role === "admin";
 
     useEffect(() => {
         fetchMentors();
@@ -37,6 +40,7 @@ export default function AdminMentorsPage() {
     };
 
     const handleDelete = async (id) => {
+        if (!isAdmin) return;
         if (!confirm("Are you sure you want to delete this mentor?")) return;
 
         try {
@@ -52,11 +56,13 @@ export default function AdminMentorsPage() {
         <div className="glass-card bg-white/30 backdrop-blur-sm p-6 space-y-6">
             <div className="flex justify-between items-center">
                 <h1 className="text-3xl font-bold tracking-tight">Mentors</h1>
-                <Link href="/admin/mentors/new">
-                    <Button>
-                        <Plus className="mr-2 h-4 w-4" /> Add Mentor
-                    </Button>
-                </Link>
+                {isAdmin && (
+                    <Link href="/admin/mentors/new">
+                        <Button>
+                            <Plus className="mr-2 h-4 w-4" /> Add Mentor
+                        </Button>
+                    </Link>
+                )}
             </div>
 
             <div className="border rounded-lg">
@@ -66,19 +72,19 @@ export default function AdminMentorsPage() {
                             <TableHead>Name</TableHead>
                             <TableHead>Role</TableHead>
                             <TableHead>Created At</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
+                            {isAdmin && <TableHead className="text-right">Actions</TableHead>}
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {loading ? (
                             <TableRow>
-                                <TableCell colSpan={4} className="text-center py-10">
+                                <TableCell colSpan={isAdmin ? 4 : 3} className="text-center py-10">
                                     Loading...
                                 </TableCell>
                             </TableRow>
                         ) : mentors.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={4} className="text-center py-10">
+                                <TableCell colSpan={isAdmin ? 4 : 3} className="text-center py-10">
                                     No mentors found.
                                 </TableCell>
                             </TableRow>
@@ -88,21 +94,23 @@ export default function AdminMentorsPage() {
                                     <TableCell className="font-medium">{mentor.name}</TableCell>
                                     <TableCell>{mentor.role}</TableCell>
                                     <TableCell>{new Date(mentor.createdAt).toLocaleDateString()}</TableCell>
-                                    <TableCell className="text-right space-x-2">
-                                        <Link href={`/admin/mentors/${mentor._id}`}>
-                                            <Button variant="ghost" size="icon">
-                                                <Pencil className="h-4 w-4" />
+                                    {isAdmin && (
+                                        <TableCell className="text-right space-x-2">
+                                            <Link href={`/admin/mentors/${mentor._id}`}>
+                                                <Button variant="ghost" size="icon">
+                                                    <Pencil className="h-4 w-4" />
+                                                </Button>
+                                            </Link>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="text-destructive hover:text-destructive"
+                                                onClick={() => handleDelete(mentor._id)}
+                                            >
+                                                <Trash2 className="h-4 w-4" />
                                             </Button>
-                                        </Link>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="text-destructive hover:text-destructive"
-                                            onClick={() => handleDelete(mentor._id)}
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
-                                    </TableCell>
+                                        </TableCell>
+                                    )}
                                 </TableRow>
                             ))
                         )}

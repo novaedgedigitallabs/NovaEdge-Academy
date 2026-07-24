@@ -86,11 +86,11 @@ export default function Header() {
                     <span>Profile</span>
                   </Link>
                 </DropdownMenuItem>
-                {user.role === "admin" && (
+                {["admin", "mentor", "agent"].includes(user.role) && (
                   <DropdownMenuItem asChild>
                     <Link href="/admin/dashboard">
                       <LayoutDashboard className="mr-2 h-4 w-4" />
-                      <span>Admin Dashboard</span>
+                      <span>{user.role === "admin" ? "Admin Dashboard" : "Staff Dashboard"}</span>
                     </Link>
                   </DropdownMenuItem>
                 )}
