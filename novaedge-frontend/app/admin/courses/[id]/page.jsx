@@ -62,7 +62,7 @@ export default function AdminCourseEditPage() {
     if (!playlistUrl.trim()) return alert("Please enter a YouTube Playlist URL, ID, or video links");
     setImportingPlaylist(true);
     try {
-      const res = await apiPost("/course/fetch-playlist", { playlistUrl: playlistUrl.trim() });
+      const res = await apiPost("/api/v1/course/fetch-playlist", { playlistUrl: playlistUrl.trim() });
       if (res?.success && Array.isArray(res?.lectures)) {
         setLectures((prev) => [...prev, ...res.lectures]);
         alert(`Successfully imported ${res.lectures.length} lecture(s)! Click 'Save Changes' to save.`);
@@ -90,7 +90,7 @@ export default function AdminCourseEditPage() {
     if (!courseId) return;
     let mounted = true;
 
-    apiGet("/courses/categories")
+    apiGet("/api/v1/courses/categories")
       .then((res) => {
         if (res.data?.success && Array.isArray(res.data?.categories)) {
           setCategoriesList(res.data.categories);
