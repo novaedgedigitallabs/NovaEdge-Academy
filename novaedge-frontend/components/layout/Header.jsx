@@ -28,7 +28,7 @@ export default function Header() {
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-3 font-bold text-xl tracking-tight">
             <Image
-              src="/Header_logo.webp"
+              src="/logo2.png"
               alt="NovaEdge Academy Logo"
               width={36}
               height={36}

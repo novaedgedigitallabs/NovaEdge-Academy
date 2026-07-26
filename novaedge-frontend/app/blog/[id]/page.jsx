@@ -65,10 +65,10 @@ export default function BlogPostPage({ params }) {
                 <div className="relative h-[320px] md:h-[420px] w-full overflow-hidden border-b border-border/40 bg-black/40">
                     <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent z-10" />
                     <img
-                        src={post.image || "/Header_logo.webp"}
+                        src={post.image || "/logo2.png"}
                         alt={post.title}
                         className="absolute inset-0 w-full h-full object-cover"
-                        onError={(e) => { e.target.src = "/Header_logo.webp"; }}
+                        onError={(e) => { e.target.src = "/logo2.png"; }}
                     />
                     <div className="absolute bottom-0 left-0 right-0 z-20 container mx-auto px-6 pb-8">
                         <Link href="/blog">

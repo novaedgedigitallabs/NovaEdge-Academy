@@ -95,10 +95,10 @@ export default function BlogPage() {
                             <div className="grid md:grid-cols-2 gap-6 bg-card border border-border/60 rounded-2xl overflow-hidden hover:border-primary/50 transition-colors group shadow-lg">
                                 <div className="relative h-56 md:h-full min-h-[240px] overflow-hidden bg-black/40">
                                     <img
-                                        src={featuredPost.image || "/Header_logo.webp"}
+                                        src={featuredPost.image || "/logo2.png"}
                                         alt={featuredPost.title}
                                         className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                        onError={(e) => { e.target.src = "/Header_logo.webp"; }}
+                                        onError={(e) => { e.target.src = "/logo2.png"; }}
                                     />
                                 </div>
                                 <div className="p-6 md:p-8 flex flex-col justify-between">
@@ -171,10 +171,10 @@ export default function BlogPage() {
                                     <Card key={post._id} className="bg-card/60 border-border/60 hover:border-primary/50 transition-all group flex flex-col h-full overflow-hidden shadow-sm hover:shadow-md">
                                         <div className="relative h-44 overflow-hidden bg-black/40">
                                             <img
-                                                src={post.image || "/Header_logo.webp"}
+                                                src={post.image || "/logo2.png"}
                                                 alt={post.title}
                                                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                                onError={(e) => { e.target.src = "/Header_logo.webp"; }}
+                                                onError={(e) => { e.target.src = "/logo2.png"; }}
                                             />
                                             <div className="absolute top-3 left-3">
                                                 <Badge className="bg-background/90 backdrop-blur-sm text-foreground text-[11px] font-semibold">

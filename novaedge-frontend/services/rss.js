@@ -86,7 +86,7 @@ function parseRssXml(xmlString) {
                     const category = item.querySelector("category")?.textContent?.trim() || "Technology";
                     
                     const enclosure = item.querySelector("enclosure");
-                    const image = enclosure?.getAttribute("url") || "/Header_logo.webp";
+                    const image = enclosure?.getAttribute("url") || "/logo2.png";
 
                     const slug = slugify(title) || `article-${index}`;
 
@@ -141,7 +141,7 @@ function parseRssXml(xmlString) {
             excerpt,
             content: cleanContent(rawContent),
             category: catMatch ? cleanCdata(catMatch[1]) : "Technology",
-            image: encMatch ? encMatch[1] : "/Header_logo.webp",
+            image: encMatch ? encMatch[1] : "/logo2.png",
             createdAt: dateMatch ? cleanCdata(dateMatch[1]) : new Date().toISOString(),
             readTime: "5 min read",
             author: "NovaEdge Digital Labs",

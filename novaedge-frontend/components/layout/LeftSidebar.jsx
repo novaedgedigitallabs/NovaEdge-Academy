@@ -121,7 +121,7 @@ export default function LeftSidebar() {
             <div className="flex w-full flex-1 flex-col gap-6 px-6">
                 <Link href="/" className="flex items-center px-3 py-1">
                     <Image
-                        src="/Header_logo.webp"
+                        src="/logo1.png"
                         alt="NovaEdge Academy"
                         width={180}
                         height={40}

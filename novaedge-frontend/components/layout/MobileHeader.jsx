@@ -125,7 +125,7 @@ export default function MobileHeader() {
 
           <Link href="/" className="flex items-center">
             <Image
-              src="/Header_logo.webp"
+              src="/logo1.png"
               alt="NovaEdge Academy"
               width={140}
               height={32}
@@ -183,7 +183,7 @@ export default function MobileHeader() {
               <div className="flex items-center justify-between border-b border-border/50 pb-4">
                 <Link href="/" onClick={() => setIsDrawerOpen(false)}>
                   <Image
-                    src="/Header_logo.webp"
+                    src="/logo1.png"
                     alt="NovaEdge Academy"
                     width={150}
                     height={36}

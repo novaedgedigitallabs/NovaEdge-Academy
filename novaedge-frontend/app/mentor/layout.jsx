@@ -49,8 +49,8 @@ export default function MentorLayout({ children }) {
                 <div className="p-6 border-b border-white/10">
                     <Link href="/" className="flex items-center gap-3">
                         <Image
-                            src="/Header_logo.webp"
-                            alt="NovaEdge Logo"
+                            src="/logo2.png"
+                            alt="NovaEdge Academy"
                             width={32}
                             height={32}
                             className="h-8 w-8 object-contain shrink-0"
