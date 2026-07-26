@@ -52,6 +52,7 @@ export default function LecturePage() {
 
     useProtection();
 
+    const [course, setCourse] = useState(null);
     const [loading, setLoading] = useState(true);
     const [lectures, setLectures] = useState([]);
     const [currentLecture, setCurrentLecture] = useState(null);
@@ -72,6 +73,14 @@ export default function LecturePage() {
                 if (!check.accessGranted) {
                     router.push(`/courses/${courseId}`);
                     return;
+                }
+
+                // Fetch Course info
+                try {
+                    const cData = await apiGet(`/api/v1/course/${courseId}`);
+                    setCourse(cData.course || cData);
+                } catch (e) {
+                    console.error("Course fetch failed", e);
                 }
 
                 const data = await apiGet(`/api/v1/course/${courseId}/lectures`);
@@ -122,9 +131,11 @@ export default function LecturePage() {
         }
     };
 
-    if (loading) return <div className="min-h-screen flex items-center justify-center bg-background">Loading...</div>;
+    if (loading) return <div className="min-h-screen flex items-center justify-center bg-background text-muted-foreground">Loading...</div>;
     if (error) return <div className="min-h-screen flex items-center justify-center text-destructive bg-background">{error}</div>;
     if (!currentLecture) return null;
+
+    const instructorName = course?.createdBy || "NovaEdge Instructor";
 
     return (
         <div className="min-h-screen flex flex-col bg-background font-sans text-foreground">
@@ -134,7 +145,7 @@ export default function LecturePage() {
                 <div className="grid lg:grid-cols-12 gap-8">
                     {/* Main Content: Video Player & Tabs */}
                     <div className="lg:col-span-8 space-y-6">
-                        <div className="aspect-video bg-black rounded-3xl overflow-hidden shadow-2xl border border-gray-100">
+                        <div className="aspect-video bg-black rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl border border-border">
                             <LecturePlayer
                                 courseId={courseId}
                                 lectureId={lectureId}
@@ -158,15 +169,15 @@ export default function LecturePage() {
 
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border pb-4 gap-3">
                                 <div className="flex items-center gap-3 min-w-0">
-                                    <Avatar className="h-10 w-10 flex-shrink-0 border-2 border-background shadow-sm">
-                                        <AvatarImage src="/instructor-avatar.jpg" />
-                                        <AvatarFallback>AS</AvatarFallback>
+                                    <Avatar className="h-10 w-10 flex-shrink-0 border border-border shadow-sm">
+                                        <AvatarFallback className="bg-primary/10 text-primary font-bold">
+                                            {instructorName.charAt(0).toUpperCase()}
+                                        </AvatarFallback>
                                     </Avatar>
                                     <div className="min-w-0">
-                                        <p className="font-bold text-sm">Dr. Anya Sharma</p>
-                                        <p className="text-xs text-muted-foreground font-medium">Senior Frontend Engineer at Vercel · <span className="text-yellow-500 inline-flex items-center gap-1"><Star className="h-3 w-3 fill-current" /> 4.9</span></p>
+                                        <p className="font-bold text-sm truncate">{instructorName}</p>
+                                        <p className="text-xs text-muted-foreground font-medium truncate">Course Instructor</p>
                                     </div>
-                                    <Button variant="outline" size="sm" className="rounded-full h-7 text-xs font-bold ml-1 flex-shrink-0">Follow</Button>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <Button
@@ -191,59 +202,73 @@ export default function LecturePage() {
                             </div>
 
                             <Tabs defaultValue="overview" className="w-full" onValueChange={setActiveTab}>
-                                <TabsList className="bg-transparent border-b border-gray-100 w-full justify-start rounded-none h-auto p-0 gap-8">
-                                    <TabsTrigger value="overview" className="rounded-none border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent data-[state=active]:shadow-none px-0 pb-4 font-bold text-gray-500 data-[state=active]:text-blue-600 transition-all">Overview</TabsTrigger>
-                                    <TabsTrigger value="qa" className="rounded-none border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent data-[state=active]:shadow-none px-0 pb-4 font-bold text-gray-500 data-[state=active]:text-blue-600 transition-all">Q&A</TabsTrigger>
-                                    <TabsTrigger value="resources" className="rounded-none border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent data-[state=active]:shadow-none px-0 pb-4 font-bold text-gray-500 data-[state=active]:text-blue-600 transition-all">Resources</TabsTrigger>
+                                <TabsList className="bg-transparent border-b border-border w-full justify-start rounded-none h-auto p-0 gap-6">
+                                    <TabsTrigger value="overview" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-1 pb-3 font-semibold text-muted-foreground data-[state=active]:text-primary transition-all">Overview</TabsTrigger>
+                                    <TabsTrigger value="qa" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-1 pb-3 font-semibold text-muted-foreground data-[state=active]:text-primary transition-all">Q&A</TabsTrigger>
+                                    <TabsTrigger value="resources" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-1 pb-3 font-semibold text-muted-foreground data-[state=active]:text-primary transition-all">Resources</TabsTrigger>
                                 </TabsList>
                                 <TabsContent value="overview" className="py-6 animate-in fade-in duration-300">
-                                    <div className="max-w-none overflow-hidden">
-                                        <p className="text-muted-foreground leading-relaxed break-words whitespace-pre-wrap overflow-wrap-anywhere" style={{ overflowWrap: 'anywhere', wordBreak: 'break-word' }}>
-                                            {currentLecture.description || "No description available for this lecture."}
-                                        </p>
-                                        <div className="mt-6 space-y-4">
-                                            <h4 className="font-bold text-gray-900">Key takeaways:</h4>
-                                            <ul className="grid md:grid-cols-2 gap-3 list-none p-0">
-                                                {[
-                                                    "Introduction to Next.js 15 & Server Components",
-                                                    "Understanding the App Router Directory Structure",
-                                                    "Creating Your First Server Component",
-                                                    "Client vs Server Components: When to use what"
-                                                ].map((item, i) => (
-                                                    <li key={i} className="flex items-center gap-3 text-sm text-gray-600 bg-gray-50 p-3 rounded-xl border border-gray-100">
-                                                        <div className="h-2 w-2 rounded-full bg-blue-500" />
-                                                        {item}
-                                                    </li>
-                                                ))}
-                                            </ul>
+                                    <div className="max-w-none overflow-hidden space-y-6">
+                                        <div>
+                                            <h4 className="font-bold text-lg mb-2">About this lecture</h4>
+                                            <p className="text-muted-foreground leading-relaxed break-words whitespace-pre-wrap" style={{ overflowWrap: 'anywhere', wordBreak: 'break-word' }}>
+                                                {currentLecture.description || "No specific description provided for this lecture."}
+                                            </p>
                                         </div>
+
+                                        {currentLecture.aiSummary && (
+                                            <div className="p-4 rounded-xl border border-primary/20 bg-primary/5">
+                                                <h4 className="font-bold text-sm text-primary mb-1">AI Generated Summary</h4>
+                                                <p className="text-sm leading-relaxed">{currentLecture.aiSummary}</p>
+                                            </div>
+                                        )}
+
+                                        {course?.outcomes && course.outcomes.length > 0 && (
+                                            <div className="space-y-3">
+                                                <h4 className="font-bold text-base">What you learn in this course:</h4>
+                                                <ul className="grid sm:grid-cols-2 gap-2">
+                                                    {course.outcomes.map((item, i) => (
+                                                        <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground bg-muted/30 p-3 rounded-lg border border-border/50">
+                                                            <span className="text-emerald-500 font-bold">✓</span>
+                                                            <span>{item}</span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
                                     </div>
                                 </TabsContent>
                                 <TabsContent value="qa" className="py-6 animate-in fade-in duration-300">
                                     <LectureDiscussionPanel courseId={courseId} lectureId={lectureId} />
                                 </TabsContent>
                                 <TabsContent value="resources" className="py-6 animate-in fade-in duration-300">
-                                    <div className="grid gap-4">
-                                        {[
-                                            { name: "Next.js 15 Cheat Sheet.pdf", size: "1.2 MB", type: "PDF" },
-                                            { name: "Source Code - Module 1.zip", size: "4.5 MB", type: "ZIP" }
-                                        ].map((file, i) => (
-                                            <div key={i} className="flex items-center justify-between p-4 rounded-2xl border border-gray-100 bg-white hover:bg-gray-50 transition-colors cursor-pointer group">
+                                    {currentLecture.notes?.url ? (
+                                        <div className="grid gap-4">
+                                            <a
+                                                href={currentLecture.notes.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="flex items-center justify-between p-4 rounded-xl border border-border bg-card hover:bg-muted/50 transition-colors group"
+                                            >
                                                 <div className="flex items-center gap-4">
-                                                    <div className="h-12 w-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-                                                        <BookOpen className="h-6 w-6" />
+                                                    <div className="h-10 w-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                                                        <BookOpen className="h-5 w-5" />
                                                     </div>
                                                     <div>
-                                                        <p className="font-bold text-sm text-gray-900 group-hover:text-blue-600 transition-colors">{file.name}</p>
-                                                        <p className="text-xs text-gray-500 font-medium">{file.size} · {file.type}</p>
+                                                        <p className="font-bold text-sm group-hover:text-primary transition-colors">Lecture Notes / Materials</p>
+                                                        <p className="text-xs text-muted-foreground font-medium">Downloadable Resource</p>
                                                     </div>
                                                 </div>
-                                                <Button variant="ghost" size="sm" className="rounded-full h-10 w-10 p-0">
-                                                    <Download className="h-5 w-5 text-gray-400" />
+                                                <Button variant="ghost" size="sm" className="rounded-full h-9 w-9 p-0">
+                                                    <Download className="h-4 w-4 text-muted-foreground" />
                                                 </Button>
-                                            </div>
-                                        ))}
-                                    </div>
+                                            </a>
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-10 text-muted-foreground text-sm border border-dashed rounded-xl p-6">
+                                            No additional downloadable resources attached to this lecture.
+                                        </div>
+                                    )}
                                 </TabsContent>
                             </Tabs>
                         </div>
