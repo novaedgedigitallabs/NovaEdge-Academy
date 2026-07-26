@@ -4,21 +4,13 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Header from "@/components/layout/Header";
 
-import { Play, Star, Globe, Clock, Award, BarChart, Lock, Unlock } from "lucide-react";
+import { Play, Star, Globe, Clock, Award, BarChart, Lock, Unlock, BookOpen, Users, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
 import { apiGet, apiPost } from "@/lib/api";
 import { getCourseProgress } from "@/services/progress";
 import { useAuth } from "@/context/auth-context";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import CourseProgressBar from "@/components/course/CourseProgressBar";
 import ReviewList from "@/components/review/ReviewList";
 import LiveSchedule from "@/components/live/LiveSchedule";
@@ -117,10 +109,8 @@ export default function CourseDetailPageClient() {
   const handleGetCertificate = async () => {
     setGeneratingCert(true);
     try {
-      // 1. Generate (or get existing)
       const res = await apiPost(`/api/v1/certificate/generate/${courseId}`);
       if (res.success && res.certificate) {
-        // 2. Redirect to certificate view
         router.push(`/certificate/${res.certificate.certificateId}`);
       } else {
         alert(res.message || "Failed to generate certificate");
@@ -136,10 +126,12 @@ export default function CourseDetailPageClient() {
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
-        <main className="flex-grow container mx-auto py-20 text-center">
-          Loading course...
+        <main className="flex-grow flex items-center justify-center">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            <p className="text-muted-foreground">Loading course...</p>
+          </div>
         </main>
-
       </div>
     );
   }
@@ -148,7 +140,7 @@ export default function CourseDetailPageClient() {
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
-        <main className="flex-grow container mx-auto py-20 text-center">
+        <main className="flex-grow container mx-auto py-20 text-center px-4">
           <h2 className="text-2xl font-bold">Course not found</h2>
           <p className="text-muted-foreground mt-2">
             {err || "We couldn't find the course."}
@@ -156,16 +148,15 @@ export default function CourseDetailPageClient() {
           <div className="mt-6 flex gap-3 justify-center">
             <Link
               href="/courses"
-              className="px-4 py-2 bg-black text-white rounded"
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg"
             >
               Browse Courses
             </Link>
-            <Link href="/" className="px-4 py-2 border rounded">
+            <Link href="/" className="px-4 py-2 border rounded-lg">
               Back to Home
             </Link>
           </div>
         </main>
-
       </div>
     );
   }
@@ -175,198 +166,288 @@ export default function CourseDetailPageClient() {
   const posterSrc = normalizeImageSrc(posterRaw);
 
   // Merge public lectures with full lectures (if available)
-  // Public lectures might not have video URLs. Full lectures do.
   const displayLectures = isEnrolled && fullLectures.length > 0 ? fullLectures : (course.lectures || []);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-background">
       <Header />
-      <main className="flex-grow container mx-auto py-12 max-w-6xl px-4">
+      <main className="flex-grow">
 
-        <div className="grid md:grid-cols-3 gap-8">
-          {/* LEFT CONTENT */}
-          <div className="md:col-span-2">
-            <>
-              <h1 className="text-3xl font-bold mb-4">{course.title}</h1>
-              <p className="text-muted-foreground mb-6">{course.description}</p>
-            </>
+        {/* Hero Banner - Course Poster + Title */}
+        <div className="relative bg-gradient-to-b from-slate-900 to-slate-800 text-white">
+          {/* Background poster overlay (desktop) */}
+          {posterSrc && (
+            <div className="absolute inset-0 opacity-10">
+              <Image
+                src={posterSrc}
+                alt=""
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
+          )}
 
-            <div className="space-y-6">
-              {/* Learning outcomes */}
-              <div className="border rounded p-4">
-                <h3 className="font-semibold">What you&apos;ll learn</h3>
-                <ul className="list-disc ml-6 mt-2">
+          <div className="relative container mx-auto max-w-6xl px-4 py-8 md:py-12">
+            <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-start">
+
+              {/* Poster - visible on mobile too */}
+              <div className="w-full md:w-80 flex-shrink-0">
+                <div className="relative aspect-video rounded-xl overflow-hidden shadow-2xl border border-white/10">
+                  <Image
+                    src={posterSrc || "/placeholder.svg"}
+                    alt={String(course?.title || courseId || "Course thumbnail")}
+                    fill
+                    className="object-cover"
+                    priority
+                  />
+                </div>
+              </div>
+
+              {/* Title & Meta */}
+              <div className="flex-1 min-w-0">
+                <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold leading-tight break-words">
+                  {course.title}
+                </h1>
+                <p className="text-slate-300 mt-3 text-sm md:text-base leading-relaxed break-words line-clamp-3 md:line-clamp-none">
+                  {course.description}
+                </p>
+
+                {/* Meta badges */}
+                <div className="flex flex-wrap gap-3 mt-4 text-sm">
+                  <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-full">
+                    <Clock className="w-3.5 h-3.5" /> {course.duration || "—"}
+                  </span>
+                  <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-full">
+                    <BarChart className="w-3.5 h-3.5" /> {course.level || "Beginner"}
+                  </span>
+                  <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-full">
+                    <BookOpen className="w-3.5 h-3.5" /> {displayLectures.length} Lectures
+                  </span>
+                  <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-full">
+                    <Globe className="w-3.5 h-3.5" /> English
+                  </span>
+                </div>
+
+                {/* Mobile CTA */}
+                <div className="mt-5 md:hidden">
+                  {isEnrolled ? (
+                    <div className="space-y-3">
+                      <div className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 p-3 rounded-lg text-center font-semibold text-sm">
+                        ✓ You are enrolled!
+                      </div>
+                      <CourseProgressBar percentComplete={progress?.percentComplete || 0} />
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-4">
+                      <span className="text-2xl font-bold">
+                        {course.price > 0 ? `₹${course.price}` : "Free"}
+                      </span>
+                      <Link href={`/checkout?courseId=${courseId}`} className="flex-1">
+                        <button className="w-full bg-primary text-primary-foreground py-2.5 rounded-lg font-semibold hover:bg-primary/90 transition-colors">
+                          Enroll Now
+                        </button>
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="container mx-auto max-w-6xl px-4 py-8">
+          <div className="flex flex-col md:flex-row gap-8">
+
+            {/* LEFT - Content */}
+            <div className="flex-1 min-w-0 space-y-8">
+
+              {/* What you'll learn */}
+              <div className="border rounded-xl p-5 bg-card">
+                <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
+                  <Award className="w-5 h-5 text-primary" />
+                  What you&apos;ll learn
+                </h3>
+                <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   {(
                     course.outcomes || [
                       "Master core concepts and build real apps.",
                       "Deploy applications to production.",
                     ]
                   ).map((o, i) => (
-                    <li key={i}>{o}</li>
+                    <li key={i} className="flex items-start gap-2 text-sm">
+                      <span className="text-emerald-500 mt-0.5">✓</span>
+                      <span>{o}</span>
+                    </li>
                   ))}
                 </ul>
               </div>
 
-              {/* Lectures Table / Index */}
+              {/* Course Index - Mobile friendly list */}
               <div>
-                <h3 className="font-semibold mb-4 text-xl">Course Index</h3>
-                <div className="border rounded-md overflow-hidden">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-[50px]">#</TableHead>
-                        <TableHead>Title</TableHead>
-                        <TableHead>Description</TableHead>
-                        <TableHead className="text-right">Duration</TableHead>
-                        <TableHead className="w-[50px]"></TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {displayLectures.map((lec, idx) => {
-                        const isLocked = !isEnrolled;
+                <h3 className="font-semibold text-xl mb-4 flex items-center gap-2">
+                  <BookOpen className="w-5 h-5 text-primary" />
+                  Course Index
+                  <span className="text-sm font-normal text-muted-foreground">
+                    ({displayLectures.length} lectures)
+                  </span>
+                </h3>
 
-                        return (
-                          <TableRow
-                            key={lec._id || lec.id || idx}
-                            className={`
-                              ${isEnrolled ? "cursor-pointer hover:bg-muted/50" : "opacity-80"} 
-                            `}
-                            onClick={() => {
-                              if (isEnrolled) {
-                                router.push(`/courses/${courseId}/lecture/${lec._id || lec.id}`);
-                              }
-                            }}
-                          >
-                            <TableCell className="font-medium">{idx + 1}</TableCell>
-                            <TableCell className="font-medium">
-                              <div className="flex items-center gap-2">
-                                {lec.title}
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-muted-foreground text-sm max-w-[300px] truncate">
-                              {lec.description}
-                            </TableCell>
-                            <TableCell className="text-right text-muted-foreground whitespace-nowrap">
-                              {lec.duration || "—"}
-                            </TableCell>
-                            <TableCell>
-                              {isLocked ? (
-                                <Lock className="w-4 h-4 text-muted-foreground" />
-                              ) : (
-                                <Play className="w-4 h-4 fill-current" />
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                      {displayLectures.length === 0 && (
-                        <TableRow>
-                          <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                            No lectures available yet.
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
+                <div className="border rounded-xl overflow-hidden divide-y">
+                  {displayLectures.map((lec, idx) => {
+                    const isLocked = !isEnrolled;
+
+                    return (
+                      <div
+                        key={lec._id || lec.id || idx}
+                        className={`
+                          flex items-center gap-3 px-4 py-3 transition-colors
+                          ${isEnrolled ? "cursor-pointer hover:bg-muted/50" : ""}
+                        `}
+                        onClick={() => {
+                          if (isEnrolled) {
+                            router.push(`/courses/${courseId}/lecture/${lec._id || lec.id}`);
+                          }
+                        }}
+                      >
+                        {/* Index number */}
+                        <span className="flex-shrink-0 w-7 h-7 rounded-full bg-muted flex items-center justify-center text-xs font-semibold text-muted-foreground">
+                          {idx + 1}
+                        </span>
+
+                        {/* Title */}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium break-words leading-snug">
+                            {lec.title}
+                          </p>
+                          {lec.duration > 0 && (
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              {lec.duration} min
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Lock / Play icon */}
+                        <span className="flex-shrink-0">
+                          {isLocked ? (
+                            <Lock className="w-4 h-4 text-muted-foreground/50" />
+                          ) : (
+                            <Play className="w-4 h-4 text-primary fill-primary" />
+                          )}
+                        </span>
+                      </div>
+                    );
+                  })}
+                  {displayLectures.length === 0 && (
+                    <div className="text-center py-8 text-muted-foreground text-sm">
+                      No lectures available yet.
+                    </div>
+                  )}
                 </div>
+              </div>
+
+              {/* Reviews */}
+              <div>
+                <ReviewList courseId={courseId} />
+              </div>
+
+              {/* Live Schedule */}
+              <div>
+                <LiveSchedule courseId={courseId} isEnrolled={isEnrolled} />
               </div>
             </div>
 
-            {/* REVIEWS SECTION */}
-            <div className="mt-12">
-              <ReviewList courseId={courseId} />
-            </div>
-
-            {/* LIVE SCHEDULE SECTION */}
-            <div className="mt-12">
-              <LiveSchedule courseId={courseId} isEnrolled={isEnrolled} />
-            </div>
-          </div>
-
-          {/* RIGHT SIDEBAR */}
-          <aside className="h-fit p-4 border rounded sticky top-20">
-            <div className="relative aspect-video mb-4 bg-muted rounded overflow-hidden">
-              <Image
-                src={posterSrc || "/placeholder.svg"}
-                alt={String(course?.title || courseId || "Course thumbnail")}
-                fill
-                className="object-cover"
-                priority
-              />
-            </div>
-
-            {/* Price or Progress */}
-            {!isEnrolled && (
-              <div className="text-2xl font-bold mb-4">
-                ₹{course.price ?? "0"}
-              </div>
-            )}
-
-            {isEnrolled ? (
-              <div className="space-y-3">
-                <div className="bg-green-100 text-green-700 p-3 rounded text-center font-semibold">
-                  You are enrolled!
+            {/* RIGHT SIDEBAR - Desktop only sticky card */}
+            <aside className="hidden md:block w-80 flex-shrink-0">
+              <div className="sticky top-20 border rounded-xl p-5 bg-card shadow-sm space-y-4">
+                <div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
+                  <Image
+                    src={posterSrc || "/placeholder.svg"}
+                    alt={String(course?.title || courseId || "Course thumbnail")}
+                    fill
+                    className="object-cover"
+                    priority
+                  />
                 </div>
 
-                {/* Progress Bar */}
-                <CourseProgressBar percentComplete={progress?.percentComplete || 0} />
-
-                {progress?.percentComplete === 100 ? (
-                  <button
-                    onClick={handleGetCertificate}
-                    disabled={generatingCert}
-                    className="w-full bg-yellow-500 text-black font-bold py-2 rounded hover:bg-yellow-400 transition-colors flex items-center justify-center gap-2"
-                  >
-                    {generatingCert ? "Generating..." : (
-                      <>
-                        <Award className="w-4 h-4" /> Get Certificate
-                      </>
-                    )}
-                  </button>
-                ) : (
-                  displayLectures.length > 0 && (
-                    <button
-                      onClick={() => router.push(`/courses/${courseId}/lecture/${displayLectures[0]._id || displayLectures[0].id}`)}
-                      className="w-full bg-primary text-primary-foreground py-2 rounded hover:bg-primary/90 transition-colors"
-                    >
-                      {progress?.percentComplete > 0 ? "Continue Watching" : "Start Watching"}
-                    </button>
-                  )
+                {/* Price or Progress */}
+                {!isEnrolled && (
+                  <div className="text-3xl font-bold">
+                    {course.price > 0 ? `₹${course.price}` : <span className="text-emerald-500">Free</span>}
+                  </div>
                 )}
-              </div>
-            ) : (
-              <Link href={`/checkout?courseId=${courseId}`}>
-                <button className="w-full bg-primary text-primary-foreground py-2 rounded hover:bg-primary/90 transition-colors">
-                  Enroll Now
-                </button>
-              </Link>
-            )}
 
-            <div className="mt-4 text-sm space-y-2">
-              <div className="flex justify-between border-b pb-2">
-                <span className="flex items-center gap-2">
-                  <Clock className="w-4 h-4" /> Duration
-                </span>
-                <span>{course.duration || "—"}</span>
+                {isEnrolled ? (
+                  <div className="space-y-3">
+                    <div className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 p-3 rounded-lg text-center font-semibold text-sm border border-emerald-500/20">
+                      ✓ You are enrolled!
+                    </div>
+
+                    <CourseProgressBar percentComplete={progress?.percentComplete || 0} />
+
+                    {progress?.percentComplete === 100 ? (
+                      <button
+                        onClick={handleGetCertificate}
+                        disabled={generatingCert}
+                        className="w-full bg-yellow-500 text-black font-bold py-2.5 rounded-lg hover:bg-yellow-400 transition-colors flex items-center justify-center gap-2"
+                      >
+                        {generatingCert ? "Generating..." : (
+                          <>
+                            <Award className="w-4 h-4" /> Get Certificate
+                          </>
+                        )}
+                      </button>
+                    ) : (
+                      displayLectures.length > 0 && (
+                        <button
+                          onClick={() => router.push(`/courses/${courseId}/lecture/${displayLectures[0]._id || displayLectures[0].id}`)}
+                          className="w-full bg-primary text-primary-foreground py-2.5 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
+                        >
+                          {progress?.percentComplete > 0 ? "Continue Watching" : "Start Watching"}
+                        </button>
+                      )
+                    )}
+                  </div>
+                ) : (
+                  <Link href={`/checkout?courseId=${courseId}`}>
+                    <button className="w-full bg-primary text-primary-foreground py-2.5 rounded-lg font-semibold hover:bg-primary/90 transition-colors">
+                      Enroll Now
+                    </button>
+                  </Link>
+                )}
+
+                <div className="text-sm space-y-2.5 pt-2 border-t">
+                  <div className="flex justify-between">
+                    <span className="flex items-center gap-2 text-muted-foreground">
+                      <Clock className="w-4 h-4" /> Duration
+                    </span>
+                    <span className="font-medium">{course.duration || "—"}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="flex items-center gap-2 text-muted-foreground">
+                      <BarChart className="w-4 h-4" /> Level
+                    </span>
+                    <span className="font-medium">{course.level || "Beginner"}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="flex items-center gap-2 text-muted-foreground">
+                      <Globe className="w-4 h-4" /> Language
+                    </span>
+                    <span className="font-medium">English</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="flex items-center gap-2 text-muted-foreground">
+                      <BookOpen className="w-4 h-4" /> Lectures
+                    </span>
+                    <span className="font-medium">{displayLectures.length}</span>
+                  </div>
+                </div>
               </div>
-              <div className="flex justify-between border-b pb-2">
-                <span className="flex items-center gap-2">
-                  <BarChart className="w-4 h-4" /> Level
-                </span>
-                <span>{course.level || "Intermediate"}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="flex items-center gap-2">
-                  <Globe className="w-4 h-4" /> Language
-                </span>
-                <span>English</span>
-              </div>
-            </div>
-          </aside>
+            </aside>
+          </div>
         </div>
       </main>
-
-
     </div>
   );
 }
