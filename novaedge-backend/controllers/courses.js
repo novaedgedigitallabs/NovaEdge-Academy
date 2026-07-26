@@ -195,7 +195,9 @@ exports.updateCourse = async (req, res) => {
         .json({ success: false, message: "Course not found" });
 
     // If new image provided, upload and replace poster (delete old)
-    if ((req.files && req.files.poster) || req.body.image) {
+    const hasNewFile = req.files && req.files.poster;
+    const hasNewDataUrl = req.body.image && req.body.image.startsWith("data:");
+    if (hasNewFile || hasNewDataUrl) {
       // delete old poster
       try {
         if (course.poster && course.poster.public_id) {
@@ -207,7 +209,7 @@ exports.updateCourse = async (req, res) => {
       }
 
       let uploadedPoster;
-      if (req.files && req.files.poster) {
+      if (hasNewFile) {
         uploadedPoster = await uploadImage({
           filePath: req.files.poster.tempFilePath,
           folder: "lms_posters",
@@ -253,17 +255,20 @@ exports.updateCourse = async (req, res) => {
 
         if (Array.isArray(parsed)) {
           course.lectures = parsed.map(l => {
-            const existingLec = course.lectures.id(l._id);
+            let existingLec = null;
+            if (l._id) {
+              try { existingLec = course.lectures.id(l._id); } catch (e) {}
+            }
             return {
-              title: l.title,
-              description: l.description,
+              title: l.title || "Lecture",
+              description: l.description || l.title || "Lecture video",
               video: {
-                url: l.videoUrl || (l.video && l.video.url),
+                url: l.videoUrl || (l.video && l.video.url) || "",
                 public_id: (l.video && l.video.public_id) || "youtube"
               },
               duration: Number(l.duration) || 0,
-              _id: l._id, // Keep existing ID if present
-              currentVersion: existingLec ? existingLec.currentVersion : 1 // Preserve version
+              _id: l._id || undefined, // Let Mongoose generate new ID if not present
+              currentVersion: existingLec ? existingLec.currentVersion : 1
             };
           });
           course.numOfVideos = course.lectures.length;
