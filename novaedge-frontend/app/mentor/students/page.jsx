@@ -61,7 +61,7 @@ export default function MentorStudentsPage() {
                     className="bg-zinc-900 border border-white/10 text-white rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500"
                 >
                     {courses.map(c => (
-                        <option key={c._id} value={c._id}>{c.title}</option>
+                        <option key={c._id} value={c._id} className="bg-slate-900 text-slate-100 dark:bg-slate-900 dark:text-slate-100">{c.title}</option>
                     ))}
                 </select>
             </div>

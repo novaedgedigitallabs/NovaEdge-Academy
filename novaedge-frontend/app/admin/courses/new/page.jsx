@@ -150,11 +150,13 @@ export default function AdminNewCoursePage() {
               required
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full border p-2 rounded"
+              className="w-full border p-2 rounded bg-background text-foreground border-input"
             >
-              <option value="">-- Select category --</option>
+              <option value="" className="bg-slate-900 text-slate-100 dark:bg-slate-900 dark:text-slate-100">
+                -- Select category --
+              </option>
               {CATEGORIES.map((c) => (
-                <option key={c} value={c}>
+                <option key={c} value={c} className="bg-slate-900 text-slate-100 dark:bg-slate-900 dark:text-slate-100">
                   {c}
                 </option>
               ))}
