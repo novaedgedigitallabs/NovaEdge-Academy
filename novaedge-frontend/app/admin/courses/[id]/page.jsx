@@ -32,6 +32,21 @@ export default function AdminCourseEditPage() {
   // Lectures State
   const [lectures, setLectures] = useState([]);
   const [newLecture, setNewLecture] = useState({ title: "", description: "", videoUrl: "", duration: "" });
+  const [playlistUrl, setPlaylistUrl] = useState("");
+  const [importingPlaylist, setImportingPlaylist] = useState(false);
+
+  const [categoriesList, setCategoriesList] = useState([
+    "App Development",
+    "Software Development",
+    "Game Development",
+    "UI/UX Design",
+    "Frontend Development",
+    "Backend Development",
+    "Full Stack Development",
+    "Data Structures & Algorithms",
+  ]);
+  const [isCustomCategory, setIsCustomCategory] = useState(false);
+  const [customCategoryInput, setCustomCategoryInput] = useState("");
 
   const addLecture = () => {
     if (!newLecture.title || !newLecture.videoUrl) return alert("Title and Video URL are required");
@@ -41,6 +56,25 @@ export default function AdminCourseEditPage() {
 
   const removeLecture = (idx) => {
     setLectures(lectures.filter((_, i) => i !== idx));
+  };
+
+  const handleImportPlaylist = async () => {
+    if (!playlistUrl.trim()) return alert("Please enter a YouTube Playlist URL or ID");
+    setImportingPlaylist(true);
+    try {
+      const res = await apiPost("/course/fetch-playlist", { playlistUrl: playlistUrl.trim() });
+      if (res.data?.success && Array.isArray(res.data?.lectures)) {
+        setLectures((prev) => [...prev, ...res.data.lectures]);
+        alert(`Successfully imported ${res.data.lectures.length} lectures! Click 'Save Changes' to save them.`);
+        setPlaylistUrl("");
+      } else {
+        alert(res.data?.message || "Failed to fetch playlist");
+      }
+    } catch (err) {
+      alert(err.response?.data?.message || err.message || "Error importing playlist");
+    } finally {
+      setImportingPlaylist(false);
+    }
   };
 
   const fileToDataUrl = (file) =>
@@ -54,6 +88,14 @@ export default function AdminCourseEditPage() {
   useEffect(() => {
     if (!courseId) return;
     let mounted = true;
+
+    apiGet("/courses/categories")
+      .then((res) => {
+        if (res.data?.success && Array.isArray(res.data?.categories)) {
+          setCategoriesList(res.data.categories);
+        }
+      })
+      .catch((err) => console.error(err));
 
     const fetchCourse = async () => {
       setLoadingCourse(true);
@@ -211,12 +253,63 @@ export default function AdminCourseEditPage() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Category</label>
-              <input
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full border p-2 rounded"
-              />
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-sm font-medium">Category</label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (isCustomCategory) {
+                      setIsCustomCategory(false);
+                      setCategory("");
+                    } else {
+                      setIsCustomCategory(true);
+                      setCategory(customCategoryInput);
+                    }
+                  }}
+                  className="text-xs text-blue-500 hover:underline font-medium"
+                >
+                  {isCustomCategory ? "← Choose Existing" : "+ New Category"}
+                </button>
+              </div>
+
+              {isCustomCategory ? (
+                <input
+                  type="text"
+                  placeholder="New Category Name"
+                  value={customCategoryInput}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setCustomCategoryInput(val);
+                    setCategory(val);
+                  }}
+                  className="w-full border p-2 rounded bg-background text-foreground border-input"
+                />
+              ) : (
+                <select
+                  value={category}
+                  onChange={(e) => {
+                    if (e.target.value === "__NEW__") {
+                      setIsCustomCategory(true);
+                      setCategory(customCategoryInput);
+                    } else {
+                      setCategory(e.target.value);
+                    }
+                  }}
+                  className="w-full border p-2 rounded bg-background text-foreground border-input"
+                >
+                  <option value="" className="bg-slate-900 text-slate-100 dark:bg-slate-900 dark:text-slate-100">
+                    -- Select category --
+                  </option>
+                  {categoriesList.map((c) => (
+                    <option key={c} value={c} className="bg-slate-900 text-slate-100 dark:bg-slate-900 dark:text-slate-100">
+                      {c}
+                    </option>
+                  ))}
+                  <option value="__NEW__" className="bg-slate-900 text-amber-400 dark:bg-slate-900 dark:text-amber-400 font-semibold">
+                    + Add New Category
+                  </option>
+                </select>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">
@@ -298,6 +391,33 @@ export default function AdminCourseEditPage() {
         {/* LECTURES SECTION */}
         <div className="border-t pt-4 mt-6">
           <h2 className="text-xl font-bold mb-4">Course Lectures</h2>
+
+          {/* YOUTUBE PLAYLIST AUTO-IMPORT */}
+          <div className="bg-blue-950/30 border border-blue-500/30 p-4 rounded-lg mb-6 space-y-2">
+            <h3 className="font-semibold text-sm text-blue-400 flex items-center gap-2">
+              <span>▶</span> Import from YouTube Playlist
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              Paste a public YouTube playlist URL (e.g. https://www.youtube.com/playlist?list=PL...) to automatically fetch all video titles and URLs.
+            </p>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Paste YouTube Playlist Link or ID..."
+                value={playlistUrl}
+                onChange={(e) => setPlaylistUrl(e.target.value)}
+                className="flex-1 border p-2 rounded bg-background text-foreground border-input text-sm"
+              />
+              <button
+                type="button"
+                onClick={handleImportPlaylist}
+                disabled={importingPlaylist}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded text-sm disabled:opacity-50 transition-colors"
+              >
+                {importingPlaylist ? "Fetching Videos..." : "Import Playlist"}
+              </button>
+            </div>
+          </div>
 
           <div className="space-y-4 mb-6">
             {lectures.map((lec, idx) => (
