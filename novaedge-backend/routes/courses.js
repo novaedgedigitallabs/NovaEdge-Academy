@@ -4,6 +4,7 @@ const router = express.Router();
 // Import Controller Functions
 const {
   getAllCourses,
+  getCategories,
   createCourse,
   getCourseDetails, // new
   getCourseLectures,
@@ -17,6 +18,10 @@ const { isAuthenticatedUser } = require("../middleware/auth");
 const { authorizeRoles } = require("../middleware/admin");
 
 // --- PUBLIC ROUTES ---
+
+// Get all categories
+// URL: /api/v1/courses/categories
+router.route("/courses/categories").get(getCategories);
 
 // Get all courses (Catalog)
 // URL: /api/v1/courses

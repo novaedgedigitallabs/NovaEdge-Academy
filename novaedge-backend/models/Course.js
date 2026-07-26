@@ -27,20 +27,11 @@ const courseSchema = new mongoose.Schema({
     },
   ],
 
-  // 3. The Course Category (Strict list from your requirements)
+  // 3. The Course Category
   category: {
     type: String,
     required: [true, "Please select category"],
-    enum: [
-      "App Development",
-      "Software Development",
-      "Game Development",
-      "UI/UX Design",
-      "Frontend Development",
-      "Backend Development",
-      "Full Stack Development",
-      "Data Structures & Algorithms",
-    ],
+    trim: true,
   },
 
   // 4. Course Level

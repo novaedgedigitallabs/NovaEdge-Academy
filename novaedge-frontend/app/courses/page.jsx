@@ -9,14 +9,16 @@ import { Search, SlidersHorizontal } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { cn } from "@/lib/utils";
 
-const CATEGORIES = [
+const DEFAULT_CATEGORIES = [
   "All",
-  "Development",
-  "Design",
-  "Marketing",
-  "Business",
-  "Photography",
-  "Music",
+  "App Development",
+  "Software Development",
+  "Game Development",
+  "UI/UX Design",
+  "Frontend Development",
+  "Backend Development",
+  "Full Stack Development",
+  "Data Structures & Algorithms",
 ];
 
 export default function CoursesPage() {
@@ -29,8 +31,21 @@ export default function CoursesPage() {
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [category, setCategory] = useState("All");
+  const [categoriesList, setCategoriesList] = useState(DEFAULT_CATEGORIES);
 
   const debounceTimer = useRef(null);
+
+  useEffect(() => {
+    const base = process.env.NEXT_PUBLIC_API_URL || "";
+    fetch(`${base}/api/v1/courses/categories`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.categories)) {
+          setCategoriesList(["All", ...data.categories.filter((c) => c !== "All")]);
+        }
+      })
+      .catch((err) => console.error(err));
+  }, []);
 
   // debounce search input
   useEffect(() => {
@@ -169,7 +184,7 @@ export default function CoursesPage() {
         </div>
 
         <div className="flex gap-2 overflow-x-auto pb-3 mb-6 no-scrollbar">
-          {CATEGORIES.map((cat) => {
+          {categoriesList.map((cat) => {
             const isSelected = cat === category;
             return (
               <button

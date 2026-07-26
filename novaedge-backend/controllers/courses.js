@@ -380,3 +380,29 @@ exports.deleteCourse = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// --- 6. GET ALL CATEGORIES ---
+exports.getCategories = async (req, res) => {
+  try {
+    const categoriesFromDb = await Course.distinct("category");
+    const defaultCategories = [
+      "App Development",
+      "Software Development",
+      "Game Development",
+      "UI/UX Design",
+      "Frontend Development",
+      "Backend Development",
+      "Full Stack Development",
+      "Data Structures & Algorithms",
+    ];
+    const allCategories = Array.from(
+      new Set([...defaultCategories, ...categoriesFromDb].filter(Boolean))
+    );
+    res.status(200).json({
+      success: true,
+      categories: allCategories,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

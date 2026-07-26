@@ -3,9 +3,20 @@
 
 import { useEffect, useState } from "react";
 import AdminGuard from "@/components/admin/AdminGuard";
-import { apiPost } from "@/lib/api";
+import { apiGet, apiPost } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
+
+const DEFAULT_CATEGORIES = [
+  "App Development",
+  "Software Development",
+  "Game Development",
+  "UI/UX Design",
+  "Frontend Development",
+  "Backend Development",
+  "Full Stack Development",
+  "Data Structures & Algorithms",
+];
 
 export default function AdminNewCoursePage() {
   const { user } = useAuth();
@@ -37,24 +48,26 @@ export default function AdminNewCoursePage() {
   // required fields now
   const [createdBy, setCreatedBy] = useState("");
   const [category, setCategory] = useState("");
-
-  // categories that match your Course schema enum
-  const CATEGORIES = [
-    "App Development",
-    "Software Development",
-    "Game Development",
-    "UI/UX Design",
-    "Frontend Development",
-    "Backend Development",
-    "Full Stack Development",
-    "Data Structures & Algorithms",
-  ];
+  const [categoriesList, setCategoriesList] = useState(DEFAULT_CATEGORIES);
+  const [isCustomCategory, setIsCustomCategory] = useState(false);
+  const [customCategoryInput, setCustomCategoryInput] = useState("");
 
   useEffect(() => {
     if (user) {
       // Prefill creator from logged-in user if available
       setCreatedBy(user.name || user.email || "");
     }
+
+    // Fetch existing categories from backend
+    apiGet("/courses/categories")
+      .then((res) => {
+        if (res.data?.success && Array.isArray(res.data?.categories)) {
+          setCategoriesList(res.data.categories);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load categories:", err);
+      });
   }, [user]);
 
   // convert selected file to base64 data URL
@@ -145,22 +158,65 @@ export default function AdminNewCoursePage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Category</label>
-            <select
-              required
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="w-full border p-2 rounded bg-background text-foreground border-input"
-            >
-              <option value="" className="bg-slate-900 text-slate-100 dark:bg-slate-900 dark:text-slate-100">
-                -- Select category --
-              </option>
-              {CATEGORIES.map((c) => (
-                <option key={c} value={c} className="bg-slate-900 text-slate-100 dark:bg-slate-900 dark:text-slate-100">
-                  {c}
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-sm font-medium">Category</label>
+              <button
+                type="button"
+                onClick={() => {
+                  if (isCustomCategory) {
+                    setIsCustomCategory(false);
+                    setCategory("");
+                  } else {
+                    setIsCustomCategory(true);
+                    setCategory(customCategoryInput);
+                  }
+                }}
+                className="text-xs text-blue-500 hover:underline font-medium"
+              >
+                {isCustomCategory ? "← Choose Existing Category" : "+ Create New Category"}
+              </button>
+            </div>
+
+            {isCustomCategory ? (
+              <input
+                type="text"
+                required
+                placeholder="Enter new category name (e.g. AI & Machine Learning)"
+                value={customCategoryInput}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setCustomCategoryInput(val);
+                  setCategory(val);
+                }}
+                className="w-full border p-2 rounded bg-background text-foreground border-input"
+              />
+            ) : (
+              <select
+                required
+                value={category}
+                onChange={(e) => {
+                  if (e.target.value === "__NEW__") {
+                    setIsCustomCategory(true);
+                    setCategory(customCategoryInput);
+                  } else {
+                    setCategory(e.target.value);
+                  }
+                }}
+                className="w-full border p-2 rounded bg-background text-foreground border-input"
+              >
+                <option value="" className="bg-slate-900 text-slate-100 dark:bg-slate-900 dark:text-slate-100">
+                  -- Select category --
                 </option>
-              ))}
-            </select>
+                {categoriesList.map((c) => (
+                  <option key={c} value={c} className="bg-slate-900 text-slate-100 dark:bg-slate-900 dark:text-slate-100">
+                    {c}
+                  </option>
+                ))}
+                <option value="__NEW__" className="bg-slate-900 text-amber-400 dark:bg-slate-900 dark:text-amber-400 font-semibold">
+                  + Add New Category
+                </option>
+              </select>
+            )}
           </div>
 
           <div>
