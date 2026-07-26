@@ -131,6 +131,7 @@ export default function MobileHeader() {
               height={32}
               className="h-7 w-auto object-contain"
               priority
+              unoptimized
             />
           </Link>
         </div>
@@ -188,6 +189,7 @@ export default function MobileHeader() {
                     width={150}
                     height={36}
                     className="h-8 w-auto object-contain"
+                    unoptimized
                   />
                 </Link>
                 <Button

@@ -127,6 +127,7 @@ export default function LeftSidebar() {
                         height={40}
                         className="h-auto w-auto object-contain"
                         priority
+                        unoptimized
                     />
                 </Link>
 
