@@ -37,13 +37,13 @@ router.route("/course/:id").get(getCourseDetails);
 // URL: /api/v1/course/:id/lectures
 router.route("/course/:id/lectures").get(isAuthenticatedUser, getCourseLectures);
 
-// --- ADMIN ROUTES (Boss Only) ---
+// --- ADMIN & MENTOR ROUTES ---
 
 // Create a new course
 // URL: /api/v1/course/new
 router
   .route("/course/new")
-  .post(isAuthenticatedUser, authorizeRoles("admin"), createCourse);
+  .post(isAuthenticatedUser, authorizeRoles("admin", "mentor"), createCourse);
 
 // Add Video/Lecture to a course AND Delete Course
 // URL: /api/v1/course/:id
@@ -51,10 +51,10 @@ router
 router
   .route("/course/:id")
   // POST = Add Lecture
-  .post(isAuthenticatedUser, authorizeRoles("admin"), addLecture)
-  // PUT = Update course metadata (admin)
-  .put(isAuthenticatedUser, authorizeRoles("admin"), updateCourse)
+  .post(isAuthenticatedUser, authorizeRoles("admin", "mentor"), addLecture)
+  // PUT = Update course metadata
+  .put(isAuthenticatedUser, authorizeRoles("admin", "mentor"), updateCourse)
   // DELETE = Remove Course
-  .delete(isAuthenticatedUser, authorizeRoles("admin"), deleteCourse);
+  .delete(isAuthenticatedUser, authorizeRoles("admin", "mentor"), deleteCourse);
 
 module.exports = router;
