@@ -122,12 +122,12 @@ export default function LecturePage() {
         }
     };
 
-    if (loading) return <div className="min-h-screen flex items-center justify-center bg-white">Loading...</div>;
-    if (error) return <div className="min-h-screen flex items-center justify-center text-red-500 bg-white">{error}</div>;
+    if (loading) return <div className="min-h-screen flex items-center justify-center bg-background">Loading...</div>;
+    if (error) return <div className="min-h-screen flex items-center justify-center text-destructive bg-background">{error}</div>;
     if (!currentLecture) return null;
 
     return (
-        <div className="min-h-screen flex flex-col bg-white font-sans text-gray-900">
+        <div className="min-h-screen flex flex-col bg-background font-sans text-foreground">
             <Header />
 
             <main className="flex-grow container mx-auto px-4 py-8 max-w-[1400px]">
@@ -152,40 +152,40 @@ export default function LecturePage() {
                         </div>
 
                         <div className="flex flex-col gap-4">
-                            <h1 className="text-3xl font-extrabold tracking-tight text-gray-900">
+                            <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight break-words">
                                 {currentIndex + 1}. {currentLecture.title}
                             </h1>
 
-                            <div className="flex items-center justify-between border-b border-gray-100 pb-6">
-                                <div className="flex items-center gap-4">
-                                    <Avatar className="h-12 w-12 border-2 border-white shadow-sm">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border pb-4 gap-3">
+                                <div className="flex items-center gap-3 min-w-0">
+                                    <Avatar className="h-10 w-10 flex-shrink-0 border-2 border-background shadow-sm">
                                         <AvatarImage src="/instructor-avatar.jpg" />
                                         <AvatarFallback>AS</AvatarFallback>
                                     </Avatar>
-                                    <div>
-                                        <p className="font-bold text-gray-900">Dr. Anya Sharma</p>
-                                        <p className="text-xs text-gray-500 font-medium">Senior Frontend Engineer at Vercel · <span className="text-yellow-500 flex items-center gap-1 inline-flex"><Star className="h-3 w-3 fill-current" /> 4.9</span></p>
+                                    <div className="min-w-0">
+                                        <p className="font-bold text-sm">Dr. Anya Sharma</p>
+                                        <p className="text-xs text-muted-foreground font-medium">Senior Frontend Engineer at Vercel · <span className="text-yellow-500 inline-flex items-center gap-1"><Star className="h-3 w-3 fill-current" /> 4.9</span></p>
                                     </div>
-                                    <Button variant="outline" size="sm" className="rounded-full h-8 text-xs font-bold ml-2 border-blue-100 text-blue-600 hover:bg-blue-50">Follow</Button>
+                                    <Button variant="outline" size="sm" className="rounded-full h-7 text-xs font-bold ml-1 flex-shrink-0">Follow</Button>
                                 </div>
-                                <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-2">
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        className="rounded-full h-10 w-10 p-0"
+                                        className="rounded-full h-9 w-9 p-0"
                                         disabled={!prevLecture}
                                         onClick={() => router.push(`/courses/${courseId}/lecture/${prevLecture._id || prevLecture.id}`)}
                                     >
-                                        <ChevronLeft className="h-6 w-6" />
+                                        <ChevronLeft className="h-5 w-5" />
                                     </Button>
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        className="rounded-full h-10 w-10 p-0"
+                                        className="rounded-full h-9 w-9 p-0"
                                         disabled={!nextLecture}
                                         onClick={() => router.push(`/courses/${courseId}/lecture/${nextLecture._id || nextLecture.id}`)}
                                     >
-                                        <ChevronRight className="h-6 w-6" />
+                                        <ChevronRight className="h-5 w-5" />
                                     </Button>
                                 </div>
                             </div>
@@ -197,9 +197,9 @@ export default function LecturePage() {
                                     <TabsTrigger value="resources" className="rounded-none border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent data-[state=active]:shadow-none px-0 pb-4 font-bold text-gray-500 data-[state=active]:text-blue-600 transition-all">Resources</TabsTrigger>
                                 </TabsList>
                                 <TabsContent value="overview" className="py-6 animate-in fade-in duration-300">
-                                    <div className="prose prose-blue max-w-none">
-                                        <p className="text-gray-600 leading-relaxed">
-                                            {currentLecture.description || "In this introductory lesson, we'll explore the fundamental concepts of Next.js 15, focusing on the new App Router and the power of React Server Components. Understand the benefits of server-side rendering and how to structure your projects for maximum performance and scalability."}
+                                    <div className="max-w-none overflow-hidden">
+                                        <p className="text-muted-foreground leading-relaxed break-words whitespace-pre-wrap overflow-wrap-anywhere" style={{ overflowWrap: 'anywhere', wordBreak: 'break-word' }}>
+                                            {currentLecture.description || "No description available for this lecture."}
                                         </p>
                                         <div className="mt-6 space-y-4">
                                             <h4 className="font-bold text-gray-900">Key takeaways:</h4>
