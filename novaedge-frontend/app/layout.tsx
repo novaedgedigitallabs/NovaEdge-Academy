@@ -37,6 +37,7 @@ export default function RootLayout({ children }) {
         <link rel="icon" href="/logo.webp" type="image/webp" sizes="any" />
         <link rel="shortcut icon" href="/logo.webp" type="image/webp" />
         <link rel="apple-touch-icon" href="/logo.webp" />
+        <meta name="apple-mobile-web-app-title" content="NovaEdge Academy" />
       </head>
       <body
         cz-shortcut-listen="true"
