@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
+
 import { Play, Star, Globe, Clock, Award, BarChart, Lock, Unlock } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -139,7 +139,7 @@ export default function CourseDetailPageClient() {
         <main className="flex-grow container mx-auto py-20 text-center">
           Loading course...
         </main>
-        <Footer />
+
       </div>
     );
   }
@@ -165,7 +165,7 @@ export default function CourseDetailPageClient() {
             </Link>
           </div>
         </main>
-        <Footer />
+
       </div>
     );
   }
@@ -365,7 +365,8 @@ export default function CourseDetailPageClient() {
           </aside>
         </div>
       </main>
-      <Footer />
+
+
     </div>
   );
 }

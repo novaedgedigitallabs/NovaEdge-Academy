@@ -3,7 +3,7 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
 import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
+
 import Image from "next/image";
 import Link from "next/link";
 import Script from "next/script";
@@ -77,34 +77,28 @@ function CheckoutContent() {
     if (!course) return;
     setProcessing(true);
     try {
-      // 1. Get Razorpay Key
-      const { key } = await apiGet("/api/v1/payment/razorpaykey");
-
-      // 2. Create Order
-      const { order } = await apiPost("/api/v1/payment/checkout", {
+      // 1. Create Order
+      const checkoutRes = await apiPost("/api/v1/payment/checkout", {
         courseId: course._id || course.id,
         couponCode: coupon?.couponCode,
         useWallet,
       });
 
-      // If fully paid by wallet (amount is 0 or undefined in order if skipped)
-      // But my backend always returns order object if finalAmount > 0.
-      // If finalAmount is 0, backend might not return order.id or might return dummy.
-      // Let's check backend logic again. I didn't handle 0 amount explicitly in backend checkout.
-      // Backend: "if (finalAmount > 0) ... order = await instance.orders.create".
-      // So if finalAmount is 0, order is null.
-
-      if (!order && (useWallet || coupon)) {
-        // Fully covered! Direct success.
-        // But wait, I need to call verification or some endpoint to record the transaction?
-        // Actually, if amount is 0, I should probably have a separate "free checkout" endpoint or handle it in checkout.
-        // For now, let's assume backend handles it. 
-        // Wait, if order is null, I can't open Razorpay.
-        // I should probably handle 0 amount in backend by creating a "completed" payment immediately.
-        // But I didn't write that logic.
-        // Let's assume for now user pays at least ₹1.
-        // Or I can quickly update backend to handle 0 amount.
+      // If course is free or 100% discounted, backend auto-enrolls
+      if (checkoutRes.freeEnrollment) {
+        router.push(`/payment/success?reference=FREE_${Date.now()}`);
+        return;
       }
+
+      const { order } = checkoutRes;
+      if (!order || !order.id) {
+        alert("Could not create payment order. Please try again.");
+        setProcessing(false);
+        return;
+      }
+
+      // 2. Get Razorpay Key
+      const { key } = await apiGet("/api/v1/payment/razorpaykey");
 
       // 3. Initialize Razorpay
       const options = {
@@ -116,7 +110,6 @@ function CheckoutContent() {
         image: normalizeImageSrc(course.poster || course.image),
         order_id: order.id,
         handler: function (response) {
-          // Redirect to payment verification page with params
           const query = new URLSearchParams({
             razorpay_payment_id: response.razorpay_payment_id,
             razorpay_order_id: response.razorpay_order_id,
@@ -127,7 +120,7 @@ function CheckoutContent() {
           router.push(`/payment?${query}`);
         },
         prefill: {
-          name: "User Name", // You might want to fetch user details if available
+          name: "User Name",
           email: "user@example.com",
           contact: "9999999999",
         },
@@ -340,7 +333,7 @@ export default function CheckoutPage() {
       >
         <CheckoutContent />
       </Suspense>
-      <Footer />
+
     </div>
   );
 }

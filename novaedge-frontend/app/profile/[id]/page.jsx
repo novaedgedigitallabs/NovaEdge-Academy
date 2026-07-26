@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { getUserCertificates } from "@/services/certificate";
 import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -50,7 +50,7 @@ export default function PublicProfilePage() {
                 <main className="flex-grow flex items-center justify-center">
                     <Loader2 className="w-8 h-8 animate-spin" />
                 </main>
-                <Footer />
+
             </div>
         );
     }
@@ -62,7 +62,7 @@ export default function PublicProfilePage() {
                 <main className="flex-grow flex items-center justify-center text-destructive">
                     <p>Error: {error}</p>
                 </main>
-                <Footer />
+
             </div>
         );
     }
@@ -127,7 +127,8 @@ export default function PublicProfilePage() {
                     )}
                 </div>
             </main>
-            <Footer />
+
+
         </div>
     );
 }
