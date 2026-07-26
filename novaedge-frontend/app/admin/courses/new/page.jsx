@@ -48,19 +48,20 @@ export default function AdminNewCoursePage() {
   };
 
   const handleImportPlaylist = async () => {
-    if (!playlistUrl.trim()) return alert("Please enter a YouTube Playlist URL or ID");
+    if (!playlistUrl.trim()) return alert("Please enter a YouTube Playlist URL, ID, or video links");
     setImportingPlaylist(true);
     try {
       const res = await apiPost("/course/fetch-playlist", { playlistUrl: playlistUrl.trim() });
-      if (res.data?.success && Array.isArray(res.data?.lectures)) {
-        setLectures((prev) => [...prev, ...res.data.lectures]);
-        alert(`Successfully imported ${res.data.lectures.length} lectures!`);
+      if (res?.success && Array.isArray(res?.lectures)) {
+        setLectures((prev) => [...prev, ...res.lectures]);
+        alert(`Successfully imported ${res.lectures.length} lecture(s)!`);
         setPlaylistUrl("");
       } else {
-        alert(res.data?.message || "Failed to fetch playlist");
+        alert(res?.message || "Failed to fetch playlist");
       }
     } catch (err) {
-      alert(err.response?.data?.message || err.message || "Error importing playlist");
+      const errMsg = err.response?.data?.message || err.message || "Error importing playlist";
+      alert(errMsg);
     } finally {
       setImportingPlaylist(false);
     }

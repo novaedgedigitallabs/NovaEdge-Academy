@@ -410,9 +410,50 @@ exports.getCategories = async (req, res) => {
 // --- 7. FETCH YOUTUBE PLAYLIST VIDEOS ---
 exports.fetchYouTubePlaylist = async (req, res) => {
   try {
-    const { playlistUrl } = req.body;
+    const { playlistUrl, videoUrls } = req.body;
+    let lectures = [];
+
+    // If an array or multiline list of video URLs is provided
+    const urlsToProcess = [];
+    if (Array.isArray(videoUrls)) {
+      urlsToProcess.push(...videoUrls);
+    } else if (playlistUrl && playlistUrl.includes("\n")) {
+      urlsToProcess.push(...playlistUrl.split("\n"));
+    }
+
+    if (urlsToProcess.length > 0) {
+      for (const line of urlsToProcess) {
+        const trimmed = line.trim();
+        if (!trimmed) continue;
+        const videoIdMatch = trimmed.match(/(?:v=|\/embed\/|\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+        const videoId = videoIdMatch ? videoIdMatch[1] : null;
+        let title = "Lecture";
+        if (videoId) {
+          try {
+            const noembedRes = await fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${videoId}`);
+            const noembedData = await noembedRes.json();
+            if (noembedData?.title) {
+              title = noembedData.title;
+            }
+          } catch (e) {}
+        }
+        lectures.push({
+          title,
+          description: `Lecture video`,
+          videoUrl: videoId ? `https://www.youtube.com/watch?v=${videoId}` : trimmed,
+          duration: 15,
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        count: lectures.length,
+        lectures,
+      });
+    }
+
     if (!playlistUrl) {
-      return res.status(400).json({ success: false, message: "Playlist URL or ID is required" });
+      return res.status(400).json({ success: false, message: "Playlist URL, ID, or video links required" });
     }
 
     // Extract Playlist ID
@@ -423,8 +464,6 @@ exports.fetchYouTubePlaylist = async (req, res) => {
         playlistId = match[1];
       }
     }
-
-    let lectures = [];
 
     // 1. Try YouTube Data API v3 if API key available
     const apiKey = process.env.YOUTUBE_API_KEY;
@@ -448,46 +487,15 @@ exports.fetchYouTubePlaylist = async (req, res) => {
             .filter((l) => l.videoUrl && l.title !== "Private video" && l.title !== "Deleted video");
         }
       } catch (err) {
-        console.error("YouTube API Key fetch failed, falling back to RSS feed:", err.message);
+        console.error("YouTube API Key fetch failed:", err.message);
       }
     }
 
-    // 2. Fallback to YouTube RSS Feed (No API key needed)
     if (lectures.length === 0) {
-      const rssRes = await fetch(`https://www.youtube.com/feeds/videos.xml?playlist_id=${playlistId}`);
-      if (!rssRes.ok) {
-        return res.status(404).json({ success: false, message: "Unable to fetch playlist. Ensure playlist is Public." });
-      }
-      const xmlText = await rssRes.text();
-
-      const entries = xmlText.match(/<entry>[\s\S]*?<\/entry>/g) || [];
-      lectures = entries
-        .map((entry) => {
-          const titleMatch = entry.match(/<title>([\s\S]*?)<\/title>/);
-          const videoIdMatch = entry.match(/<yt:videoId>(.*?)<\/yt:videoId>/);
-
-          const rawTitle = titleMatch ? titleMatch[1] : "Lecture";
-          const title = rawTitle
-            .replace(/&amp;/g, "&")
-            .replace(/&lt;/g, "<")
-            .replace(/&gt;/g, ">")
-            .replace(/&quot;/g, '"')
-            .replace(/&#39;/g, "'")
-            .trim();
-          const videoId = videoIdMatch ? videoIdMatch[1].trim() : "";
-
-          return {
-            title,
-            description: "",
-            videoUrl: videoId ? `https://www.youtube.com/watch?v=${videoId}` : "",
-            duration: 15,
-          };
-        })
-        .filter((l) => l.videoUrl && l.title !== "Private video" && l.title !== "Deleted video");
-    }
-
-    if (lectures.length === 0) {
-      return res.status(404).json({ success: false, message: "No videos found in this playlist or playlist is private." });
+      return res.status(400).json({
+        success: false,
+        message: "YOUTUBE_API_KEY environment variable is required on backend server to fetch full playlists automatically. Alternatively, you can paste video links directly (one per line).",
+      });
     }
 
     res.status(200).json({
