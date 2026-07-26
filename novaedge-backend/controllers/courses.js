@@ -406,3 +406,96 @@ exports.getCategories = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// --- 7. FETCH YOUTUBE PLAYLIST VIDEOS ---
+exports.fetchYouTubePlaylist = async (req, res) => {
+  try {
+    const { playlistUrl } = req.body;
+    if (!playlistUrl) {
+      return res.status(400).json({ success: false, message: "Playlist URL or ID is required" });
+    }
+
+    // Extract Playlist ID
+    let playlistId = playlistUrl.trim();
+    if (playlistUrl.includes("list=")) {
+      const match = playlistUrl.match(/[?&]list=([^&]+)/);
+      if (match && match[1]) {
+        playlistId = match[1];
+      }
+    }
+
+    let lectures = [];
+
+    // 1. Try YouTube Data API v3 if API key available
+    const apiKey = process.env.YOUTUBE_API_KEY;
+    if (apiKey) {
+      try {
+        const apiRes = await fetch(
+          `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${playlistId}&key=${apiKey}`
+        );
+        const data = await apiRes.json();
+        if (data.items && Array.isArray(data.items)) {
+          lectures = data.items
+            .map((item) => {
+              const videoId = item.snippet?.resourceId?.videoId;
+              return {
+                title: item.snippet?.title || "Lecture",
+                description: item.snippet?.description || "",
+                videoUrl: videoId ? `https://www.youtube.com/watch?v=${videoId}` : "",
+                duration: 15,
+              };
+            })
+            .filter((l) => l.videoUrl && l.title !== "Private video" && l.title !== "Deleted video");
+        }
+      } catch (err) {
+        console.error("YouTube API Key fetch failed, falling back to RSS feed:", err.message);
+      }
+    }
+
+    // 2. Fallback to YouTube RSS Feed (No API key needed)
+    if (lectures.length === 0) {
+      const rssRes = await fetch(`https://www.youtube.com/feeds/videos.xml?playlist_id=${playlistId}`);
+      if (!rssRes.ok) {
+        return res.status(404).json({ success: false, message: "Unable to fetch playlist. Ensure playlist is Public." });
+      }
+      const xmlText = await rssRes.text();
+
+      const entries = xmlText.match(/<entry>[\s\S]*?<\/entry>/g) || [];
+      lectures = entries
+        .map((entry) => {
+          const titleMatch = entry.match(/<title>([\s\S]*?)<\/title>/);
+          const videoIdMatch = entry.match(/<yt:videoId>(.*?)<\/yt:videoId>/);
+
+          const rawTitle = titleMatch ? titleMatch[1] : "Lecture";
+          const title = rawTitle
+            .replace(/&amp;/g, "&")
+            .replace(/&lt;/g, "<")
+            .replace(/&gt;/g, ">")
+            .replace(/&quot;/g, '"')
+            .replace(/&#39;/g, "'")
+            .trim();
+          const videoId = videoIdMatch ? videoIdMatch[1].trim() : "";
+
+          return {
+            title,
+            description: "",
+            videoUrl: videoId ? `https://www.youtube.com/watch?v=${videoId}` : "",
+            duration: 15,
+          };
+        })
+        .filter((l) => l.videoUrl && l.title !== "Private video" && l.title !== "Deleted video");
+    }
+
+    if (lectures.length === 0) {
+      return res.status(404).json({ success: false, message: "No videos found in this playlist or playlist is private." });
+    }
+
+    res.status(200).json({
+      success: true,
+      count: lectures.length,
+      lectures,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

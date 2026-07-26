@@ -6,6 +6,7 @@ const {
   getAllCourses,
   getCategories,
   createCourse,
+  fetchYouTubePlaylist,
   getCourseDetails, // new
   getCourseLectures,
   addLecture,
@@ -38,6 +39,12 @@ router.route("/course/:id").get(getCourseDetails);
 router.route("/course/:id/lectures").get(isAuthenticatedUser, getCourseLectures);
 
 // --- ADMIN & MENTOR ROUTES ---
+
+// Fetch YouTube Playlist Videos
+// URL: /api/v1/course/fetch-playlist
+router
+  .route("/course/fetch-playlist")
+  .post(isAuthenticatedUser, authorizeRoles("admin", "mentor"), fetchYouTubePlaylist);
 
 // Create a new course
 // URL: /api/v1/course/new
