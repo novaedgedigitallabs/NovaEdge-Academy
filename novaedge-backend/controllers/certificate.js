@@ -161,12 +161,15 @@ exports.getUserCertificates = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-// --- 5. DOWNLOAD CERTIFICATE (Secure Proxy) ---
+
+// --- 5. DOWNLOAD CERTIFICATE (Direct PDF Streaming) ---
 exports.downloadCertificate = async (req, res) => {
   try {
     const { id } = req.params; // Certificate ID (e.g., CERT-...)
 
-    const certificate = await Certificate.findOne({ certificateId: id });
+    const certificate = await Certificate.findOne({ certificateId: id })
+      .populate("user", "name")
+      .populate("course", "title");
 
     if (!certificate) {
       return res.status(404).json({
@@ -175,62 +178,34 @@ exports.downloadCertificate = async (req, res) => {
       });
     }
 
-    // Authorization Check: Only Owner or Admin can download
-    // If the certificate is public, anyone can verify, but maybe we restrict download?
-    // For now, let's allow download if the user is the owner OR if it's a public verification link (maybe?)
-    // Let's stick to strict auth for download: Owner or Admin.
-
-    // However, the requirement says: "only certificate owner or admin or when certificate is public"
-    // Since we don't have a "isPublic" flag on the certificate yet, let's assume if they have the ID, they can download it via the verification page?
-    // But the prompt says "Create GET /api/v1/certificate/:certId/download with auth: only certificate owner or admin or when certificate is public."
-
-    // Let's check if the user is logged in and is the owner or admin.
-    // If not logged in, we might need a way to check if it's "public". 
-    // For now, let's implement the Owner/Admin check if a user is authenticated.
-
-    let isAuthorized = false;
-
-    if (req.user) {
-      if (req.user.role === 'admin' || certificate.user.toString() === req.user.id) {
-        isAuthorized = true;
-      }
+    const verificationUrl = `${process.env.FRONTEND_URL || "https://www.novaedgeacademy.in"}/verify/${id}`;
+    let qrCodeBuffer = null;
+    try {
+      qrCodeBuffer = await generateQR(verificationUrl);
+    } catch (e) {
+      console.error("QR Code Error:", e);
     }
 
-    // If not authorized via login, we might check if the request comes from a valid verification context or if we want to allow public downloads.
-    // Given the prompt "or when certificate is public", let's assume all certificates are verifiable publicly, so maybe download is also public?
-    // But usually, download is restricted.
-    // Let's stick to: If you have the valid ID, you can download it (Security by Obscurity for the ID + QR code). 
-    // BUT, the prompt explicitly asked for auth.
-    // Let's implement: If req.user exists, check ownership/admin. If not, check if it's a public access (maybe via a query param or just allow it for now since verification is public).
+    const issueDate = certificate.createdAt
+      ? new Date(certificate.createdAt).toLocaleDateString("en-IN", { dateStyle: "medium" })
+      : new Date().toLocaleDateString("en-IN", { dateStyle: "medium" });
 
-    // Actually, the prompt says: "Create GET /api/v1/certificate/:certId/download with auth: only certificate owner or admin or when certificate is public."
-    // Let's assume for now that if the user hits this endpoint, they are either the owner (logged in) or it's a public link.
-    // But wait, the route will likely be protected by `isAuthenticatedUser` if we want `req.user`.
-    // If we want it public, we shouldn't use `isAuthenticatedUser` on the route, but handle `req.user` manually if the token is present.
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="certificate-${id}.pdf"`);
 
-    // Let's proceed with: Allow download if the ID is valid. The ID itself is the secret.
-
-    // 1. Get the Cloudinary URL
-    const pdfUrl = certificate.pdfUrl;
-
-    // 2. Generate a Signed URL (if it was private) OR just proxy the file
-    // Since we stored it as 'raw' and it might be public or private.
-    // If we want to proxy it to avoid CORS or Auth issues on the client:
-
-    const https = require('https');
-    const request = https.get(pdfUrl, function (response) {
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename=certificate-${id}.pdf`);
-      response.pipe(res);
+    const { streamCertificatePDF } = require("../utils/generateCertificate");
+    streamCertificatePDF(res, {
+      studentName: certificate.user?.name || "Student",
+      courseName: certificate.course?.title || "Course",
+      date: issueDate,
+      certificateId: id,
+      qrCodeBuffer,
     });
-
-    request.on('error', function (e) {
-      console.error(e);
-      res.status(500).json({ success: false, message: "Error downloading file" });
-    });
-
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error("Download Certificate Error:", error);
+    if (!res.headersSent) {
+      res.status(500).json({ success: false, message: error.message });
+    }
   }
 };
 
