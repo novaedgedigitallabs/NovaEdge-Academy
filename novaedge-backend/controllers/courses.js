@@ -141,7 +141,8 @@ exports.createCourse = async (req, res) => {
               url: l.videoUrl,
               public_id: "youtube" // Placeholder for external links
             },
-            duration: Number(l.duration) || 0
+            duration: Number(l.duration) || 0,
+            notes: l.notesUrl ? { url: l.notesUrl, public_id: "manual" } : undefined,
           }));
 
           totalDurationStr = calculateTotalDuration(lecturesData);
@@ -259,6 +260,22 @@ exports.updateCourse = async (req, res) => {
             if (l._id) {
               try { existingLec = course.lectures.id(l._id); } catch (e) {}
             }
+
+            // Resolve notes: prefer incoming data, then existing lecture data
+            let notesData = existingLec ? existingLec.notes : undefined;
+            if (l.notes && l.notes.url) {
+              notesData = {
+                url: l.notes.url,
+                public_id: l.notes.public_id || "manual",
+              };
+            } else if (l.notesUrl) {
+              // Frontend may send notesUrl as a flat string
+              notesData = {
+                url: l.notesUrl,
+                public_id: "manual",
+              };
+            }
+
             return {
               title: l.title || "Lecture",
               description: l.description || l.title || "Lecture video",
@@ -267,8 +284,11 @@ exports.updateCourse = async (req, res) => {
                 public_id: (l.video && l.video.public_id) || "youtube"
               },
               duration: Number(l.duration) || 0,
+              notes: notesData || undefined,
               _id: l._id || undefined, // Let Mongoose generate new ID if not present
-              currentVersion: existingLec ? existingLec.currentVersion : 1
+              currentVersion: existingLec ? existingLec.currentVersion : 1,
+              aiSummary: l.aiSummary || (existingLec ? existingLec.aiSummary : undefined),
+              quiz: l.quiz || (existingLec ? existingLec.quiz : undefined),
             };
           });
           course.numOfVideos = course.lectures.length;

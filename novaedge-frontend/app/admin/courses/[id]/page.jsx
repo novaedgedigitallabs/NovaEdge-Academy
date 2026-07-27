@@ -31,7 +31,7 @@ export default function AdminCourseEditPage() {
 
   // Lectures State
   const [lectures, setLectures] = useState([]);
-  const [newLecture, setNewLecture] = useState({ title: "", description: "", videoUrl: "", duration: "" });
+  const [newLecture, setNewLecture] = useState({ title: "", description: "", videoUrl: "", duration: "", notesUrl: "" });
   const [playlistUrl, setPlaylistUrl] = useState("");
   const [importingPlaylist, setImportingPlaylist] = useState(false);
 
@@ -51,7 +51,7 @@ export default function AdminCourseEditPage() {
   const addLecture = () => {
     if (!newLecture.title || !newLecture.videoUrl) return alert("Title and Video URL are required");
     setLectures([...lectures, newLecture]);
-    setNewLecture({ title: "", description: "", videoUrl: "", duration: "" });
+    setNewLecture({ title: "", description: "", videoUrl: "", duration: "", notesUrl: "" });
   };
 
   const removeLecture = (idx) => {
@@ -461,6 +461,32 @@ export default function AdminCourseEditPage() {
                     <span className="bg-blue-100 text-blue-800 px-1 rounded">v{lec.currentVersion}</span>
                   )}
                 </div>
+
+                {/* Resource URL */}
+                <div className="mt-3 flex items-center gap-2">
+                  <label className="text-xs font-medium text-muted-foreground whitespace-nowrap">📎 Resource URL:</label>
+                  <input
+                    type="text"
+                    placeholder="https://drive.google.com/... or any downloadable link"
+                    value={lec.notesUrl || lec.notes?.url || ""}
+                    onChange={(e) => {
+                      const updated = [...lectures];
+                      updated[idx] = { ...updated[idx], notesUrl: e.target.value };
+                      setLectures(updated);
+                    }}
+                    className="flex-1 border p-1.5 rounded text-xs bg-background text-foreground border-input"
+                  />
+                  {(lec.notesUrl || lec.notes?.url) && (
+                    <a
+                      href={lec.notesUrl || lec.notes?.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-blue-500 hover:underline whitespace-nowrap"
+                    >
+                      Preview ↗
+                    </a>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -497,6 +523,14 @@ export default function AdminCourseEditPage() {
                   className="w-full border p-2 rounded"
                 />
               </div>
+            </div>
+            <div>
+              <input
+                placeholder="Resource URL (optional — Google Drive, PDF link, etc.)"
+                value={newLecture.notesUrl}
+                onChange={(e) => setNewLecture({ ...newLecture, notesUrl: e.target.value })}
+                className="w-full border p-2 rounded text-sm"
+              />
             </div>
             <button
               type="button"
