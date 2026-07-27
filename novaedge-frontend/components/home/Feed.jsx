@@ -199,7 +199,7 @@ export default function Feed() {
                         <div className="flex flex-col md:flex-row gap-6 items-center">
                             <div className="relative h-24 w-40 overflow-hidden rounded-lg border border-border">
                                 <Image
-                                    src={activeCourse.thumbnail?.url || "/course-placeholder.jpg"}
+                                    src={activeCourse.poster?.url || activeCourse.thumbnail?.url || activeCourse.image || "/course-placeholder.jpg"}
                                     alt={activeCourse.title}
                                     fill
                                     className="object-cover"
