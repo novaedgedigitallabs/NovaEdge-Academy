@@ -25,6 +25,7 @@ import {
   ChevronRight,
   Sparkles,
   ScrollText,
+  Video,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -35,6 +36,7 @@ const navItems = [
   { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
   { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
   { label: "Courses", href: "/admin/courses", icon: BookOpen },
+  { label: "Live Classes", href: "/admin/live-classes", icon: Video },
   { label: "Users", href: "/admin/users", icon: Users },
   { label: "Enrollments", href: "/admin/enrollments", icon: GraduationCap },
   { label: "Certificates", href: "/admin/certificates", icon: ScrollText },
