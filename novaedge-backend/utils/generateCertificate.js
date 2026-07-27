@@ -1,9 +1,240 @@
 const fs = require("fs");
 const path = require("path");
 const os = require("os");
-const puppeteer = require("puppeteer");
+const PDFDocument = require("pdfkit");
 const QRCode = require("qrcode");
 
+let puppeteer = null;
+try {
+  puppeteer = require("puppeteer");
+} catch (e) {
+  console.log("Puppeteer not available, using native PDFKit renderer.");
+}
+
+// ── NATIVE PDFKIT RENDERER (100% Works on Vercel, Serverless, AWS Lambda & Local) ──────
+const drawCertificateNativePDF = (doc, { studentName, courseName, date, certificateId, qrCodeBuffer }) => {
+  const W = doc.page.width;   // 841.89
+  const H = doc.page.height;  // 595.28
+  const centerX = W / 2;
+
+  // 1. Paper Background (Warm Off-White / Ivory Cream)
+  doc.rect(0, 0, W, H).fill("#FAF8F5");
+
+  // 2. Outer Royal Purple Border Frame
+  const B = 14;
+  doc.rect(B, B, W - B * 2, H - B * 2).fill("#2A144E");
+
+  const gap = 20;
+  doc.rect(B + gap, B + gap, W - (B + gap) * 2, H - (B + gap) * 2).fill("#FAF8F5");
+
+  // Double Fine Inner Border Lines
+  doc.rect(B + gap + 8, B + gap + 8, W - (B + gap + 8) * 2, H - (B + gap + 8) * 2)
+     .lineWidth(1.5)
+     .stroke("#381D63");
+
+  doc.rect(B + gap + 12, B + gap + 12, W - (B + gap + 12) * 2, H - (B + gap + 12) * 2)
+     .lineWidth(1.0)
+     .stroke("#381D63");
+
+  // Scalloped corner accents
+  const c1 = B + gap + 12;
+  const c2 = W - (B + gap + 12);
+  const c3 = H - (B + gap + 12);
+  const r = 24;
+
+  doc.lineWidth(1.2).strokeColor("#381D63");
+  doc.moveTo(c1, c1 + r).bezierCurveTo(c1 + r, c1 + r, c1 + r, c1, c1 + r, c1).stroke();
+  doc.moveTo(c2, c1 + r).bezierCurveTo(c2 - r, c1 + r, c2 - r, c1, c2 - r, c1).stroke();
+  doc.moveTo(c1, c3 - r).bezierCurveTo(c1 + r, c3 - r, c1 + r, c3, c1 + r, c3).stroke();
+  doc.moveTo(c2, c3 - r).bezierCurveTo(c2 - r, c3 - r, c2 - r, c3, c2 - r, c3).stroke();
+
+  // 3. Header Section (Logo & Brand Name)
+  const logoY = 48;
+  const hexX = centerX - 95;
+  const hexY = logoY + 12;
+  const size = 14;
+  doc.save();
+  doc.lineWidth(2).strokeColor("#2A134E");
+  doc.polygon(
+    [hexX, hexY - size],
+    [hexX + size * 0.866, hexY - size * 0.5],
+    [hexX + size * 0.866, hexY + size * 0.5],
+    [hexX, hexY + size],
+    [hexX - size * 0.866, hexY + size * 0.5],
+    [hexX - size * 0.866, hexY - size * 0.5]
+  ).stroke();
+  doc.circle(hexX, hexY, 3).fill("#2A134E");
+  doc.restore();
+
+  doc
+    .fontSize(16)
+    .fillColor("#241045")
+    .font("Helvetica-Bold")
+    .text("NOVAEDGE", centerX - 72, logoY, { characterSpacing: 3, lineBreak: false });
+
+  doc
+    .fontSize(8.5)
+    .fillColor("#584577")
+    .font("Helvetica-Bold")
+    .text("DIGITAL LABS", centerX - 72, logoY + 19, { characterSpacing: 4.5, lineBreak: false });
+
+  doc.moveTo(centerX - 120, logoY + 36).lineTo(centerX + 120, logoY + 36).lineWidth(0.5).stroke("#8E7AA8");
+  doc.circle(centerX, logoY + 36, 2).fill("#8E7AA8");
+
+  // 4. Main Title Section
+  doc
+    .fontSize(32)
+    .fillColor("#1D0C38")
+    .font("Times-Bold")
+    .text("Certificate of Completion", 0, 108, { align: "center" });
+
+  doc.moveTo(centerX - 130, 148).lineTo(centerX + 130, 148).lineWidth(0.8).stroke("#A393BD");
+  doc.polygon([centerX - 4, 148], [centerX, 144], [centerX + 4, 148], [centerX, 152]).fill("#4E3773");
+
+  // 5. Ribbon Banner Course Title
+  const bannerY = 166;
+  const courseUpper = (courseName || "ADVANCED FULL STACK WEB DEVELOPMENT").toUpperCase();
+  doc.font("Helvetica-Bold").fontSize(12);
+  const textWidth = doc.widthOfString(courseUpper, { characterSpacing: 1.5 });
+  const bannerW = Math.max(340, Math.min(680, textWidth + 80));
+  const bannerX = centerX - bannerW / 2;
+
+  doc.polygon([bannerX - 16, bannerY + 15], [bannerX - 11, bannerY + 10], [bannerX - 6, bannerY + 15], [bannerX - 11, bannerY + 20]).fill("#2B1450");
+  doc.polygon([bannerX + bannerW + 6, bannerY + 15], [bannerX + bannerW + 11, bannerY + 10], [bannerX + bannerW + 16, bannerY + 15], [bannerX + bannerW + 11, bannerY + 20]).fill("#2B1450");
+
+  doc.save();
+  doc.path(`M ${bannerX} ${bannerY} L ${bannerX + bannerW} ${bannerY} L ${bannerX + bannerW - 10} ${bannerY + 15} L ${bannerX + bannerW} ${bannerY + 30} L ${bannerX} ${bannerY + 30} L ${bannerX + 10} ${bannerY + 15} Z`)
+     .fill("#1F0E3D");
+  doc.restore();
+
+  doc
+    .fontSize(11)
+    .fillColor("#FFFFFF")
+    .font("Helvetica-Bold")
+    .text(courseUpper, bannerX + 10, bannerY + 9, {
+      width: bannerW - 20,
+      align: "center",
+      characterSpacing: 1.5
+    });
+
+  // 6. Recipient Section
+  doc
+    .fontSize(9.5)
+    .fillColor("#6E5D87")
+    .font("Helvetica-Bold")
+    .text("PRESENTED TO", 0, 218, { align: "center", characterSpacing: 3 });
+
+  doc
+    .fontSize(38)
+    .fillColor("#231046")
+    .font("Times-BoldItalic")
+    .text(studentName || "Your Name Here", 0, 236, { align: "center" });
+
+  doc.moveTo(centerX - 160, 284).lineTo(centerX + 160, 284).lineWidth(0.75).stroke("#7E6C9E");
+  doc.polygon([centerX - 3, 284], [centerX, 281], [centerX + 3, 284], [centerX, 287]).fill("#7E6C9E");
+
+  doc
+    .fontSize(11.5)
+    .fillColor("#3E334D")
+    .font("Times-Italic")
+    .text(
+      "for successfully completing the course and demonstrating dedication, knowledge, and excellence in the subject matter.",
+      centerX - 270,
+      294,
+      { align: "center", width: 540 }
+    );
+
+  // 7. Footer Metadata & Verification (3 Columns)
+  const footerY = H - 138;
+
+  doc.save();
+  doc.dash(3, { space: 3 });
+  doc.moveTo(270, footerY - 5).lineTo(270, H - 38).lineWidth(0.75).stroke("#CBBEE0");
+  doc.moveTo(560, footerY - 5).lineTo(560, H - 38).lineWidth(0.75).stroke("#CBBEE0");
+  doc.restore();
+
+  const col1X = 65;
+  doc.roundedRect(col1X, footerY, 24, 24, 4).fill("#381F66");
+  doc.fontSize(7).fillColor("#FFFFFF").font("Helvetica-Bold").text("CAL", col1X + 4, footerY + 8);
+
+  doc
+    .fontSize(8.5)
+    .fillColor("#6B5A86")
+    .font("Helvetica-Bold")
+    .text("ISSUE DATE", col1X + 32, footerY, { characterSpacing: 1.5 });
+  doc
+    .fontSize(11)
+    .fillColor("#231046")
+    .font("Helvetica-Bold")
+    .text(date, col1X + 32, footerY + 11);
+
+  doc.moveTo(col1X, footerY + 30).lineTo(col1X + 180, footerY + 30).lineWidth(0.5).stroke("#E5DDEE");
+
+  doc.roundedRect(col1X, footerY + 36, 24, 24, 4).fill("#381F66");
+  doc.fontSize(7).fillColor("#FFFFFF").font("Helvetica-Bold").text("ID", col1X + 8, footerY + 44);
+
+  doc
+    .fontSize(8.5)
+    .fillColor("#6B5A86")
+    .font("Helvetica-Bold")
+    .text("CERTIFICATE ID", col1X + 32, footerY + 36, { characterSpacing: 1.5 });
+  doc
+    .fontSize(9.5)
+    .fillColor("#231046")
+    .font("Helvetica-Bold")
+    .text(certificateId, col1X + 32, footerY + 47);
+
+  if (qrCodeBuffer) {
+    const qrSize = 60;
+    const qrX = centerX - qrSize / 2;
+    const qrY = footerY - 6;
+
+    doc.roundedRect(qrX - 4, qrY - 4, qrSize + 8, qrSize + 8, 6).lineWidth(1.5).stroke("#381F66");
+    doc.image(qrCodeBuffer, qrX, qrY, { width: qrSize, height: qrSize });
+
+    doc
+      .fontSize(8.5)
+      .fillColor("#231046")
+      .font("Helvetica-Bold")
+      .text("SCAN TO VERIFY", 270, qrY + qrSize + 8, { width: 290, align: "center", characterSpacing: 1.2 });
+    doc
+      .fontSize(7.5)
+      .fillColor("#6E6184")
+      .font("Helvetica")
+      .text("Authenticity of this certificate", 270, qrY + qrSize + 19, { width: 290, align: "center" });
+  }
+
+  const sigX = 570;
+  const sigW = 200;
+
+  doc
+    .fontSize(22)
+    .fillColor("#1F0E3D")
+    .font("Times-BoldItalic")
+    .text("Amit Raikwar", sigX, footerY + 4, { width: sigW, align: "center" });
+
+  doc.moveTo(sigX + 25, footerY + 32).lineTo(sigX + sigW - 25, footerY + 32).lineWidth(1.5).stroke("#2C164D");
+
+  doc
+    .fontSize(9.5)
+    .fillColor("#1F0E3D")
+    .font("Helvetica-Bold")
+    .text("AMIT KUMAR RAIKWAR", sigX, footerY + 37, { width: sigW, align: "center", characterSpacing: 1 });
+
+  doc
+    .fontSize(8)
+    .fillColor("#64537E")
+    .font("Helvetica-Bold")
+    .text("FOUNDER & CEO", sigX, footerY + 49, { width: sigW, align: "center", characterSpacing: 1.2 });
+
+  doc
+    .fontSize(8)
+    .fillColor("#64537E")
+    .font("Helvetica")
+    .text("NovaEdge Digital Labs", sigX, footerY + 60, { width: sigW, align: "center" });
+};
+
+// ── PUPPETEER HTML RENDERER (Used when Chromium binary is present) ─────────────────
 const getCertificateHTML = ({ studentName, courseName, date, certificateId, qrDataUrl }) => {
   return `<!DOCTYPE html>
 <html>
@@ -51,7 +282,6 @@ body {
   box-sizing: border-box;
 }
 
-/* SVG Guilloche Border Frame Overlay */
 .border-overlay {
   position: absolute;
   top: 0;
@@ -61,7 +291,6 @@ body {
   pointer-events: none;
 }
 
-/* Content Stack */
 .content {
   position: relative;
   z-index: 10;
@@ -72,7 +301,6 @@ body {
   text-align: center;
 }
 
-/* Header */
 .header {
   display: flex;
   flex-direction: column;
@@ -134,7 +362,6 @@ body {
   color: #8E7AA8;
 }
 
-/* Title Section */
 .title-section {
   margin: 6px 0;
 }
@@ -161,7 +388,6 @@ body {
   background-color: #A393BD;
 }
 
-/* Ribbon Banner */
 .ribbon-wrapper {
   display: flex;
   align-items: center;
@@ -187,7 +413,6 @@ body {
   font-size: 14px;
 }
 
-/* Recipient Section */
 .recipient-section {
   margin: 6px 0;
 }
@@ -239,7 +464,6 @@ body {
   line-height: 1.4;
 }
 
-/* Footer Section */
 .footer-grid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -390,7 +614,6 @@ body {
 </head>
 <body>
 <div class="certificate-card">
-  <!-- SVG Ornamental Guilloche Frame -->
   <svg class="border-overlay" viewBox="0 0 1123 794" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
     <defs>
       <pattern id="guilloche-pattern" width="30" height="30" patternUnits="userSpaceOnUse">
@@ -401,14 +624,10 @@ body {
         <path d="M 0 0 L 30 30 M 0 30 L 30 0" fill="none" stroke="#261047" stroke-width="0.4" opacity="0.3" />
       </pattern>
     </defs>
-    <!-- Outer Guilloche Pattern Frame Band -->
     <rect x="16" y="16" width="1091" height="762" fill="url(#guilloche-pattern)" stroke="#261148" stroke-width="2.5" />
-    <!-- Inner Ivory Paper Background Clear Out (Clears center paper) -->
     <rect x="42" y="42" width="1039" height="710" fill="#FAF8F5" stroke="#261148" stroke-width="2" />
-    <!-- Double Fine Inner Lines -->
     <rect x="52" y="52" width="1019" height="690" fill="none" stroke="#381D63" stroke-width="1.5" />
     <rect x="56" y="56" width="1011" height="682" fill="none" stroke="#381D63" stroke-width="1" />
-    <!-- Scalloped Corner Accents -->
     <g stroke="#381D63" fill="none">
       <path d="M 56 90 C 74 90, 90 74, 90 56" stroke-width="1.8" />
       <path d="M 56 80 C 69 80, 80 69, 80 56" stroke-width="1.2" />
@@ -436,7 +655,6 @@ body {
   </svg>
 
   <div class="content">
-    <!-- Header -->
     <div class="header">
       <div class="logo-row">
         <svg viewBox="0 0 100 100" class="logo-svg">
@@ -462,7 +680,6 @@ body {
       </div>
     </div>
 
-    <!-- Title -->
     <div class="title-section">
       <h1 class="main-title">Certificate of Completion</h1>
       <div class="flourish-row">
@@ -474,14 +691,12 @@ body {
       </div>
     </div>
 
-    <!-- Ribbon Banner -->
     <div class="ribbon-wrapper">
       <span class="banner-diamond">◆</span>
       <div class="ribbon-banner">${courseName ? courseName.toUpperCase() : "ADVANCED FULL STACK WEB DEVELOPMENT"}</div>
       <span class="banner-diamond">◆</span>
     </div>
 
-    <!-- Recipient -->
     <div class="recipient-section">
       <div class="presented-to">PRESENTED TO</div>
       <div class="student-name">${studentName || "Your Name Here"}</div>
@@ -493,7 +708,6 @@ body {
       <p class="citation-text">for successfully completing the course and demonstrating dedication, knowledge, and excellence in the subject matter.</p>
     </div>
 
-    <!-- Footer -->
     <div class="footer-grid">
       <div class="footer-col col-left">
         <div class="meta-item">
@@ -555,6 +769,10 @@ const findChromePath = () => {
 };
 
 const generatePDFBuffer = async ({ studentName, courseName, date, certificateId, qrCodeBuffer }) => {
+  if (!puppeteer) {
+    throw new Error("Puppeteer is not available");
+  }
+
   let qrDataUrl = '';
   if (qrCodeBuffer) {
     qrDataUrl = `data:image/png;base64,${qrCodeBuffer.toString('base64')}`;
@@ -585,7 +803,6 @@ const generatePDFBuffer = async ({ studentName, courseName, date, certificateId,
     await page.setViewport({ width: 1123, height: 794, deviceScaleFactor: 2 });
     await page.setContent(htmlContent, { waitUntil: "networkidle0" });
     
-    // Wait for Google Fonts to be ready
     await page.evaluateHandle("document.fonts.ready");
 
     const pdfBuffer = await page.pdf({
@@ -600,12 +817,34 @@ const generatePDFBuffer = async ({ studentName, courseName, date, certificateId,
   }
 };
 
+// ── HYBRID STREAMER (Tries Puppeteer if Chrome available, fallback to PDFKit native on Vercel) ──
 const streamCertificatePDF = async (res, certificateData) => {
   try {
-    const pdfBuffer = await generatePDFBuffer(certificateData);
+    // If not Vercel and Chrome binary is present, use Puppeteer
+    if (!process.env.VERCEL && puppeteer && findChromePath()) {
+      try {
+        const pdfBuffer = await generatePDFBuffer(certificateData);
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader("Content-Length", pdfBuffer.length);
+        return res.end(pdfBuffer);
+      } catch (puppeteerErr) {
+        console.warn("Puppeteer PDF generation failed, falling back to native PDFKit:", puppeteerErr.message);
+      }
+    }
+
+    // NATIVE PDFKIT STREAMING (Zero dependencies, 100% Works on Vercel Serverless & Cloud)
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Length", pdfBuffer.length);
-    res.end(pdfBuffer);
+    res.setHeader("Content-Disposition", `inline; filename="certificate-${certificateData.certificateId || 'download'}.pdf"`);
+
+    const doc = new PDFDocument({
+      size: "A4",
+      layout: "landscape",
+      margin: 0,
+    });
+
+    doc.pipe(res);
+    drawCertificateNativePDF(doc, certificateData);
+    doc.end();
   } catch (error) {
     console.error("Stream PDF Error:", error);
     if (!res.headersSent) {
@@ -615,12 +854,40 @@ const streamCertificatePDF = async (res, certificateData) => {
 };
 
 const generateCertificate = async (studentName, courseName, date, certificateId, qrCodeBuffer) => {
-  const pdfBuffer = await generatePDFBuffer({ studentName, courseName, date, certificateId, qrCodeBuffer });
-  const tmpDir = os.tmpdir();
-  const fileName = `cert-${certificateId}.pdf`;
-  const filePath = path.join(tmpDir, fileName);
-  fs.writeFileSync(filePath, pdfBuffer);
-  return filePath;
+  if (!process.env.VERCEL && puppeteer && findChromePath()) {
+    try {
+      const pdfBuffer = await generatePDFBuffer({ studentName, courseName, date, certificateId, qrCodeBuffer });
+      const tmpDir = os.tmpdir();
+      const fileName = `cert-${certificateId}.pdf`;
+      const filePath = path.join(tmpDir, fileName);
+      fs.writeFileSync(filePath, pdfBuffer);
+      return filePath;
+    } catch (e) {
+      console.warn("Puppeteer generateCertificate failed, using PDFKit:", e.message);
+    }
+  }
+
+  // Fallback to PDFKit file generation
+  return new Promise((resolve, reject) => {
+    try {
+      const tmpDir = os.tmpdir();
+      const fileName = `cert-${certificateId}.pdf`;
+      const filePath = path.join(tmpDir, fileName);
+      const doc = new PDFDocument({
+        size: "A4",
+        layout: "landscape",
+        margin: 0,
+      });
+      const stream = fs.createWriteStream(filePath);
+      doc.pipe(stream);
+      drawCertificateNativePDF(doc, { studentName, courseName, date, certificateId, qrCodeBuffer });
+      doc.end();
+      stream.on("finish", () => resolve(filePath));
+      stream.on("error", reject);
+    } catch (err) {
+      reject(err);
+    }
+  });
 };
 
 module.exports = generateCertificate;
