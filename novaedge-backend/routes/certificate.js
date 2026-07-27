@@ -8,10 +8,13 @@ const {
   verifyCertificate,
   getUserCertificates,
   downloadCertificate,
+  adminGenerateCertificate,
+  getAllCertificates,
 } = require("../controllers/certificate");
 
 // Import Guard
 const { isAuthenticatedUser } = require("../middleware/auth");
+const { authorizeRoles } = require("../middleware/admin");
 
 // --- STUDENT ROUTES (Private) ---
 
@@ -42,5 +45,11 @@ router.route("/certificate/:id").get(verifyCertificate);
 // But to support "req.user", we might need a middleware that extracts user but doesn't fail if not present.
 // For now, let's keep it simple and allow public download if they have the ID, as the verification is public.
 router.route("/certificate/:id/download").get(downloadCertificate);
+
+// --- ADMIN ROUTES ---
+// POST /api/v1/admin/certificate/generate
+router.route("/admin/certificate/generate").post(isAuthenticatedUser, authorizeRoles("admin"), adminGenerateCertificate);
+// GET /api/v1/admin/certificates
+router.route("/admin/certificates").get(isAuthenticatedUser, authorizeRoles("admin"), getAllCertificates);
 
 module.exports = router;

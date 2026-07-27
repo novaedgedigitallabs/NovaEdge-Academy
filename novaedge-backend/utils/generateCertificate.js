@@ -1,9 +1,8 @@
-const puppeteer = require("puppeteer");
+const PDFDocument = require("pdfkit");
 const fs = require("fs");
 const path = require("path");
-const handlebars = require("handlebars");
 
-// This function returns a Promise that resolves to the file path of the new PDF
+// Generates a styled certificate PDF using PDFKit (works on Vercel/serverless)
 const generateCertificate = async (
   studentName,
   courseName,
@@ -11,55 +10,162 @@ const generateCertificate = async (
   certificateId,
   qrCodeBuffer
 ) => {
-  try {
-    // 1. Read the HTML Template
-    const templatePath = path.join(__dirname, "../templates/certificate.html");
-    const templateHtml = fs.readFileSync(templatePath, "utf8");
+  return new Promise((resolve, reject) => {
+    try {
+      // Ensure tmp directory exists
+      const tmpDir = path.join(__dirname, "../tmp");
+      if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
 
-    // 2. Compile Template with Handlebars
-    const template = handlebars.compile(templateHtml);
+      const fileName = `cert-${certificateId}.pdf`;
+      const filePath = path.join(tmpDir, fileName);
 
-    // Convert QR Buffer to Data URI
-    const qrDataUri = `data:image/png;base64,${qrCodeBuffer.toString("base64")}`;
+      const doc = new PDFDocument({
+        size: "A4",
+        layout: "landscape",
+        margin: 0,
+      });
 
-    const html = template({
-      userName: studentName,
-      courseTitle: courseName,
-      issuedAt: date,
-      certNumber: certificateId,
-      qrDataUri: qrDataUri,
-      // signatureImageUrl: "..." // Add signature logic later if needed
-    });
+      const stream = fs.createWriteStream(filePath);
+      doc.pipe(stream);
 
-    // 3. Launch Puppeteer
-    const browser = await puppeteer.launch({
-      headless: "new",
-      args: ["--no-sandbox", "--disable-setuid-sandbox"], // Required for some server environments
-    });
-    const page = await browser.newPage();
-    await page.setViewport({ width: 1123, height: 794 });
+      const W = doc.page.width;   // 841.89
+      const H = doc.page.height;  // 595.28
 
-    // 4. Set Content and Wait for Load
-    await page.setContent(html, { waitUntil: "networkidle0" });
+      // ── Background ──────────────────────────────────────────────────────────
+      // Deep navy gradient via layered rects
+      doc.rect(0, 0, W, H).fill("#0a0f1e");
+      doc.rect(0, 0, W, H / 2).fill("#0d1629");
 
-    // 5. Generate PDF
-    const fileName = `cert-${certificateId}.pdf`;
-    const filePath = path.join(__dirname, `../tmp/${fileName}`);
+      // ── Decorative border ───────────────────────────────────────────────────
+      const B = 18; // border inset
+      // Outer gold border
+      doc.rect(B, B, W - B * 2, H - B * 2).lineWidth(2).stroke("#c9a84c");
+      // Inner thin border
+      doc.rect(B + 6, B + 6, W - (B + 6) * 2, H - (B + 6) * 2).lineWidth(0.5).stroke("#c9a84c");
 
-    await page.pdf({
-      path: filePath,
-      format: "A4",
-      landscape: true,
-      printBackground: true,
-    });
+      // ── Corner ornaments ────────────────────────────────────────────────────
+      const ornamentSize = 30;
+      const corners = [
+        [B + 6, B + 6],
+        [W - B - 6 - ornamentSize, B + 6],
+        [B + 6, H - B - 6 - ornamentSize],
+        [W - B - 6 - ornamentSize, H - B - 6 - ornamentSize],
+      ];
+      corners.forEach(([x, y]) => {
+        doc.rect(x, y, ornamentSize, ornamentSize).lineWidth(1).stroke("#c9a84c");
+        doc.rect(x + 4, y + 4, ornamentSize - 8, ornamentSize - 8).lineWidth(0.5).stroke("#c9a84c");
+      });
 
-    await browser.close();
+      // ── Header badge ────────────────────────────────────────────────────────
+      const badgeY = 52;
+      doc
+        .fontSize(9)
+        .fillColor("#c9a84c")
+        .font("Helvetica-Bold")
+        .text("NOVAEDGE ACADEMY", 0, badgeY, { align: "center", characterSpacing: 4 });
 
-    return filePath;
-  } catch (error) {
-    console.error("Error generating certificate PDF:", error);
-    throw error;
-  }
+      // Divider lines around badge text
+      const badgeTextW = 160;
+      const centerX = W / 2;
+      doc.moveTo(centerX - badgeTextW, badgeY + 7).lineTo(centerX - 95, badgeY + 7).lineWidth(0.5).stroke("#c9a84c");
+      doc.moveTo(centerX + 95, badgeY + 7).lineTo(centerX + badgeTextW, badgeY + 7).lineWidth(0.5).stroke("#c9a84c");
+
+      // ── "CERTIFICATE OF COMPLETION" title ───────────────────────────────────
+      doc
+        .fontSize(34)
+        .fillColor("#ffffff")
+        .font("Helvetica-Bold")
+        .text("CERTIFICATE OF COMPLETION", 0, 85, { align: "center", characterSpacing: 2 });
+
+      // Gold underline
+      doc.moveTo(centerX - 200, 128).lineTo(centerX + 200, 128).lineWidth(1.5).stroke("#c9a84c");
+
+      // ── "This is to certify that" ────────────────────────────────────────────
+      doc
+        .fontSize(12)
+        .fillColor("#a0aec0")
+        .font("Helvetica")
+        .text("This is to certify that", 0, 148, { align: "center" });
+
+      // ── Student Name ─────────────────────────────────────────────────────────
+      doc
+        .fontSize(30)
+        .fillColor("#f6d860")
+        .font("Helvetica-BoldOblique")
+        .text(studentName, 0, 172, { align: "center" });
+
+      // Name underline
+      const nameWidth = Math.min(doc.widthOfString(studentName) + 60, 400);
+      doc.moveTo(centerX - nameWidth / 2, 212).lineTo(centerX + nameWidth / 2, 212).lineWidth(0.5).stroke("#f6d860");
+
+      // ── "has successfully completed" ─────────────────────────────────────────
+      doc
+        .fontSize(12)
+        .fillColor("#a0aec0")
+        .font("Helvetica")
+        .text("has successfully completed the course", 0, 224, { align: "center" });
+
+      // ── Course Name ──────────────────────────────────────────────────────────
+      doc
+        .fontSize(16)
+        .fillColor("#ffffff")
+        .font("Helvetica-Bold")
+        .text(courseName, 60, 248, { align: "center", width: W - 120, lineGap: 3 });
+
+      // ── Bottom section ───────────────────────────────────────────────────────
+      const bottomY = H - 120;
+
+      // Date block (left)
+      doc
+        .fontSize(10)
+        .fillColor("#a0aec0")
+        .font("Helvetica")
+        .text("DATE OF ISSUE", 90, bottomY, { characterSpacing: 1 });
+      doc
+        .fontSize(13)
+        .fillColor("#ffffff")
+        .font("Helvetica-Bold")
+        .text(date, 90, bottomY + 16);
+      doc.moveTo(90, bottomY + 38).lineTo(230, bottomY + 38).lineWidth(0.5).stroke("#4a5568");
+
+      // Certificate ID block (center)
+      doc
+        .fontSize(10)
+        .fillColor("#a0aec0")
+        .font("Helvetica")
+        .text("CERTIFICATE ID", 0, bottomY, { align: "center", characterSpacing: 1 });
+      doc
+        .fontSize(11)
+        .fillColor("#c9a84c")
+        .font("Helvetica-Bold")
+        .text(certificateId, 0, bottomY + 16, { align: "center" });
+
+      // QR Code (right side)
+      if (qrCodeBuffer) {
+        const qrSize = 70;
+        const qrX = W - 90 - qrSize;
+        const qrY = bottomY - 10;
+        doc.image(qrCodeBuffer, qrX, qrY, { width: qrSize, height: qrSize });
+        doc
+          .fontSize(7)
+          .fillColor("#a0aec0")
+          .text("Scan to verify", qrX, qrY + qrSize + 4, { width: qrSize, align: "center" });
+      }
+
+      // ── Footer ───────────────────────────────────────────────────────────────
+      doc
+        .fontSize(8)
+        .fillColor("#4a5568")
+        .text("This certificate is issued by NovaEdge Academy. Verify at novaedgeacademy.in/verify", 0, H - 30, { align: "center" });
+
+      doc.end();
+
+      stream.on("finish", () => resolve(filePath));
+      stream.on("error", reject);
+    } catch (error) {
+      reject(error);
+    }
+  });
 };
 
 module.exports = generateCertificate;

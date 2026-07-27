@@ -351,3 +351,17 @@ exports.downloadCertificate = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// --- 6. ADMIN GET ALL CERTIFICATES ---
+exports.getAllCertificates = async (req, res) => {
+  try {
+    const certificates = await Certificate.find()
+      .populate("user", "name email avatar")
+      .populate("course", "title")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({ success: true, certificates });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
