@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Alex+Brush&family=Cinzel:wght@500;700;900&family=Great+Vibes&family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,400&family=Montserrat:wght@400;500;600;700;800;900&display=swap');
+
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -239,4 +241,29 @@
 .dark-quill-wrapper .ql-snow button.ql-active,
 .dark-quill-wrapper .ql-snow .ql-picker-label:hover {
   color: hsl(var(--primary)) !important;
+}
+
+/* Certificate Print Styles */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .print\:hidden {
+    display: none !important;
+  }
+  #certificate-print-area {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: none !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+  @page {
+    size: landscape;
+    margin: 0;
+  }
 }
