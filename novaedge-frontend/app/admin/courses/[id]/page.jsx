@@ -50,6 +50,7 @@ export default function AdminCourseEditPage() {
   const [customCategoryInput, setCustomCategoryInput] = useState("");
   const lectureCardRefs = useRef([]);
   const [exportingIdx, setExportingIdx] = useState(null);
+  const [editingIdx, setEditingIdx] = useState(null);
 
   const exportCardAsImage = useCallback(async (idx) => {
     const cardEl = lectureCardRefs.current[idx];
@@ -452,7 +453,7 @@ export default function AdminCourseEditPage() {
 
 
               <div key={idx} ref={(el) => (lectureCardRefs.current[idx] = el)} className="p-4 border rounded bg-muted/20 relative">
-                <div className="absolute top-2 right-2 flex gap-2">
+                <div className="absolute top-2 right-2 flex gap-2 z-10">
                   <button
                     type="button"
                     onClick={() => exportCardAsImage(idx)}
@@ -462,12 +463,28 @@ export default function AdminCourseEditPage() {
                   >
                     {exportingIdx === idx ? "Exporting..." : "📷 Export"}
                   </button>
+                  {editingIdx === idx ? (
+                    <button
+                      type="button"
+                      onClick={() => setEditingIdx(null)}
+                      className="text-blue-500 hover:text-blue-400 text-sm font-medium"
+                    >
+                      ✓ Done
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setEditingIdx(idx)}
+                      className="text-yellow-500 hover:text-yellow-400 text-sm"
+                    >
+                      ✏️ Edit
+                    </button>
+                  )}
                   {lec._id && (
                     <VersionHistory
                       courseId={courseId}
                       lectureId={lec._id}
                       onRollback={() => {
-                        // Reload course data to reflect rollback
                         apiGet(`/api/v1/course/${courseId}`).then(data => {
                           const fetched = data.course || data;
                           setCourse(fetched);
@@ -484,45 +501,109 @@ export default function AdminCourseEditPage() {
                     Remove
                   </button>
                 </div>
-                <h3 className="font-semibold">Lecture {idx + 1}: {lec.title}</h3>
-                <p className="text-sm text-muted-foreground truncate">{lec.description}</p>
-                <div className="flex gap-4 text-xs mt-1">
-                  <span className="text-blue-500 truncate max-w-[200px]">
-                    {lec.videoUrl || (lec.video && lec.video.url)}
-                  </span>
-                  <span className="text-green-600 font-medium">
-                    {lec.duration ? `${lec.duration} min` : "0 min"}
-                  </span>
-                  {lec.currentVersion && (
-                    <span className="bg-blue-100 text-blue-800 px-1 rounded">v{lec.currentVersion}</span>
-                  )}
-                </div>
 
-                {/* Resource URL */}
-                <div className="mt-3 flex items-center gap-2">
-                  <label className="text-xs font-medium text-muted-foreground whitespace-nowrap">📎 Resource URL:</label>
-                  <input
-                    type="text"
-                    placeholder="https://drive.google.com/... or any downloadable link"
-                    value={lec.notesUrl || lec.notes?.url || ""}
-                    onChange={(e) => {
-                      const updated = [...lectures];
-                      updated[idx] = { ...updated[idx], notesUrl: e.target.value };
-                      setLectures(updated);
-                    }}
-                    className="flex-1 border p-1.5 rounded text-xs bg-background text-foreground border-input"
-                  />
-                  {(lec.notesUrl || lec.notes?.url) && (
-                    <a
-                      href={lec.notesUrl || lec.notes?.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs text-blue-500 hover:underline whitespace-nowrap"
-                    >
-                      Preview ↗
-                    </a>
-                  )}
-                </div>
+                {editingIdx === idx ? (
+                  /* ─── Edit Mode ─── */
+                  <div className="space-y-2 pr-40">
+                    <div>
+                      <label className="text-xs font-medium text-muted-foreground">Title</label>
+                      <input
+                        value={lec.title || ""}
+                        onChange={(e) => {
+                          const updated = [...lectures];
+                          updated[idx] = { ...updated[idx], title: e.target.value };
+                          setLectures(updated);
+                        }}
+                        className="w-full border p-2 rounded text-sm bg-background text-foreground border-input"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-muted-foreground">Description</label>
+                      <textarea
+                        value={lec.description || ""}
+                        onChange={(e) => {
+                          const updated = [...lectures];
+                          updated[idx] = { ...updated[idx], description: e.target.value };
+                          setLectures(updated);
+                        }}
+                        rows={2}
+                        className="w-full border p-2 rounded text-sm bg-background text-foreground border-input"
+                      />
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="col-span-2">
+                        <label className="text-xs font-medium text-muted-foreground">Video URL</label>
+                        <input
+                          value={lec.videoUrl || lec.video?.url || ""}
+                          onChange={(e) => {
+                            const updated = [...lectures];
+                            updated[idx] = { ...updated[idx], videoUrl: e.target.value };
+                            setLectures(updated);
+                          }}
+                          className="w-full border p-2 rounded text-sm bg-background text-foreground border-input"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium text-muted-foreground">Duration (min)</label>
+                        <input
+                          type="number"
+                          value={lec.duration || ""}
+                          onChange={(e) => {
+                            const updated = [...lectures];
+                            updated[idx] = { ...updated[idx], duration: e.target.value };
+                            setLectures(updated);
+                          }}
+                          className="w-full border p-2 rounded text-sm bg-background text-foreground border-input"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-muted-foreground">📎 Resource URL</label>
+                      <input
+                        placeholder="https://drive.google.com/... or any downloadable link"
+                        value={lec.notesUrl || lec.notes?.url || ""}
+                        onChange={(e) => {
+                          const updated = [...lectures];
+                          updated[idx] = { ...updated[idx], notesUrl: e.target.value };
+                          setLectures(updated);
+                        }}
+                        className="w-full border p-1.5 rounded text-xs bg-background text-foreground border-input"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  /* ─── View Mode ─── */
+                  <>
+                    <h3 className="font-semibold">Lecture {idx + 1}: {lec.title}</h3>
+                    <p className="text-sm text-muted-foreground truncate">{lec.description}</p>
+                    <div className="flex gap-4 text-xs mt-1">
+                      <span className="text-blue-500 truncate max-w-[200px]">
+                        {lec.videoUrl || (lec.video && lec.video.url)}
+                      </span>
+                      <span className="text-green-600 font-medium">
+                        {lec.duration ? `${lec.duration} min` : "0 min"}
+                      </span>
+                      {lec.currentVersion && (
+                        <span className="bg-blue-100 text-blue-800 px-1 rounded">v{lec.currentVersion}</span>
+                      )}
+                    </div>
+
+                    {/* Resource URL (view mode) */}
+                    {(lec.notesUrl || lec.notes?.url) && (
+                      <div className="mt-2 flex items-center gap-2 text-xs">
+                        <span className="text-muted-foreground">📎</span>
+                        <a
+                          href={lec.notesUrl || lec.notes?.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-500 hover:underline truncate max-w-[400px]"
+                        >
+                          {lec.notesUrl || lec.notes?.url}
+                        </a>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
             ))}
           </div>
