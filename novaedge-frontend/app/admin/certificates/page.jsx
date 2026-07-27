@@ -68,10 +68,17 @@ export default function AdminCertificatesPage() {
         setResult(null);
         try {
             const res = await adminGenerateCertificate(selectedUser, selectedCourse);
-            setResult({ success: true, certificate: res.certificate, message: res.message || "Certificate generated!" });
+            const cert = res.certificate;
+            setResult({
+                success: true,
+                certificate: cert,
+                message: res.message || "Certificate generated successfully!",
+                verifyUrl: cert?.pdfUrl || `${window.location.origin}/verify/${cert?.certificateId}`,
+            });
             toast.success(res.message || "Certificate generated successfully!");
             setSelectedUser("");
             setSelectedCourse("");
+            setUserSearch("");
             fetchCertificates();
         } catch (error) {
             const msg = error?.response?.data?.message || error?.message || "Failed to generate certificate";
@@ -81,6 +88,7 @@ export default function AdminCertificatesPage() {
             setGenerating(false);
         }
     };
+
 
     const filteredUsers = users.filter(u =>
         (u.name + u.email).toLowerCase().includes(userSearch.toLowerCase())
@@ -199,9 +207,9 @@ export default function AdminCertificatesPage() {
                                     }
                                     <div>
                                         <p className="font-medium">{result.message}</p>
-                                        {result.certificate?.pdfUrl && (
-                                            <a href={result.certificate.pdfUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs mt-1 underline underline-offset-2">
-                                                <ExternalLink className="h-3 w-3" /> View Certificate PDF
+                                        {result.verifyUrl && (
+                                            <a href={result.verifyUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs mt-1 underline underline-offset-2">
+                                                <ExternalLink className="h-3 w-3" /> View Certificate
                                             </a>
                                         )}
                                     </div>

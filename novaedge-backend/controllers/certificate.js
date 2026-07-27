@@ -15,101 +15,37 @@ exports.generateCertificate = async (req, res) => {
     const { courseId } = req.params;
     const userId = req.user.id;
 
-    // A. Check if Certificate already exists (Don't generate twice)
-    let certificate = await Certificate.findOne({
-      user: userId,
-      course: courseId,
-    });
-
+    // A. Check if Certificate already exists
+    let certificate = await Certificate.findOne({ user: userId, course: courseId });
     if (certificate) {
-      return res.status(200).json({
-        success: true,
-        certificate,
-        message: "Certificate already exists",
-      });
+      return res.status(200).json({ success: true, certificate, message: "Certificate already exists" });
     }
 
-    // B. Check if the user has actually finished the course (Anti-Cheat)
+    // B. Check completion
     const progress = await Progress.findOne({ user: userId, course: courseId });
-
     if (!progress || progress.percentComplete < 100) {
-      return res.status(400).json({
-        success: false,
-        message: "You have not completed this course yet.",
-      });
+      return res.status(400).json({ success: false, message: "You have not completed this course yet." });
     }
 
-    // C. Fetch User and Course details for the PDF
+    // C. Fetch User and Course
     const user = await User.findById(userId);
     const course = await Course.findById(courseId);
 
     // D. Generate Unique Certificate ID
-    // Format: CERT-CourseID-UserID-RandomHex
-    const uniqueId = `CERT-${courseId.slice(-4)}-${userId.slice(-4)}-${crypto
-      .randomBytes(3)
-      .toString("hex")
-      .toUpperCase()}`;
+    const uniqueId = `CERT-${courseId.slice(-4)}-${userId.slice(-4)}-${crypto.randomBytes(3).toString("hex").toUpperCase()}`;
 
-    // E. Generate QR Code
-    // This URL points to your frontend verification page
-    const verificationUrl = `${process.env.FRONTEND_URL}/verify/${uniqueId}`;
-    const qrCodeBuffer = await generateQR(verificationUrl);
+    // E. Build verify URL (web-based certificate, no file generation needed)
+    const verifyUrl = `${process.env.FRONTEND_URL}/verify/${uniqueId}`;
 
-    // F. Generate PDF (Creates a file in /tmp folder)
-    const filePath = await generateCertificate(
-      user.name,
-      course.title,
-      new Date().toLocaleDateString(), // Today's date
-      uniqueId,
-      qrCodeBuffer
-    );
-
-    // G. Upload to Google Drive (Structured)
-    const { ensureUserFolder, uploadFileToFolder } = require("../utils/googleDrive");
-    const DriveFile = require("../models/DriveFile");
-
-    // 1. Get/Create User Folder
-    const userFolderId = await ensureUserFolder(userId, user.username);
-
-    // 2. Read file buffer
-    const fileBuffer = fs.readFileSync(filePath);
-
-    // 3. Upload
-    const driveFile = await uploadFileToFolder(
-      fileBuffer,
-      `Certificate-${uniqueId}.pdf`,
-      "application/pdf",
-      userFolderId
-    );
-
-    // 4. Save DriveFile Metadata
-    await DriveFile.create({
-      filename: `Certificate-${uniqueId}.pdf`,
-      mimeType: "application/pdf",
-      size: driveFile.size, // API returns size
-      uploader: userId,
-      driveFileId: driveFile.id,
-      folderId: userFolderId,
-      webViewLink: driveFile.webViewLink,
-      webContentLink: driveFile.webContentLink,
-      storage: "drive",
-    });
-
-    // H. Delete the local temp file
-    fs.unlinkSync(filePath);
-
-    // I. Save to Database
+    // F. Save to Database
     certificate = await Certificate.create({
       user: userId,
       course: courseId,
       certificateId: uniqueId,
-      pdfUrl: driveFile.webViewLink, // Use Drive Link
+      pdfUrl: verifyUrl,
     });
 
-    res.status(201).json({
-      success: true,
-      certificate,
-    });
+    res.status(201).json({ success: true, certificate });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -167,11 +103,7 @@ exports.adminGenerateCertificate = async (req, res) => {
     const { userId, courseId } = req.body;
 
     // A. Check if Certificate already exists
-    let certificate = await Certificate.findOne({
-      user: userId,
-      course: courseId,
-    });
-
+    let certificate = await Certificate.findOne({ user: userId, course: courseId });
     if (certificate) {
       return res.status(200).json({
         success: true,
@@ -185,71 +117,21 @@ exports.adminGenerateCertificate = async (req, res) => {
     const course = await Course.findById(courseId);
 
     if (!user || !course) {
-      return res.status(404).json({
-        success: false,
-        message: "User or Course not found",
-      });
+      return res.status(404).json({ success: false, message: "User or Course not found" });
     }
 
     // C. Generate Unique Certificate ID
-    const uniqueId = `CERT-${courseId.slice(-4)}-${userId.slice(-4)}-${crypto
-      .randomBytes(3)
-      .toString("hex")
-      .toUpperCase()}`;
+    const uniqueId = `CERT-${courseId.slice(-4)}-${userId.slice(-4)}-${crypto.randomBytes(3).toString("hex").toUpperCase()}`;
 
-    // D. Generate QR Code
-    const verificationUrl = `${process.env.FRONTEND_URL}/verify/${uniqueId}`;
-    const qrCodeBuffer = await generateQR(verificationUrl);
+    // D. Web-based certificate URL (instant — no file generation, no Drive upload)
+    const verifyUrl = `${process.env.FRONTEND_URL}/verify/${uniqueId}`;
 
-    // E. Generate PDF
-    const filePath = await generateCertificate(
-      user.name,
-      course.title,
-      new Date().toLocaleDateString(),
-      uniqueId,
-      qrCodeBuffer
-    );
-
-    // F. Upload to Google Drive (Structured)
-    const { ensureUserFolder, uploadFileToFolder } = require("../utils/googleDrive");
-    const DriveFile = require("../models/DriveFile");
-
-    // 1. Get/Create User Folder
-    const userFolderId = await ensureUserFolder(userId, user.username);
-
-    // 2. Read file buffer
-    const fileBuffer = fs.readFileSync(filePath);
-
-    // 3. Upload
-    const driveFile = await uploadFileToFolder(
-      fileBuffer,
-      `Certificate-${uniqueId}.pdf`,
-      "application/pdf",
-      userFolderId
-    );
-
-    // 4. Save DriveFile Metadata
-    await DriveFile.create({
-      filename: `Certificate-${uniqueId}.pdf`,
-      mimeType: "application/pdf",
-      size: driveFile.size,
-      uploader: userId,
-      driveFileId: driveFile.id,
-      folderId: userFolderId,
-      webViewLink: driveFile.webViewLink,
-      webContentLink: driveFile.webContentLink,
-      storage: "drive",
-    });
-
-    // G. Delete local file
-    fs.unlinkSync(filePath);
-
-    // H. Save to Database
+    // E. Save to Database
     certificate = await Certificate.create({
       user: userId,
       course: courseId,
       certificateId: uniqueId,
-      pdfUrl: driveFile.webViewLink,
+      pdfUrl: verifyUrl,
     });
 
     res.status(201).json({
