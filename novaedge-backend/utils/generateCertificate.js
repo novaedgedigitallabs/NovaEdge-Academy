@@ -1,6 +1,7 @@
 const PDFDocument = require("pdfkit");
 const fs = require("fs");
 const path = require("path");
+const os = require("os");
 
 // Generates a styled certificate PDF using PDFKit (works on Vercel/serverless)
 const generateCertificate = async (
@@ -12,9 +13,8 @@ const generateCertificate = async (
 ) => {
   return new Promise((resolve, reject) => {
     try {
-      // Ensure tmp directory exists
-      const tmpDir = path.join(__dirname, "../tmp");
-      if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
+      // Use os.tmpdir() for serverless/Vercel read-only filesystem compatibility
+      const tmpDir = os.tmpdir();
 
       const fileName = `cert-${certificateId}.pdf`;
       const filePath = path.join(tmpDir, fileName);
