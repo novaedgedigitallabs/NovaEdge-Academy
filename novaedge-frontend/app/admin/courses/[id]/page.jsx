@@ -1,11 +1,12 @@
 // app/admin/courses/[id]/page.jsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import AdminGuard from "@/components/admin/AdminGuard";
 import { apiGet, apiPost, apiPut, apiDelete } from "@/lib/api";
 import VersionHistory from "@/components/admin/VersionHistory";
+import html2canvas from "html2canvas";
 
 export default function AdminCourseEditPage() {
   const params = useParams();
@@ -47,6 +48,32 @@ export default function AdminCourseEditPage() {
   ]);
   const [isCustomCategory, setIsCustomCategory] = useState(false);
   const [customCategoryInput, setCustomCategoryInput] = useState("");
+  const lectureCardRefs = useRef([]);
+  const [exportingIdx, setExportingIdx] = useState(null);
+
+  const exportCardAsImage = useCallback(async (idx) => {
+    const cardEl = lectureCardRefs.current[idx];
+    if (!cardEl) return;
+    setExportingIdx(idx);
+    try {
+      const canvas = await html2canvas(cardEl, {
+        backgroundColor: "#1a1a2e",
+        scale: 2,
+        useCORS: true,
+        logging: false,
+      });
+      const link = document.createElement("a");
+      const lecTitle = lectures[idx]?.title || `Lecture_${idx + 1}`;
+      link.download = `${lecTitle.replace(/[^a-zA-Z0-9]/g, "_")}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    } catch (err) {
+      console.error("Export failed:", err);
+      alert("Failed to export card as image");
+    } finally {
+      setExportingIdx(null);
+    }
+  }, [lectures]);
 
   const addLecture = () => {
     if (!newLecture.title || !newLecture.videoUrl) return alert("Title and Video URL are required");
@@ -424,8 +451,17 @@ export default function AdminCourseEditPage() {
             {lectures.map((lec, idx) => (
 
 
-              <div key={idx} className="p-4 border rounded bg-muted/20 relative">
+              <div key={idx} ref={(el) => (lectureCardRefs.current[idx] = el)} className="p-4 border rounded bg-muted/20 relative">
                 <div className="absolute top-2 right-2 flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => exportCardAsImage(idx)}
+                    disabled={exportingIdx === idx}
+                    className="text-emerald-500 hover:text-emerald-400 text-sm disabled:opacity-50"
+                    title="Export as Image"
+                  >
+                    {exportingIdx === idx ? "Exporting..." : "📷 Export"}
+                  </button>
                   {lec._id && (
                     <VersionHistory
                       courseId={courseId}
