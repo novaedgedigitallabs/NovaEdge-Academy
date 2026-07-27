@@ -6,7 +6,7 @@ import { useRouter, useParams } from "next/navigation";
 import AdminGuard from "@/components/admin/AdminGuard";
 import { apiGet, apiPost, apiPut, apiDelete } from "@/lib/api";
 import VersionHistory from "@/components/admin/VersionHistory";
-import html2canvas from "html2canvas";
+import { toPng } from "html-to-image";
 
 export default function AdminCourseEditPage() {
   const params = useParams();
@@ -57,20 +57,22 @@ export default function AdminCourseEditPage() {
     if (!cardEl) return;
     setExportingIdx(idx);
     try {
-      const canvas = await html2canvas(cardEl, {
-        backgroundColor: "#1a1a2e",
-        scale: 2,
-        useCORS: true,
-        logging: false,
+      const lecTitle = lectures[idx]?.title || `Lecture_${idx + 1}`;
+      const dataUrl = await toPng(cardEl, {
+        cacheBust: true,
+        pixelRatio: 2,
+        backgroundColor: "#0f172a",
+        style: {
+          borderRadius: "8px",
+        },
       });
       const link = document.createElement("a");
-      const lecTitle = lectures[idx]?.title || `Lecture_${idx + 1}`;
       link.download = `${lecTitle.replace(/[^a-zA-Z0-9]/g, "_")}.png`;
-      link.href = canvas.toDataURL("image/png");
+      link.href = dataUrl;
       link.click();
     } catch (err) {
       console.error("Export failed:", err);
-      alert("Failed to export card as image");
+      alert("Export failed: " + (err?.message || "Unknown error"));
     } finally {
       setExportingIdx(null);
     }
