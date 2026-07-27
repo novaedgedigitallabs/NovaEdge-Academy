@@ -73,7 +73,7 @@ export default function AdminCertificatesPage() {
                 success: true,
                 certificate: cert,
                 message: res.message || "Certificate generated successfully!",
-                verifyUrl: cert?.pdfUrl || `${window.location.origin}/verify/${cert?.certificateId}`,
+                verifyUrl: cert?.pdfUrl || `/certificate/${cert?.certificateId}`,
             });
             toast.success(res.message || "Certificate generated successfully!");
             setSelectedUser("");

@@ -32,19 +32,8 @@ export default function CertificatePage() {
         fetchCert();
     }, [id]);
 
-    const handleDownload = async () => {
-        try {
-            const downloadUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/v1/certificate/${id}/download`;
-            const link = document.createElement('a');
-            link.href = downloadUrl;
-            link.setAttribute('download', `Certificate-${id}.pdf`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            toast.success("Download started");
-        } catch (e) {
-            toast.error("Download failed");
-        }
+    const handleDownload = () => {
+        window.print();
     };
 
     const handleCopyLink = () => {
@@ -66,7 +55,7 @@ export default function CertificatePage() {
     return (
         <div className="min-h-screen flex flex-col bg-white font-sans">
             {/* Minimalist Header */}
-            <header className="w-full border-b border-gray-100 bg-white/80 backdrop-blur-md sticky top-0 z-50">
+            <header className="w-full border-b border-gray-100 bg-white/80 backdrop-blur-md sticky top-0 z-50 print:hidden">
                 <div className="container mx-auto flex h-16 items-center justify-between px-6">
                     <Link href="/" className="flex items-center gap-2 font-black text-xl tracking-tighter text-blue-600">
                         <ShieldCheck className="w-8 h-8" />
@@ -144,7 +133,7 @@ export default function CertificatePage() {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex flex-wrap items-center justify-center gap-4">
+                    <div className="flex flex-wrap items-center justify-center gap-4 print:hidden">
                         <Button
                             size="lg"
                             onClick={handleLinkedInShare}
@@ -161,7 +150,7 @@ export default function CertificatePage() {
                             className="border-gray-200 text-gray-600 hover:bg-gray-50 rounded-full px-8 h-14 text-base font-bold transition-all hover:border-gray-300"
                         >
                             <Download className="w-5 h-5 mr-2" />
-                            Download PDF
+                            Print / Save as PDF
                         </Button>
 
                         <Button
@@ -178,7 +167,7 @@ export default function CertificatePage() {
             </main>
 
             {/* Footer Info */}
-            <footer className="py-8 border-t border-gray-50 text-center">
+            <footer className="py-8 border-t border-gray-50 text-center print:hidden">
                 <p className="text-sm text-gray-400 font-medium">
                     Verified by NovaEdge Academy · Certificate ID: {certificate.certificateId}
                 </p>

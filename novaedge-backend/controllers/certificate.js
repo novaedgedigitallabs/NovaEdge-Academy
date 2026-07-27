@@ -34,15 +34,15 @@ exports.generateCertificate = async (req, res) => {
     // D. Generate Unique Certificate ID
     const uniqueId = `CERT-${courseId.slice(-4)}-${userId.slice(-4)}-${crypto.randomBytes(3).toString("hex").toUpperCase()}`;
 
-    // E. Build verify URL (web-based certificate, no file generation needed)
-    const verifyUrl = `${process.env.FRONTEND_URL}/verify/${uniqueId}`;
+    // E. Build web certificate URL (instant — no file generation needed)
+    const certUrl = `${process.env.FRONTEND_URL || "https://www.novaedgeacademy.in"}/certificate/${uniqueId}`;
 
     // F. Save to Database
     certificate = await Certificate.create({
       user: userId,
       course: courseId,
       certificateId: uniqueId,
-      pdfUrl: verifyUrl,
+      pdfUrl: certUrl,
     });
 
     res.status(201).json({ success: true, certificate });
@@ -124,14 +124,14 @@ exports.adminGenerateCertificate = async (req, res) => {
     const uniqueId = `CERT-${courseId.slice(-4)}-${userId.slice(-4)}-${crypto.randomBytes(3).toString("hex").toUpperCase()}`;
 
     // D. Web-based certificate URL (instant — no file generation, no Drive upload)
-    const verifyUrl = `${process.env.FRONTEND_URL}/verify/${uniqueId}`;
+    const certUrl = `${process.env.FRONTEND_URL || "https://www.novaedgeacademy.in"}/certificate/${uniqueId}`;
 
     // E. Save to Database
     certificate = await Certificate.create({
       user: userId,
       course: courseId,
       certificateId: uniqueId,
-      pdfUrl: verifyUrl,
+      pdfUrl: certUrl,
     });
 
     res.status(201).json({
