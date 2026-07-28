@@ -54,10 +54,6 @@ exports.generateCertificate = async (req, res) => {
 // --- 2. GET MY CERTIFICATES ---
 exports.getMyCertificates = async (req, res) => {
   try {
-    const certificates = await Certificate.findOne({ user: req.user.id })
-      .populate("course", "title");
-
-    // Wait, findOne returns only one. We need find.
     const allCertificates = await Certificate.find({ user: req.user.id })
       .populate("course", "title");
 
@@ -71,7 +67,6 @@ exports.getMyCertificates = async (req, res) => {
 };
 
 // --- 2. VERIFY CERTIFICATE (Public/Employer Route) ---
-// Employer scans QR -> Frontend calls this API -> Returns validity
 exports.verifyCertificate = async (req, res) => {
   try {
     const { id } = req.params; // The Certificate ID (e.g., CERT-123...)
@@ -218,6 +213,27 @@ exports.getAllCertificates = async (req, res) => {
       .sort({ createdAt: -1 });
 
     res.status(200).json({ success: true, certificates });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// --- 7. ADMIN DELETE / REVOKE CERTIFICATE ---
+exports.adminDeleteCertificate = async (req, res) => {
+  try {
+    const { id } = req.params; // Accepts Mongo _id or certificateId string
+    const certificate = await Certificate.findOneAndDelete({
+      $or: [{ _id: id }, { certificateId: id }]
+    });
+
+    if (!certificate) {
+      return res.status(404).json({ success: false, message: "Certificate not found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Certificate deleted / revoked successfully",
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

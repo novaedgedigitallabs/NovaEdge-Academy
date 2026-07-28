@@ -10,6 +10,7 @@ const {
   downloadCertificate,
   adminGenerateCertificate,
   getAllCertificates,
+  adminDeleteCertificate,
 } = require("../controllers/certificate");
 
 // Import Guard
@@ -41,9 +42,6 @@ router.route("/certificate/:id").get(verifyCertificate);
 
 // Download Certificate
 // GET /api/v1/certificate/:id/download
-// We will make this "optional auth" - if you have the token, we check. If not, we rely on the ID being secret.
-// But to support "req.user", we might need a middleware that extracts user but doesn't fail if not present.
-// For now, let's keep it simple and allow public download if they have the ID, as the verification is public.
 router.route("/certificate/:id/download").get(downloadCertificate);
 
 // --- ADMIN ROUTES ---
@@ -51,5 +49,7 @@ router.route("/certificate/:id/download").get(downloadCertificate);
 router.route("/admin/certificate/generate").post(isAuthenticatedUser, authorizeRoles("admin"), adminGenerateCertificate);
 // GET /api/v1/admin/certificates
 router.route("/admin/certificates").get(isAuthenticatedUser, authorizeRoles("admin"), getAllCertificates);
+// DELETE /api/v1/admin/certificate/:id
+router.route("/admin/certificate/:id").delete(isAuthenticatedUser, authorizeRoles("admin"), adminDeleteCertificate);
 
 module.exports = router;

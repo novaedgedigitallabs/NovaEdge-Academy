@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { apiGet } from "@/lib/api";
-import { adminGenerateCertificate } from "@/services/certificate";
+import { adminGenerateCertificate, adminDeleteCertificate } from "@/services/certificate";
 import { toast } from "sonner";
 import {
     ScrollText, Award, User, BookOpen, Loader2,
-    CheckCircle, XCircle, ExternalLink, RefreshCw, Search
+    CheckCircle, XCircle, ExternalLink, RefreshCw, Search, Trash2
 } from "lucide-react";
 import AdminGuard from "@/components/admin/AdminGuard";
 
@@ -20,7 +20,8 @@ export default function AdminCertificatesPage() {
     const [selectedUser, setSelectedUser] = useState("");
     const [selectedCourse, setSelectedCourse] = useState("");
     const [generating, setGenerating] = useState(false);
-    const [result, setResult] = useState(null); // { success, certificate, message }
+    const [deletingId, setDeletingId] = useState(null);
+    const [result, setResult] = useState(null);
 
     const [userSearch, setUserSearch] = useState("");
     const [certSearch, setCertSearch] = useState("");
@@ -47,7 +48,6 @@ export default function AdminCertificatesPage() {
             const res = await apiGet("/api/v1/admin/certificates");
             setCertificates(Array.isArray(res.certificates) ? res.certificates : []);
         } catch {
-            // endpoint might not exist yet — ignore silently
             setCertificates([]);
         } finally {
             setLoadingCerts(false);
@@ -89,6 +89,23 @@ export default function AdminCertificatesPage() {
         }
     };
 
+    const handleDelete = async (cert) => {
+        const studentName = cert.user?.name || "this student";
+        if (!window.confirm(`Are you sure you want to delete/revoke the certificate for "${studentName}"?`)) {
+            return;
+        }
+        setDeletingId(cert._id);
+        try {
+            const res = await adminDeleteCertificate(cert._id);
+            toast.success(res.message || "Certificate deleted successfully!");
+            fetchCertificates();
+        } catch (error) {
+            const msg = error?.response?.data?.message || error?.message || "Failed to delete certificate";
+            toast.error(msg);
+        } finally {
+            setDeletingId(null);
+        }
+    };
 
     const filteredUsers = users.filter(u =>
         (u.name + u.email).toLowerCase().includes(userSearch.toLowerCase())
@@ -111,7 +128,7 @@ export default function AdminCertificatesPage() {
                     </div>
                     <div>
                         <h1 className="text-2xl font-bold">Certificate Management</h1>
-                        <p className="text-sm text-muted-foreground">Issue certificates manually to students</p>
+                        <p className="text-sm text-muted-foreground">Issue certificates manually or remove mistakenly issued ones</p>
                     </div>
                 </div>
 
@@ -275,29 +292,48 @@ export default function AdminCertificatesPage() {
                         ) : (
                             <div className="divide-y divide-border">
                                 {filteredCerts.map((cert) => (
-                                    <div key={cert._id} className="px-5 py-3.5 hover:bg-muted/20 transition-colors flex items-center gap-4">
-                                        <div className="h-9 w-9 rounded-full bg-amber-500/10 flex items-center justify-center flex-shrink-0">
-                                            <Award className="h-4 w-4 text-amber-400" />
+                                    <div key={cert._id} className="px-5 py-3.5 hover:bg-muted/20 transition-colors flex items-center justify-between gap-4">
+                                        <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                                            <div className="h-9 w-9 rounded-full bg-amber-500/10 flex items-center justify-center flex-shrink-0">
+                                                <Award className="h-4 w-4 text-amber-400" />
+                                            </div>
+                                            <div className="min-w-0 flex-1">
+                                                <p className="text-sm font-medium truncate">{cert.user?.name || "Unknown"}</p>
+                                                <p className="text-xs text-muted-foreground truncate">{cert.course?.title || "Unknown Course"}</p>
+                                                <p className="text-xs text-amber-400/80 font-mono mt-0.5">{cert.certificateId}</p>
+                                            </div>
                                         </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-medium truncate">{cert.user?.name || "Unknown"}</p>
-                                            <p className="text-xs text-muted-foreground truncate">{cert.course?.title || "Unknown Course"}</p>
-                                            <p className="text-xs text-amber-400/80 font-mono mt-0.5">{cert.certificateId}</p>
-                                        </div>
-                                        <div className="text-right flex-shrink-0 space-y-1">
-                                            <p className="text-xs text-muted-foreground">
-                                                {cert.createdAt ? new Date(cert.createdAt).toLocaleDateString("en-IN", { dateStyle: "medium" }) : "—"}
-                                            </p>
-                                            {cert.pdfUrl && (
-                                                <a
-                                                    href={cert.pdfUrl}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                                                >
-                                                    <ExternalLink className="h-3 w-3" /> View
-                                                </a>
-                                            )}
+
+                                        <div className="flex items-center gap-3 flex-shrink-0">
+                                            <div className="text-right space-y-1">
+                                                <p className="text-xs text-muted-foreground">
+                                                    {cert.createdAt ? new Date(cert.createdAt).toLocaleDateString("en-IN", { dateStyle: "medium" }) : "—"}
+                                                </p>                                                {cert.pdfUrl && (
+                                                    <a
+                                                        href={cert.pdfUrl}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center gap-1 text-xs text-primary hover:underline block"
+                                                    >
+                                                        <ExternalLink className="h-3 w-3" /> View
+                                                    </a>
+                                                )}
+                                            </div>
+
+                                            {/* Delete / Revoke Action Button */}
+                                            <button
+                                                type="button"
+                                                onClick={() => handleDelete(cert)}
+                                                disabled={deletingId === cert._id}
+                                                className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors border border-transparent hover:border-red-500/20 disabled:opacity-50"
+                                                title="Delete / Revoke Certificate"
+                                            >
+                                                {deletingId === cert._id ? (
+                                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                                ) : (
+                                                    <Trash2 className="h-4 w-4" />
+                                                )}
+                                            </button>
                                         </div>
                                     </div>
                                 ))}
