@@ -94,12 +94,12 @@ export default function CertificateTemplate({
                 </div>
 
                 {/* Citation & Course Banner */}
-                <div className="text-center max-w-xl mx-auto space-y-1">
+                <div className="text-center max-w-2xl mx-auto space-y-1.5 px-2">
                     <p
-                        className="text-[10px] sm:text-xs md:text-sm text-[#3B285E] italic font-medium leading-normal"
+                        className="text-[10.5px] sm:text-xs md:text-sm text-[#3B285E] italic font-medium leading-relaxed"
                         style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
                     >
-                        for successfully completing the course requirements and demonstrating dedication, knowledge, and skill in
+                        For successfully completing all comprehensive course modules, practical assessments, and hands-on project builds while demonstrating solid technical skills and commitment in
                     </p>
 
                     {/* Course Ribbon Badge */}

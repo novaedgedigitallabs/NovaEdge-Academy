@@ -82,14 +82,14 @@ const drawCertificateNativePDF = (doc, { studentName, courseName, date, certific
   doc.polygon([centerX - 3, 326], [centerX, 323], [centerX + 3, 326], [centerX, 329]).fill("#7E6C9E");
 
   doc
-    .fontSize(10.5)
+    .fontSize(10)
     .fillColor("#3E334D")
     .font("Times-Italic")
     .text(
-      "for successfully completing the course and demonstrating dedication, knowledge, and excellence in the subject matter.",
-      centerX - 270,
-      336,
-      { align: "center", width: 540 }
+      "For successfully completing all comprehensive course modules, practical assessments, and hands-on project builds while demonstrating solid technical skills and commitment in",
+      centerX - 280,
+      334,
+      { align: "center", width: 560, lineGap: 2.5 }
     );
 
   // 5. Footer Metadata & Verification (3 Columns Harmoniously Aligned)
@@ -396,9 +396,9 @@ body {
   font-style: italic;
   font-size: 13.5px;
   color: #3E334D;
-  max-width: 600px;
+  max-width: 640px;
   margin: 8px auto 0;
-  line-height: 1.35;
+  line-height: 1.4;
 }
 
 .footer-grid {
@@ -602,7 +602,7 @@ body {
         <span style="font-size: 9px; color: #7E6C9E;">◆</span>
         <div class="name-line-right"></div>
       </div>
-      <p class="citation-text">for successfully completing the course and demonstrating dedication, knowledge, and excellence in the subject matter.</p>
+      <p class="citation-text">For successfully completing all comprehensive course modules, practical assessments, and hands-on project builds while demonstrating solid technical skills and commitment in</p>
     </div>
 
     <div class="footer-grid">
