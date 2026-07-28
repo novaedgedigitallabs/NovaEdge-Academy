@@ -5,8 +5,8 @@ import MobileHeader from "@/components/layout/MobileHeader";
 import LeftSidebar from "@/components/layout/LeftSidebar";
 import RightSidebar from "@/components/layout/RightSidebar";
 import MobileNav from "@/components/layout/MobileNav";
+import AppLoadingSkeleton from "@/components/layout/AppLoadingSkeleton";
 import { useAuth } from "@/context/auth-context";
-import { Loader2 } from "lucide-react";
 
 export default function ShellLayout({ children }) {
     const pathname = usePathname();
@@ -26,11 +26,7 @@ export default function ShellLayout({ children }) {
     }
 
     if (isLoading) {
-        return (
-            <div className="flex h-screen items-center justify-center bg-background">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-        );
+        return <AppLoadingSkeleton />;
     }
 
     return (
