@@ -21,6 +21,7 @@ export default function RightSidebar() {
     const [schedule, setSchedule] = useState([]);
     const [leaderboard, setLeaderboard] = useState([]);
     const [suggestedPeers, setSuggestedPeers] = useState([]);
+    const [isEnrolledInAnyCourse, setIsEnrolledInAnyCourse] = useState(true);
     const [hashtags, setHashtags] = useState([]);
     const [requestedUsers, setRequestedUsers] = useState({});
     const [loadingPeers, setLoadingPeers] = useState({});
@@ -64,11 +65,12 @@ export default function RightSidebar() {
         }
         setSchedule(uniqueBookings);
 
-        // 2. Load Suggested Peers (Learners taking same courses)
+        // 2. Load Suggested Peers (Learners taking exact same courses)
         try {
             const peerRes = await apiGet("/api/v1/recommendations/peers");
-            if (peerRes?.success && Array.isArray(peerRes.peers)) {
-                setSuggestedPeers(peerRes.peers);
+            if (peerRes?.success) {
+                setIsEnrolledInAnyCourse(peerRes.enrolled !== false);
+                setSuggestedPeers(Array.isArray(peerRes.peers) ? peerRes.peers : []);
             }
         } catch (e) {}
 
@@ -383,16 +385,29 @@ export default function RightSidebar() {
                 )}
             </div>
 
-            {/* 4. Find Friends (Learners Taking Same Courses) */}
+            {/* 4. Find Friends (Learners Taking Same Courses Only) */}
             <div className="flex flex-col rounded-2xl glass-card border border-white/10 overflow-hidden">
-                <div onClick={() => router.push("/network")} className="px-4 pt-4 mb-3 flex items-center justify-between cursor-pointer hover:opacity-80 transition-opacity">
+                <div onClick={() => router.push("/courses")} className="px-4 pt-4 mb-3 flex items-center justify-between cursor-pointer hover:opacity-80 transition-opacity">
                     <h3 className="text-base font-bold text-foreground">Find Friends</h3>
                     <span className="text-[10px] font-semibold text-primary bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-full">
                         Same Courses
                     </span>
                 </div>
 
-                {suggestedPeers.length > 0 ? (
+                {!isEnrolledInAnyCourse ? (
+                    <div className="p-5 text-center flex flex-col items-center justify-center gap-2 border-t border-border/40">
+                        <BookOpen className="w-7 h-7 text-primary/40" />
+                        <p className="text-xs font-semibold text-foreground">No enrolled courses yet</p>
+                        <p className="text-[11px] text-muted-foreground">Enroll in courses to find and connect with your classmates!</p>
+                        <Button 
+                            size="sm" 
+                            onClick={() => router.push("/courses")} 
+                            className="mt-1 rounded-full h-7 text-xs px-3 bg-primary text-primary-foreground font-semibold"
+                        >
+                            Explore Courses
+                        </Button>
+                    </div>
+                ) : suggestedPeers.length > 0 ? (
                     <div className="flex flex-col max-h-64 overflow-y-auto custom-scrollbar">
                         {suggestedPeers.map((peer) => {
                             const pId = peer._id;
@@ -453,8 +468,8 @@ export default function RightSidebar() {
                 ) : (
                     <div className="p-5 text-center flex flex-col items-center justify-center gap-1.5 border-t border-border/40">
                         <Users className="w-7 h-7 text-muted-foreground/40" />
-                        <p className="text-xs font-semibold text-foreground">No peer suggestions</p>
-                        <p className="text-[11px] text-muted-foreground">Enroll in courses to connect with classmates.</p>
+                        <p className="text-xs font-semibold text-foreground">No classmates found yet</p>
+                        <p className="text-[11px] text-muted-foreground">Other learners joining your courses will appear here.</p>
                     </div>
                 )}
             </div>

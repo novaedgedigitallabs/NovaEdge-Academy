@@ -133,93 +133,85 @@ exports.getRecommendations = async (req, res) => {
     }
 };
 
-// --- GET SUGGESTED PEERS / FRIENDS TAKING SAME COURSES ---
+// --- GET SUGGESTED PEERS / FRIENDS TAKING SAME COURSES ONLY ---
 exports.getSuggestedPeers = async (req, res) => {
     try {
         const userId = req.user ? req.user._id || req.user.id : null;
-        let currentUser = null;
-        let friendsSet = new Set();
 
-        if (userId) {
-            currentUser = await User.findById(userId).select("friends");
-            if (currentUser && Array.isArray(currentUser.friends)) {
-                currentUser.friends.forEach(id => friendsSet.add(id.toString()));
-            }
-        }
-
-        let suggestedPeers = [];
-
-        if (userId) {
-            // Find courses current user is enrolled in
-            const userEnrollments = await Enrollment.find({ user: userId, status: "active" }).select("course");
-            const courseIds = userEnrollments.map(e => e.course);
-
-            if (courseIds.length > 0) {
-                // Find other learners enrolled in the same courses
-                const peerEnrollments = await Enrollment.find({
-                    course: { $in: courseIds },
-                    user: { $ne: userId, $nin: Array.from(friendsSet) }
-                })
-                .populate("user", "name username avatar role email")
-                .populate("course", "title")
-                .limit(30);
-
-                const peerMap = new Map();
-
-                peerEnrollments.forEach(e => {
-                    if (!e.user) return;
-                    const pId = e.user._id.toString();
-                    if (!peerMap.has(pId)) {
-                        peerMap.set(pId, {
-                            user: e.user,
-                            courses: [e.course ? e.course.title : "Same Course"],
-                        });
-                    } else {
-                        const existing = peerMap.get(pId);
-                        if (e.course && !existing.courses.includes(e.course.title)) {
-                            existing.courses.push(e.course.title);
-                        }
-                    }
-                });
-
-                peerMap.forEach((val) => {
-                    suggestedPeers.push({
-                        _id: val.user._id,
-                        name: val.user.name,
-                        username: val.user.username || val.user.email?.split("@")[0],
-                        avatar: val.user.avatar?.url,
-                        reason: val.courses.length > 1 
-                            ? `Enrolled in ${val.courses.length} same courses` 
-                            : `Enrolled in ${val.courses[0]}`
-                    });
-                });
-            }
-        }
-
-        // Fallback: If no peer matches or user not enrolled in courses, get active learners
-        if (suggestedPeers.length < 5) {
-            const excludeIds = [userId, ...Array.from(friendsSet), ...suggestedPeers.map(p => p._id)];
-            const fallbackUsers = await User.find({
-                _id: { $nin: excludeIds.filter(Boolean) }
-            })
-            .select("name username avatar role email")
-            .limit(5 - suggestedPeers.length)
-            .lean();
-
-            fallbackUsers.forEach(u => {
-                suggestedPeers.push({
-                    _id: u._id,
-                    name: u.name,
-                    username: u.username || u.email?.split("@")[0],
-                    avatar: u.avatar?.url,
-                    reason: "Learner on NovaEdge"
-                });
+        if (!userId) {
+            return res.status(200).json({
+                success: true,
+                enrolled: false,
+                peers: [],
+                message: "Please login to see classmates"
             });
         }
 
+        let currentUser = await User.findById(userId).select("friends");
+        let friendsSet = new Set();
+        if (currentUser && Array.isArray(currentUser.friends)) {
+            currentUser.friends.forEach(id => friendsSet.add(id.toString()));
+        }
+
+        // Find courses current user is enrolled in
+        const userEnrollments = await Enrollment.find({ user: userId, status: "active" }).select("course");
+        const courseIds = userEnrollments.map(e => e.course);
+
+        if (courseIds.length === 0) {
+            // User is not enrolled in any course yet
+            return res.status(200).json({
+                success: true,
+                enrolled: false,
+                peers: [],
+                message: "Enroll in courses to connect with classmates"
+            });
+        }
+
+        // Find other learners enrolled in the EXACT SAME courses
+        const peerEnrollments = await Enrollment.find({
+            course: { $in: courseIds },
+            user: { $ne: userId, $nin: Array.from(friendsSet) }
+        })
+        .populate("user", "name username avatar role email")
+        .populate("course", "title")
+        .limit(30);
+
+        const peerMap = new Map();
+
+        peerEnrollments.forEach(e => {
+            if (!e.user) return;
+            const pId = e.user._id.toString();
+            if (!peerMap.has(pId)) {
+                peerMap.set(pId, {
+                    user: e.user,
+                    courses: [e.course ? e.course.title : "Same Course"],
+                });
+            } else {
+                const existing = peerMap.get(pId);
+                if (e.course && !existing.courses.includes(e.course.title)) {
+                    existing.courses.push(e.course.title);
+                }
+            }
+        });
+
+        let suggestedPeers = [];
+        peerMap.forEach((val) => {
+            suggestedPeers.push({
+                _id: val.user._id,
+                name: val.user.name,
+                username: val.user.username || val.user.email?.split("@")[0],
+                avatar: val.user.avatar?.url,
+                reason: val.courses.length > 1 
+                    ? `Enrolled in ${val.courses.length} same courses` 
+                    : `Enrolled in ${val.courses[0]}`
+            });
+        });
+
         res.status(200).json({
             success: true,
+            enrolled: true,
             peers: suggestedPeers.slice(0, 5),
+            message: suggestedPeers.length === 0 ? "No classmates found in your enrolled courses yet" : ""
         });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
