@@ -48,12 +48,12 @@ export default function CourseCard({ course }) {
       {/* Wishlist Button */}
       <button
         onClick={handleWishlist}
-        className="absolute top-3 right-3 z-20 p-2 rounded-full bg-background/80 hover:bg-background text-foreground backdrop-blur transition-colors"
+        className="absolute top-3 right-3 z-20 p-2 rounded-full bg-background/80 hover:bg-background text-foreground backdrop-blur transition-colors shadow-sm"
       >
         <Heart className={`w-4 h-4 ${isWishlisted ? "fill-red-500 text-red-500" : ""}`} />
       </button>
 
-      <Card className="h-full flex flex-col overflow-hidden border-border/50 bg-card transition-all duration-300 hover:shadow-lg hover:border-primary/50 group-hover:-translate-y-1">
+      <Card className="p-0 pt-0 pb-0 gap-0 h-full flex flex-col overflow-hidden border-border/50 bg-card transition-all duration-300 hover:shadow-lg hover:border-primary/50 group-hover:-translate-y-1">
         <div className="relative aspect-video w-full overflow-hidden">
           <Image
             src={
