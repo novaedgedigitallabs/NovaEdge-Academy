@@ -174,18 +174,18 @@ export default function CertificateTemplate({
 
                     {/* Right Column: Signature Block */}
                     <div className="flex flex-col items-center justify-end text-center pl-2">
-                        {/* Real Handwritten Founder Signature Image */}
-                        <div className="h-7 sm:h-9 md:h-10 flex items-end justify-center">
+                        {/* Real Handwritten Founder Signature Image - Increased Size */}
+                        <div className="h-10 sm:h-12 md:h-14 flex items-end justify-center pb-0.5">
                             <img
                                 src={signatureImagePath}
                                 alt="Founder Signature"
-                                className="h-full max-h-10 object-contain pointer-events-none select-none mix-blend-multiply"
+                                className="h-full max-h-14 w-auto object-contain pointer-events-none select-none mix-blend-multiply scale-110"
                                 crossOrigin="anonymous"
                             />
                         </div>
 
                         {/* Signature Line */}
-                        <div className="h-[1px] w-full max-w-[110px] sm:max-w-[140px] bg-[#2D1459] my-0.5" />
+                        <div className="h-[1px] w-full max-w-[120px] sm:max-w-[150px] bg-[#2D1459] my-0.5" />
 
                         {/* Signatory Text */}
                         <span className="block font-black text-[8px] sm:text-[10px] text-[#1C0938] tracking-[0.1em] uppercase">
