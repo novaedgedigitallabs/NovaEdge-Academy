@@ -102,8 +102,14 @@ const drawCertificateNativePDF = (doc, { studentName, courseName, date, certific
   doc.restore();
 
   const col1X = 65;
+  // Issue Date Icon Box & Vector Calendar Icon
   doc.roundedRect(col1X, footerY, 22, 22, 4).fill("#381F66");
-  doc.fontSize(6.5).fillColor("#FFFFFF").font("Helvetica-Bold").text("CAL", col1X + 3, footerY + 7);
+  doc.rect(col1X + 5, footerY + 5, 12, 12).lineWidth(1).stroke("#FFFFFF");
+  doc.rect(col1X + 5, footerY + 5, 12, 3.5).fill("#FFFFFF");
+  doc.circle(col1X + 8.5, footerY + 11.5, 0.8).fill("#FFFFFF");
+  doc.circle(col1X + 13.5, footerY + 11.5, 0.8).fill("#FFFFFF");
+  doc.circle(col1X + 8.5, footerY + 14.5, 0.8).fill("#FFFFFF");
+  doc.circle(col1X + 13.5, footerY + 14.5, 0.8).fill("#FFFFFF");
 
   doc
     .fontSize(8)
@@ -118,8 +124,11 @@ const drawCertificateNativePDF = (doc, { studentName, courseName, date, certific
 
   doc.moveTo(col1X, footerY + 28).lineTo(col1X + 180, footerY + 28).lineWidth(0.5).stroke("#E5DDEE");
 
+  // Certificate ID Icon Box & Vector Shield Icon
   doc.roundedRect(col1X, footerY + 34, 22, 22, 4).fill("#381F66");
-  doc.fontSize(6.5).fillColor("#FFFFFF").font("Helvetica-Bold").text("ID", col1X + 7, footerY + 41);
+  doc.save();
+  doc.path(`M ${col1X + 11} ${footerY + 38} L ${col1X + 17} ${footerY + 41} L ${col1X + 17} ${footerY + 47} C ${col1X + 17} ${footerY + 51}, ${col1X + 11} ${footerY + 53}, ${col1X + 11} ${footerY + 53} C ${col1X + 11} ${footerY + 53}, ${col1X + 5} ${footerY + 51}, ${col1X + 5} ${footerY + 47} L ${col1X + 5} ${footerY + 41} Z`).fill("#FFFFFF");
+  doc.restore();
 
   doc
     .fontSize(8)
@@ -155,7 +164,7 @@ const drawCertificateNativePDF = (doc, { studentName, courseName, date, certific
   const sigX = 570;
   const sigW = 200;
 
-  // Real Founder Signature Image - Prominent & Scaled Up
+  // Real Founder Signature Image
   const sigImgPath = path.join(__dirname, "../templates/founder_sign.png");
   const fallbackSigImgPath = path.join(__dirname, "../founder_sign.png");
   const actualSig = fs.existsSync(sigImgPath) ? sigImgPath : (fs.existsSync(fallbackSigImgPath) ? fallbackSigImgPath : null);
@@ -585,7 +594,7 @@ body {
       <div class="footer-col col-left">
         <div class="meta-item">
           <div class="meta-icon-box">
-            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2"></rect><line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" stroke-width="2"></line><line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" stroke-width="2"></line><line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="2"></line></svg>
           </div>
           <div>
             <span class="meta-label">ISSUE DATE</span>
@@ -595,7 +604,7 @@ body {
         <div class="meta-divider"></div>
         <div class="meta-item">
           <div class="meta-icon-box">
-            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="none" stroke="currentColor" stroke-width="2"></path></svg>
           </div>
           <div>
             <span class="meta-label">CERTIFICATE ID</span>
