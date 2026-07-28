@@ -8,7 +8,8 @@
                 "includeFiles": [
                     "dist/**",
                     "templates/**",
-                    "certificate_background.png"
+                    "certificate_background.png",
+                    "founder_sign.png"
                 ]
             }
         }

@@ -10,7 +10,7 @@ export default function CertificateTemplate({
     issueDate = "May 20, 2025",
     certificateId = "NEA-2025-05-0001",
     signatoryName = "Amit Kumar Raikwar",
-    signatorySignatureText = "Amit Raikwar",
+    signatureImagePath = "/founder_sign.png",
     signatoryRole = "FOUNDER & CEO",
     organization = "NovaEdge Digital Labs",
     verificationUrl = "",
@@ -174,14 +174,14 @@ export default function CertificateTemplate({
 
                     {/* Right Column: Signature Block */}
                     <div className="flex flex-col items-center justify-end text-center pl-2">
-                        {/* Calligraphic Signature */}
-                        <div className="h-6 sm:h-8 flex items-end justify-center">
-                            <span
-                                className="text-xl sm:text-2xl md:text-3xl text-[#1C0938] font-normal leading-none transform -rotate-2 select-none drop-shadow-xs"
-                                style={{ fontFamily: "'Great Vibes', 'Alex Brush', cursive" }}
-                            >
-                                {signatorySignatureText}
-                            </span>
+                        {/* Real Handwritten Founder Signature Image */}
+                        <div className="h-7 sm:h-9 md:h-10 flex items-end justify-center">
+                            <img
+                                src={signatureImagePath}
+                                alt="Founder Signature"
+                                className="h-full max-h-10 object-contain pointer-events-none select-none mix-blend-multiply"
+                                crossOrigin="anonymous"
+                            />
                         </div>
 
                         {/* Signature Line */}

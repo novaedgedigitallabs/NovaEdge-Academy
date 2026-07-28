@@ -155,11 +155,20 @@ const drawCertificateNativePDF = (doc, { studentName, courseName, date, certific
   const sigX = 570;
   const sigW = 200;
 
-  doc
-    .fontSize(20)
-    .fillColor("#1F0E3D")
-    .font("Times-BoldItalic")
-    .text("Amit Raikwar", sigX, footerY + 2, { width: sigW, align: "center" });
+  // Real Founder Signature Image
+  const sigImgPath = path.join(__dirname, "../templates/founder_sign.png");
+  const fallbackSigImgPath = path.join(__dirname, "../founder_sign.png");
+  const actualSig = fs.existsSync(sigImgPath) ? sigImgPath : (fs.existsSync(fallbackSigImgPath) ? fallbackSigImgPath : null);
+
+  if (actualSig) {
+    doc.image(actualSig, sigX + 45, footerY - 12, { fit: [110, 36], align: "center", valig: "bottom" });
+  } else {
+    doc
+      .fontSize(20)
+      .fillColor("#1F0E3D")
+      .font("Times-BoldItalic")
+      .text("Amit Raikwar", sigX, footerY + 2, { width: sigW, align: "center" });
+  }
 
   doc.moveTo(sigX + 25, footerY + 28).lineTo(sigX + sigW - 25, footerY + 28).lineWidth(1.2).stroke("#2C164D");
 
@@ -195,6 +204,19 @@ const getCertificateHTML = ({ studentName, courseName, date, certificateId, qrDa
     }
   } catch (e) {
     console.warn("Could not read bg image for base64 HTML:", e);
+  }
+
+  let sigDataUrl = '';
+  try {
+    const sigPath = path.join(__dirname, "../templates/founder_sign.png");
+    const fallbackSigPath = path.join(__dirname, "../founder_sign.png");
+    const actualSig = fs.existsSync(sigPath) ? sigPath : (fs.existsSync(fallbackSigPath) ? fallbackSigPath : null);
+    if (actualSig) {
+      const fileData = fs.readFileSync(actualSig);
+      sigDataUrl = `data:image/png;base64,${fileData.toString("base64")}`;
+    }
+  } catch (e) {
+    console.warn("Could not read signature image for base64 HTML:", e);
   }
 
   return `<!DOCTYPE html>
@@ -478,6 +500,15 @@ body {
   padding-left: 20px;
 }
 
+.sig-img {
+  height: 36px;
+  max-width: 140px;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+  display: block;
+  margin: 0 auto;
+}
+
 .signature-text {
   font-family: 'Great Vibes', 'Alex Brush', cursive;
   font-size: 34px;
@@ -582,7 +613,7 @@ body {
       </div>
 
       <div class="footer-col col-right">
-        <div class="signature-text">Amit Raikwar</div>
+        ${sigDataUrl ? `<img src="${sigDataUrl}" class="sig-img" />` : `<div class="signature-text">Amit Raikwar</div>`}
         <div class="signature-line"></div>
         <div class="sig-name">AMIT KUMAR RAIKWAR</div>
         <div class="sig-role">FOUNDER & CEO</div>
