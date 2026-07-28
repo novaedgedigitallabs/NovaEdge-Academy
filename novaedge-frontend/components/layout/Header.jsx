@@ -26,15 +26,19 @@ export default function Header() {
     <header className="md:hidden sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-3 font-bold text-xl tracking-tight">
+          <Link href="/" className="flex items-center gap-2.5 font-bold text-xl tracking-tight">
             <Image
-              src="/logo2.png"
+              src="/icon.png"
               alt="NovaEdge Academy Logo"
               width={36}
               height={36}
-              className="h-9 w-9 object-contain"
+              className="h-8 w-8 object-contain rounded-md shrink-0"
+              priority
+              unoptimized
             />
-            <span>NovaEdge Academy</span>
+            <span className="text-foreground font-extrabold text-base sm:text-lg">
+              NovaEdge <span className="text-primary font-bold">Academy</span>
+            </span>
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
             <Link href="/courses" className="hover:text-foreground transition-colors">

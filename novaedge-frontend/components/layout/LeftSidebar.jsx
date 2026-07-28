@@ -225,16 +225,19 @@ export default function LeftSidebar() {
     return (
         <section className="custom-scrollbar glass-sidebar sticky left-0 top-0 z-20 flex h-screen w-[240px] xl:w-[266px] shrink-0 flex-col justify-between overflow-y-auto border-r pb-6 pt-8 max-md:hidden">
             <div className="flex w-full flex-1 flex-col gap-6 px-6">
-                <Link href="/" className="flex items-center px-3 py-1">
+                <Link href="/" className="flex items-center gap-2.5 px-2 py-1">
                     <Image
-                        src="/logo1.png"
+                        src="/icon.png"
                         alt="NovaEdge Academy"
-                        width={180}
-                        height={40}
-                        className="h-auto w-auto object-contain"
+                        width={36}
+                        height={36}
+                        className="h-8 w-8 object-contain rounded-lg shrink-0"
                         priority
                         unoptimized
                     />
+                    <span className="font-extrabold text-base xl:text-lg tracking-tight text-foreground whitespace-nowrap">
+                        NovaEdge <span className="text-primary font-bold">Academy</span>
+                    </span>
                 </Link>
 
                 <div className="flex flex-col gap-1.5">

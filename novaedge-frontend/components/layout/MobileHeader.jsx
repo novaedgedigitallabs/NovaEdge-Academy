@@ -123,16 +123,19 @@ export default function MobileHeader() {
             <Menu className="h-5 w-5" />
           </Button>
 
-          <Link href="/" className="flex items-center">
+          <Link href="/" className="flex items-center gap-2">
             <Image
-              src="/logo1.png"
+              src="/icon.png"
               alt="NovaEdge Academy"
-              width={140}
+              width={32}
               height={32}
-              className="h-7 w-auto object-contain"
+              className="h-7 w-7 object-contain rounded-md shrink-0"
               priority
               unoptimized
             />
+            <span className="font-extrabold text-sm tracking-tight text-foreground whitespace-nowrap">
+              NovaEdge <span className="text-primary font-bold">Academy</span>
+            </span>
           </Link>
         </div>
 
@@ -182,15 +185,19 @@ export default function MobileHeader() {
             <div className="space-y-6">
               {/* Header & Close */}
               <div className="flex items-center justify-between border-b border-border/50 pb-4">
-                <Link href="/" onClick={() => setIsDrawerOpen(false)}>
+                <Link href="/" onClick={() => setIsDrawerOpen(false)} className="flex items-center gap-2.5">
                   <Image
-                    src="/logo1.png"
+                    src="/icon.png"
                     alt="NovaEdge Academy"
-                    width={150}
+                    width={36}
                     height={36}
-                    className="h-8 w-auto object-contain"
+                    className="h-8 w-8 object-contain rounded-md shrink-0"
+                    priority
                     unoptimized
                   />
+                  <span className="font-extrabold text-base tracking-tight text-foreground whitespace-nowrap">
+                    NovaEdge <span className="text-primary font-bold">Academy</span>
+                  </span>
                 </Link>
                 <Button
                   variant="ghost"
