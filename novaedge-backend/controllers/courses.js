@@ -80,7 +80,6 @@ exports.getCourseDetails = async (req, res) => {
 };
 
 // --- 2. CREATE COURSE (Admin Only) ---
-// Accepts either req.files.poster (multipart) OR req.body.image (base64/dataUrl)
 exports.createCourse = async (req, res) => {
   try {
     const {
@@ -93,7 +92,6 @@ exports.createCourse = async (req, res) => {
       prerequisites,
     } = req.body;
 
-    // Prepare poster upload: either req.files.poster (express-fileupload) or req.body.image (data URL)
     let uploadedPoster;
     if (req.files && req.files.poster) {
       const file = req.files.poster;
@@ -102,7 +100,6 @@ exports.createCourse = async (req, res) => {
         folder: "lms_posters",
       });
     } else if (req.body.image) {
-      // frontend sent base64 data url in req.body.image
       uploadedPoster = await uploadImage({
         dataUrl: req.body.image,
         folder: "lms_posters",
@@ -113,7 +110,6 @@ exports.createCourse = async (req, res) => {
         .json({ success: false, message: "Poster image is required" });
     }
 
-    // Normalize techStack (frontend may send comma-separated string)
     let techStackArray = [];
     if (Array.isArray(techStack)) techStackArray = techStack;
     else if (typeof techStack === "string" && techStack.trim() !== "") {
@@ -123,7 +119,6 @@ exports.createCourse = async (req, res) => {
         .filter(Boolean);
     }
 
-    // Process Lectures (if provided)
     let lecturesData = [];
     let totalDurationStr = "0 min";
 
@@ -139,7 +134,7 @@ exports.createCourse = async (req, res) => {
             description: l.description,
             video: {
               url: l.videoUrl,
-              public_id: "youtube" // Placeholder for external links
+              public_id: "youtube"
             },
             duration: Number(l.duration) || 0,
             notes: l.notesUrl ? { url: l.notesUrl, public_id: "manual" } : undefined,
@@ -152,7 +147,6 @@ exports.createCourse = async (req, res) => {
       }
     }
 
-    // Create DB entry
     const course = await Course.create({
       title,
       description,
@@ -180,9 +174,7 @@ exports.createCourse = async (req, res) => {
   }
 };
 
-// --- NEW: UPDATE COURSE (Admin Only) ---
-// PUT /api/v1/course/:id
-// Accepts: title, description, category, price, techStack, prerequisites, image (dataURL) or poster file
+// --- UPDATE COURSE (Admin Only) ---
 exports.updateCourse = async (req, res) => {
   try {
     const courseId = req.params.id;
@@ -195,17 +187,14 @@ exports.updateCourse = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Course not found" });
 
-    // If new image provided, upload and replace poster (delete old)
     const hasNewFile = req.files && req.files.poster;
     const hasNewDataUrl = req.body.image && req.body.image.startsWith("data:");
     if (hasNewFile || hasNewDataUrl) {
-      // delete old poster
       try {
         if (course.poster && course.poster.public_id) {
           await cloudinary.uploader.destroy(course.poster.public_id);
         }
       } catch (e) {
-        // log but continue
         console.warn("Failed to delete old poster:", e.message || e);
       }
 
@@ -228,13 +217,11 @@ exports.updateCourse = async (req, res) => {
       };
     }
 
-    // update other fields if provided
     if (title !== undefined) course.title = title;
     if (description !== undefined) course.description = description;
     if (category !== undefined) course.category = category;
     if (price !== undefined) course.price = Number(price || 0);
 
-    // normalize techStack
     if (techStack !== undefined) {
       if (Array.isArray(techStack)) course.techStack = techStack;
       else if (typeof techStack === "string") {
@@ -247,7 +234,6 @@ exports.updateCourse = async (req, res) => {
 
     if (prerequisites !== undefined) course.prerequisites = prerequisites;
 
-    // Process Lectures (if provided)
     if (req.body.lectures) {
       try {
         const parsed = typeof req.body.lectures === "string"
@@ -261,7 +247,6 @@ exports.updateCourse = async (req, res) => {
               try { existingLec = course.lectures.id(l._id); } catch (e) {}
             }
 
-            // Resolve notes: prefer incoming data, then existing lecture data
             let notesData = existingLec ? existingLec.notes : undefined;
             if (l.notes && l.notes.url) {
               notesData = {
@@ -269,7 +254,6 @@ exports.updateCourse = async (req, res) => {
                 public_id: l.notes.public_id || "manual",
               };
             } else if (l.notesUrl) {
-              // Frontend may send notesUrl as a flat string
               notesData = {
                 url: l.notesUrl,
                 public_id: "manual",
@@ -285,7 +269,7 @@ exports.updateCourse = async (req, res) => {
               },
               duration: Number(l.duration) || 0,
               notes: notesData || undefined,
-              _id: l._id || undefined, // Let Mongoose generate new ID if not present
+              _id: l._id || undefined,
               currentVersion: existingLec ? existingLec.currentVersion : 1,
               aiSummary: l.aiSummary || (existingLec ? existingLec.aiSummary : undefined),
               quiz: l.quiz || (existingLec ? existingLec.quiz : undefined),
@@ -383,12 +367,10 @@ exports.deleteCourse = async (req, res) => {
     const course = await Course.findById(req.params.id);
     if (!course) return res.status(404).json({ message: "Course not found" });
 
-    // Delete poster from Cloudinary
     if (course.poster && course.poster.public_id) {
       await cloudinary.uploader.destroy(course.poster.public_id);
     }
 
-    // Delete all videos from Cloudinary
     for (let i = 0; i < course.lectures.length; i++) {
       await cloudinary.uploader.destroy(course.lectures[i].video.public_id, {
         resource_type: "video",
@@ -432,7 +414,7 @@ exports.getCategories = async (req, res) => {
   }
 };
 
-// --- 7. FETCH YOUTUBE PLAYLIST VIDEOS ---
+// --- 7. FETCH YOUTUBE PLAYLIST VIDEOS (Full Pagination Support) ---
 exports.fetchYouTubePlaylist = async (req, res) => {
   try {
     const { playlistUrl, videoUrls } = req.body;
@@ -490,16 +472,27 @@ exports.fetchYouTubePlaylist = async (req, res) => {
       }
     }
 
-    // 1. Try YouTube Data API v3 if API key available
+    // 1. Try YouTube Data API v3 with full pagination (loops until all playlist items fetched)
     const apiKey = process.env.YOUTUBE_API_KEY;
     if (apiKey) {
       try {
-        const apiRes = await fetch(
-          `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${playlistId}&key=${apiKey}`
-        );
-        const data = await apiRes.json();
-        if (data.items && Array.isArray(data.items)) {
-          lectures = data.items
+        let nextPageToken = "";
+        const allItems = [];
+
+        do {
+          const pageUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${playlistId}&key=${apiKey}${nextPageToken ? `&pageToken=${nextPageToken}` : ""}`;
+          const apiRes = await fetch(pageUrl);
+          const data = await apiRes.json();
+
+          if (data.items && Array.isArray(data.items)) {
+            allItems.push(...data.items);
+          }
+
+          nextPageToken = data.nextPageToken || "";
+        } while (nextPageToken);
+
+        if (allItems.length > 0) {
+          lectures = allItems
             .map((item) => {
               const videoId = item.snippet?.resourceId?.videoId;
               return {
