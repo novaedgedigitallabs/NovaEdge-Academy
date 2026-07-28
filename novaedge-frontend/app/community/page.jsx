@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare, Calendar, Github, Plus, CheckCircle2, Clock, User, Loader2, Sparkles, ExternalLink, Video } from "lucide-react";
+import { MessageSquare, Calendar, Github, Plus, CheckCircle2, Clock, User, Loader2, Sparkles, ExternalLink, Video, Link as LinkIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/context/auth-context";
@@ -59,6 +59,7 @@ export default function CommunityPage() {
     const [newEventCategory, setNewEventCategory] = useState("Workshop");
     const [newEventDescription, setNewEventDescription] = useState("");
     const [newEventSpeaker, setNewEventSpeaker] = useState("");
+    const [newEventJoinUrl, setNewEventJoinUrl] = useState("");
     const [isSubmittingEvent, setIsSubmittingEvent] = useState(false);
 
     // Load saved custom events and registrations on mount
@@ -108,7 +109,7 @@ export default function CommunityPage() {
             localStorage.setItem("novaedge_my_bookings", JSON.stringify(updatedBookings));
 
             setLoadingRegister((prev) => ({ ...prev, [eventId]: false }));
-            toast.success(`🎉 Registered for "${event.title}"! Added to your Upcoming Schedule.`);
+            toast.success(`Registered for "${event.title}"! Added to your Upcoming Schedule.`);
             
             // Dispatch custom event for real-time RightSidebar sync
             if (typeof window !== "undefined") {
@@ -137,7 +138,7 @@ export default function CommunityPage() {
                 category: newEventCategory,
                 description: newEventDescription.trim(),
                 speaker: newEventSpeaker.trim() || user?.name || "Community Host",
-                joinUrl: "https://discord.gg/novaedge-live-stage"
+                joinUrl: newEventJoinUrl.trim() || "https://discord.gg/novaedge-live-stage"
             };
 
             const updatedEvents = [createdEvent, ...events];
@@ -153,8 +154,9 @@ export default function CommunityPage() {
             setNewEventTime("");
             setNewEventDescription("");
             setNewEventSpeaker("");
+            setNewEventJoinUrl("");
 
-            toast.success("🚀 Event successfully published to the Community!");
+            toast.success("Event successfully published to the Community!");
         }, 400);
     };
 
@@ -164,7 +166,6 @@ export default function CommunityPage() {
                 {/* Hero Section */}
                 <div className="relative overflow-hidden rounded-3xl glass-panel p-8 md:p-12 text-center shadow-2xl">
                     <div className="absolute right-6 top-6 h-32 w-32 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
-                    
 
                     <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-foreground mb-3 leading-tight">
                         Join the <span className="text-primary">Community</span>
@@ -452,6 +453,22 @@ export default function CommunityPage() {
                                     className="bg-secondary/40 border-border/80 h-9 text-xs rounded-xl"
                                 />
                             </div>
+                        </div>
+
+                        {/* Event Link / Meeting URL Field */}
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-foreground flex items-center justify-between">
+                                <span className="flex items-center gap-1.5">
+                                    <LinkIcon className="w-3.5 h-3.5 text-primary" /> Event / Meeting Link
+                                </span>
+                                <span className="text-[10px] text-muted-foreground font-normal">(Google Meet, Zoom, Discord, etc.)</span>
+                            </label>
+                            <Input 
+                                placeholder="e.g. https://meet.google.com/xyz-abc-123 or Discord / Zoom URL"
+                                value={newEventJoinUrl}
+                                onChange={(e) => setNewEventJoinUrl(e.target.value)}
+                                className="bg-secondary/40 border-border/80 h-9 text-xs rounded-xl"
+                            />
                         </div>
 
                         <div className="space-y-1">
