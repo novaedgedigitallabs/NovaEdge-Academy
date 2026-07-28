@@ -70,16 +70,16 @@ const drawCertificateNativePDF = (doc, { studentName, courseName, date, certific
     .fontSize(8.5)
     .fillColor("#6E5D87")
     .font("Helvetica-Bold")
-    .text("PRESENTED TO", 0, 268, { align: "center", characterSpacing: 3 });
+    .text("PRESENTED TO", 0, 266, { align: "center", characterSpacing: 3 });
 
   doc
     .fontSize(34)
     .fillColor("#231046")
     .font("Times-BoldItalic")
-    .text(studentName || "Your Name Here", 0, 282, { align: "center" });
+    .text(studentName || "Your Name Here", 0, 278, { align: "center" });
 
-  doc.moveTo(centerX - 160, 324).lineTo(centerX + 160, 324).lineWidth(0.75).stroke("#7E6C9E");
-  doc.polygon([centerX - 3, 324], [centerX, 321], [centerX + 3, 324], [centerX, 327]).fill("#7E6C9E");
+  doc.moveTo(centerX - 160, 320).lineTo(centerX + 160, 320).lineWidth(0.75).stroke("#7E6C9E");
+  doc.polygon([centerX - 3, 320], [centerX, 317], [centerX + 3, 320], [centerX, 323]).fill("#7E6C9E");
 
   const descText = `For successfully completing all comprehensive course modules, practical assessments, and hands-on project builds, while demonstrating solid technical skills, dedication, and a strong commitment to continuous learning throughout the ${courseName || "program"}. This certificate acknowledges the recipient's proficiency and readiness to apply these skills in real-world development environments.`;
 
@@ -90,7 +90,7 @@ const drawCertificateNativePDF = (doc, { studentName, courseName, date, certific
     .text(
       descText,
       centerX - 300,
-      328,
+      336,
       { align: "center", width: 600, lineGap: 3 }
     );
 
@@ -203,7 +203,7 @@ const drawCertificateNativePDF = (doc, { studentName, courseName, date, certific
     .text("NovaEdge Digital Labs", sigX, footerY + 47, { width: sigW, align: "center" });
 };
 
-// ── PUPPETEER HTML RRENDERER (Used when Chromium binary is present) ─────────────────
+// ── PUPPETEER HTML RENDERER (Used when Chromium binary is present) ─────────────────
 const getCertificateHTML = ({ studentName, courseName, date, certificateId, qrDataUrl }) => {
   let bgDataUrl = '';
   try {
@@ -379,7 +379,7 @@ body {
   justify-content: center;
   gap: 8px;
   width: 360px;
-  margin: 0 auto;
+  margin: 2px auto 14px auto;
 }
 
 .name-line {
@@ -399,7 +399,7 @@ body {
   font-size: 14.5px;
   color: #3E334D;
   max-width: 680px;
-  margin: 6px auto 0;
+  margin: 10px auto 0;
   line-height: 1.45;
 }
 

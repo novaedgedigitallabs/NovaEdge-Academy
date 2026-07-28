@@ -77,7 +77,7 @@ export default function CertificateTemplate({
                 </div>
 
                 {/* Recipient Name Block */}
-                <div className="text-center my-0.5 space-y-0.5">
+                <div className="text-center my-0.5 sm:my-1 space-y-1">
                     <h2
                         className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-[#1C0938] font-normal capitalize drop-shadow-xs leading-tight py-0.5"
                         style={{ fontFamily: "'Great Vibes', 'Alex Brush', cursive" }}
@@ -85,8 +85,8 @@ export default function CertificateTemplate({
                         {recipientName}
                     </h2>
 
-                    {/* Underline Accent */}
-                    <div className="flex items-center justify-center gap-2 w-full max-w-xs sm:max-w-sm mx-auto">
+                    {/* Underline Accent with comfortable bottom margin */}
+                    <div className="flex items-center justify-center gap-2 w-full max-w-xs sm:max-w-sm mx-auto mb-2 sm:mb-3">
                         <div className="h-[1px] flex-grow bg-gradient-to-r from-transparent via-[#4A2D82] to-[#4A2D82]" />
                         <span className="text-[8px] text-[#4A2D82]">◆</span>
                         <div className="h-[1px] flex-grow bg-gradient-to-l from-transparent via-[#4A2D82] to-[#4A2D82]" />
@@ -94,7 +94,7 @@ export default function CertificateTemplate({
                 </div>
 
                 {/* Citation & Course Banner */}
-                <div className="text-center max-w-2xl sm:max-w-3xl mx-auto space-y-1.5 px-2">
+                <div className="text-center max-w-2xl sm:max-w-3xl mx-auto space-y-2 px-2 pt-1 sm:pt-2">
                     <p
                         className="text-[11px] sm:text-xs md:text-sm lg:text-[15px] text-[#3B285E] italic font-medium leading-normal sm:leading-relaxed"
                         style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
