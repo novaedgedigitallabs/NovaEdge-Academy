@@ -1,6 +1,7 @@
 const Course = require("../models/Course");
 const Enrollment = require("../models/Enrollment");
 const AnalyticsEvent = require("../models/AnalyticsEvent");
+const User = require("../models/User");
 
 // Helper: Calculate Jaccard Similarity for tags
 function calculateTagSimilarity(courseTags, userTags) {
@@ -56,7 +57,6 @@ exports.getRecommendations = async (req, res) => {
             const userCategoriesArray = Array.from(userCategories);
 
             // --- STRATEGY A: Content-Based Filtering ---
-            // Find courses in same categories or matching tags
             const contentCandidates = await Course.find({
                 _id: { $nin: excludeCourseIds },
                 $or: [
@@ -68,64 +68,53 @@ exports.getRecommendations = async (req, res) => {
             // Score Candidates
             contentCandidates.forEach(c => {
                 let score = 0;
-                if (userCategories.has(c.category)) score += 5; // Category match
-                score += calculateTagSimilarity(c.techStack, userTagsArray) * 10; // Tag overlap
-                score += (c.rating || 0); // Quality boost
+                if (userCategories.has(c.category)) score += 5;
+                score += calculateTagSimilarity(c.techStack, userTagsArray) * 10;
+                score += (c.rating || 0);
                 c.score = score;
                 c.reason = "Based on your interests";
             });
 
-            // --- STRATEGY B: Collaborative Filtering (Co-occurrence) ---
-            // "Users who bought what you bought, also bought..."
+            // --- STRATEGY B: Collaborative Filtering ---
             if (enrolledCourseIds.length > 0) {
-                // Find other users who enrolled in same courses
                 const peerEnrollments = await Enrollment.find({
                     course: { $in: enrolledCourseIds },
                     user: { $ne: userId }
-                }).limit(100); // Limit sample size for performance
+                }).limit(100);
 
                 const peerUserIds = [...new Set(peerEnrollments.map(e => e.user))];
 
-                // Find what ELSE they bought
                 const peerOtherEnrollments = await Enrollment.find({
                     user: { $in: peerUserIds },
-                    course: { $nin: enrolledCourseIds } // Exclude what I already have
+                    course: { $nin: enrolledCourseIds }
                 });
 
-                // Count frequency
                 const freqMap = {};
                 peerOtherEnrollments.forEach(e => {
                     const cId = e.course.toString();
                     freqMap[cId] = (freqMap[cId] || 0) + 1;
                 });
 
-                // Boost scores of content candidates or add new ones
                 for (const [cId, count] of Object.entries(freqMap)) {
                     const existing = contentCandidates.find(c => c._id.toString() === cId);
                     if (existing) {
-                        existing.score += (count * 2); // Boost
+                        existing.score += (count * 2);
                         existing.reason = "Popular among similar learners";
-                    } else {
-                        // Fetch if not in content candidates (rare if category is different, but possible)
-                        // For simplicity, we skip fetching new ones to save DB calls, 
-                        // or we could fetch top 3 collaborative misses.
                     }
                 }
             }
 
-            // Sort and Slice
             recommendations = contentCandidates
                 .sort((a, b) => b.score - a.score)
                 .slice(0, Number(limit));
-
         }
 
-        // 2. Fallback: Popular / Trending (Cold Start)
+        // 2. Fallback: Popular / Trending
         if (recommendations.length < Number(limit)) {
             const popular = await Course.find({
                 _id: { $nin: [...excludeCourseIds, ...recommendations.map(r => r._id)] }
             })
-                .sort({ views: -1, rating: -1 }) // Most viewed & rated
+                .sort({ views: -1, rating: -1 })
                 .limit(Number(limit) - recommendations.length)
                 .lean();
 
@@ -138,6 +127,99 @@ exports.getRecommendations = async (req, res) => {
         res.status(200).json({
             success: true,
             recommendations,
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// --- GET SUGGESTED PEERS / FRIENDS TAKING SAME COURSES ---
+exports.getSuggestedPeers = async (req, res) => {
+    try {
+        const userId = req.user ? req.user._id || req.user.id : null;
+        let currentUser = null;
+        let friendsSet = new Set();
+
+        if (userId) {
+            currentUser = await User.findById(userId).select("friends");
+            if (currentUser && Array.isArray(currentUser.friends)) {
+                currentUser.friends.forEach(id => friendsSet.add(id.toString()));
+            }
+        }
+
+        let suggestedPeers = [];
+
+        if (userId) {
+            // Find courses current user is enrolled in
+            const userEnrollments = await Enrollment.find({ user: userId, status: "active" }).select("course");
+            const courseIds = userEnrollments.map(e => e.course);
+
+            if (courseIds.length > 0) {
+                // Find other learners enrolled in the same courses
+                const peerEnrollments = await Enrollment.find({
+                    course: { $in: courseIds },
+                    user: { $ne: userId, $nin: Array.from(friendsSet) }
+                })
+                .populate("user", "name username avatar role email")
+                .populate("course", "title")
+                .limit(30);
+
+                const peerMap = new Map();
+
+                peerEnrollments.forEach(e => {
+                    if (!e.user) return;
+                    const pId = e.user._id.toString();
+                    if (!peerMap.has(pId)) {
+                        peerMap.set(pId, {
+                            user: e.user,
+                            courses: [e.course ? e.course.title : "Same Course"],
+                        });
+                    } else {
+                        const existing = peerMap.get(pId);
+                        if (e.course && !existing.courses.includes(e.course.title)) {
+                            existing.courses.push(e.course.title);
+                        }
+                    }
+                });
+
+                peerMap.forEach((val) => {
+                    suggestedPeers.push({
+                        _id: val.user._id,
+                        name: val.user.name,
+                        username: val.user.username || val.user.email?.split("@")[0],
+                        avatar: val.user.avatar?.url,
+                        reason: val.courses.length > 1 
+                            ? `Enrolled in ${val.courses.length} same courses` 
+                            : `Enrolled in ${val.courses[0]}`
+                    });
+                });
+            }
+        }
+
+        // Fallback: If no peer matches or user not enrolled in courses, get active learners
+        if (suggestedPeers.length < 5) {
+            const excludeIds = [userId, ...Array.from(friendsSet), ...suggestedPeers.map(p => p._id)];
+            const fallbackUsers = await User.find({
+                _id: { $nin: excludeIds.filter(Boolean) }
+            })
+            .select("name username avatar role email")
+            .limit(5 - suggestedPeers.length)
+            .lean();
+
+            fallbackUsers.forEach(u => {
+                suggestedPeers.push({
+                    _id: u._id,
+                    name: u.name,
+                    username: u.username || u.email?.split("@")[0],
+                    avatar: u.avatar?.url,
+                    reason: "Learner on NovaEdge"
+                });
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            peers: suggestedPeers.slice(0, 5),
         });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });

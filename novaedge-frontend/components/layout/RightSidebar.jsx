@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, Trophy, TrendingUp, Clock, X, Check, Loader2, Calendar, Users, Hash, BookOpen, FileText, ArrowRight } from "lucide-react";
+import { Search, Trophy, TrendingUp, Clock, X, Check, Loader2, Calendar, Users, Hash, BookOpen, FileText, ArrowRight, UserPlus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -10,19 +10,20 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { apiGet } from "@/lib/api";
 import { globalSearch } from "@/services/search";
+import { sendFriendRequest } from "@/services/friend";
 import { toast } from "sonner";
 
 export default function RightSidebar() {
     const router = useRouter();
     const [query, setQuery] = useState("");
     
-    // Dynamic states initialized empty
+    // Dynamic states
     const [schedule, setSchedule] = useState([]);
     const [leaderboard, setLeaderboard] = useState([]);
-    const [mentors, setMentors] = useState([]);
+    const [suggestedPeers, setSuggestedPeers] = useState([]);
     const [hashtags, setHashtags] = useState([]);
-    const [following, setFollowing] = useState({});
-    const [loadingMentors, setLoadingMentors] = useState({});
+    const [requestedUsers, setRequestedUsers] = useState({});
+    const [loadingPeers, setLoadingPeers] = useState({});
     const [loadingData, setLoadingData] = useState(true);
 
     const loadAllData = async () => {
@@ -63,18 +64,11 @@ export default function RightSidebar() {
         }
         setSchedule(uniqueBookings);
 
-        // 2. Load Real Mentors (with Images)
+        // 2. Load Suggested Peers (Learners taking same courses)
         try {
-            const mentorRes = await apiGet("/api/v1/mentors");
-            if (mentorRes?.success && Array.isArray(mentorRes.data)) {
-                setMentors(mentorRes.data.map(m => ({
-                    id: m._id || m.id,
-                    name: m.name,
-                    role: m.role || "Mentor",
-                    image: m.image,
-                    avatar: m.name ? m.name.substring(0, 2).toUpperCase() : "M",
-                    company: m.company
-                })));
+            const peerRes = await apiGet("/api/v1/recommendations/peers");
+            if (peerRes?.success && Array.isArray(peerRes.peers)) {
+                setSuggestedPeers(peerRes.peers);
             }
         } catch (e) {}
 
@@ -176,18 +170,21 @@ export default function RightSidebar() {
         }
     };
 
-    const toggleFollowMentor = (mentorId, mentorName) => {
-        setLoadingMentors((prev) => ({ ...prev, [mentorId]: true }));
-        
-        setTimeout(() => {
-            setFollowing((prev) => {
-                const isCurrentlyFollowing = !!prev[mentorId];
-                const newState = !isCurrentlyFollowing;
-                toast.success(newState ? `Now following ${mentorName}` : `Unfollowed ${mentorName}`);
-                return { ...prev, [mentorId]: newState };
-            });
-            setLoadingMentors((prev) => ({ ...prev, [mentorId]: false }));
-        }, 300);
+    const handleConnectPeer = async (peerId, peerName) => {
+        setLoadingPeers((prev) => ({ ...prev, [peerId]: true }));
+        try {
+            const res = await sendFriendRequest(peerId);
+            if (res.success) {
+                toast.success(`Friend request sent to ${peerName}`);
+                setRequestedUsers((prev) => ({ ...prev, [peerId]: true }));
+            } else {
+                toast.error(res.message || "Could not send friend request");
+            }
+        } catch (e) {
+            toast.error(e.message || "Failed to send request");
+        } finally {
+            setLoadingPeers((prev) => ({ ...prev, [peerId]: false }));
+        }
     };
 
     return (
@@ -386,58 +383,67 @@ export default function RightSidebar() {
                 )}
             </div>
 
-            {/* 4. Recommended Mentors */}
+            {/* 4. Find Friends (Learners Taking Same Courses) */}
             <div className="flex flex-col rounded-2xl glass-card border border-white/10 overflow-hidden">
-                <div onClick={() => router.push("/mentors")} className="px-4 pt-4 mb-3 cursor-pointer hover:opacity-80 transition-opacity">
-                    <h3 className="text-base font-bold text-foreground">Recommended Mentors</h3>
+                <div onClick={() => router.push("/network")} className="px-4 pt-4 mb-3 flex items-center justify-between cursor-pointer hover:opacity-80 transition-opacity">
+                    <h3 className="text-base font-bold text-foreground">Find Friends</h3>
+                    <span className="text-[10px] font-semibold text-primary bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-full">
+                        Same Courses
+                    </span>
                 </div>
 
-                {mentors.length > 0 ? (
-                    <div className="flex flex-col max-h-56 overflow-y-auto custom-scrollbar">
-                        {mentors.slice(0, 3).map((mentor, i) => {
-                            const mId = mentor.id || i;
-                            const isFollowing = !!following[mId];
-                            const isLoading = !!loadingMentors[mId];
+                {suggestedPeers.length > 0 ? (
+                    <div className="flex flex-col max-h-64 overflow-y-auto custom-scrollbar">
+                        {suggestedPeers.map((peer) => {
+                            const pId = peer._id;
+                            const isRequested = !!requestedUsers[pId];
+                            const isLoading = !!loadingPeers[pId];
+
                             return (
                                 <div 
-                                    key={mId} 
-                                    onClick={() => router.push("/mentors")}
+                                    key={pId} 
+                                    onClick={() => router.push(`/${peer.username || pId}`)}
                                     className="flex items-center gap-3 px-4 py-3 hover:bg-secondary/40 transition-colors border-t border-border/40 cursor-pointer"
                                 >
                                     <Avatar className="h-9 w-9 border border-primary/30 flex-shrink-0 overflow-hidden shadow-xs">
-                                        <AvatarImage src={mentor.image} alt={mentor.name} className="object-cover w-full h-full" />
+                                        <AvatarImage src={peer.avatar} alt={peer.name} className="object-cover w-full h-full" />
                                         <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
-                                            {mentor.avatar}
+                                            {peer.name ? peer.name[0] : "U"}
                                         </AvatarFallback>
                                     </Avatar>
+
                                     <div className="flex flex-col flex-1 min-w-0">
-                                        <p className="text-sm font-semibold text-foreground line-clamp-1">{mentor.name}</p>
-                                        <p className="text-xs text-muted-foreground line-clamp-1">{mentor.role}</p>
+                                        <p className="text-sm font-semibold text-foreground line-clamp-1">{peer.name}</p>
+                                        <p className="text-[11px] text-primary font-medium line-clamp-1">{peer.reason}</p>
                                     </div>
+
                                     <Button 
                                         size="sm" 
-                                        variant={isFollowing ? "secondary" : "outline"} 
-                                        disabled={isLoading}
+                                        variant={isRequested ? "secondary" : "outline"} 
+                                        disabled={isLoading || isRequested}
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            toggleFollowMentor(mId, mentor.name);
+                                            handleConnectPeer(pId, peer.name);
                                         }}
                                         className={cn(
-                                            "rounded-full h-7 text-xs font-semibold px-3 transition-all flex items-center gap-1.5",
-                                            isFollowing 
+                                            "rounded-full h-7 text-xs font-semibold px-3 transition-all flex items-center gap-1.5 shrink-0",
+                                            isRequested 
                                                 ? "bg-primary/20 text-primary border-primary/30" 
                                                 : "border-border/60 hover:bg-primary hover:text-primary-foreground hover:border-primary"
                                         )}
                                     >
                                         {isLoading ? (
                                             <Loader2 className="h-3 w-3 animate-spin" />
-                                        ) : isFollowing ? (
+                                        ) : isRequested ? (
                                             <>
                                                 <Check className="h-3 w-3" />
-                                                Following
+                                                Sent
                                             </>
                                         ) : (
-                                            "Follow"
+                                            <>
+                                                <UserPlus className="h-3 w-3" />
+                                                Connect
+                                            </>
                                         )}
                                     </Button>
                                 </div>
@@ -447,7 +453,8 @@ export default function RightSidebar() {
                 ) : (
                     <div className="p-5 text-center flex flex-col items-center justify-center gap-1.5 border-t border-border/40">
                         <Users className="w-7 h-7 text-muted-foreground/40" />
-                        <p className="text-xs font-semibold text-foreground">No mentors available</p>
+                        <p className="text-xs font-semibold text-foreground">No peer suggestions</p>
+                        <p className="text-[11px] text-muted-foreground">Enroll in courses to connect with classmates.</p>
                     </div>
                 )}
             </div>
