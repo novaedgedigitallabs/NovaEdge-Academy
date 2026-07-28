@@ -2,6 +2,7 @@
 
 import AppLayout from "@/components/layout/AppLayout";
 import CourseCard from "@/components/course/CourseCard";
+import CourseCardSkeleton from "@/components/course/CourseCardSkeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +26,7 @@ export default function CoursesPage() {
   const [courses, setCourses] = useState([]); // accumulated list
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const [query, setQuery] = useState("");
@@ -196,10 +197,12 @@ export default function CoursesPage() {
           })}
         </div>
 
-        {/* states */}
+        {/* Initial Loading Skeleton Grid */}
         {loading && courses.length === 0 && (
-          <div className="py-20 text-center text-muted-foreground">
-            Loading courses...
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 my-4">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <CourseCardSkeleton key={i} />
+            ))}
           </div>
         )}
 
@@ -241,38 +244,40 @@ export default function CoursesPage() {
           </div>
         )}
 
-        {/* courses grid: 1 col on mobile, 2 cols on PC/Desktop for clean compact cards */}
+        {/* Courses grid: 1 col on mobile, 2 cols on PC/Desktop */}
         {courses.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             {courses.map((course) => {
               const key =
                 course._id || course.id || course.slug || Math.random();
-              return <CourseCard key={key} course={course} />;
+              return <CourseCard key={key} course={course} me={false} />;
             })}
+            {loading && (
+              <>
+                <CourseCardSkeleton />
+                <CourseCardSkeleton />
+              </>
+            )}
           </div>
         )}
 
         {/* load more */}
-        <div className="mt-16 flex justify-center">
+        <div className="mt-12 flex justify-center">
           {loading && courses.length > 0 ? (
-            <Button
-              variant="ghost"
-              size="lg"
-              disabled
-            >
-              Loading...
-            </Button>
+            <div className="flex items-center gap-2 text-xs font-semibold text-primary animate-pulse">
+              Loading more courses...
+            </div>
           ) : hasMore ? (
             <Button
               variant="outline"
               size="lg"
-              className="rounded-full min-w-[150px]"
+              className="rounded-full min-w-[150px] font-semibold"
               onClick={loadMore}
             >
               Load More
             </Button>
           ) : (
-            <div className="text-muted-foreground">No more courses</div>
+            <div className="text-muted-foreground text-xs font-medium">No more courses</div>
           )}
         </div>
       </div>
