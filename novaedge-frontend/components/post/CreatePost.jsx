@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Loader2, Image as ImageIcon, Smile, Calendar, MapPin, X, Navigation } from "lucide-react";
 import CityPicker from "@/components/ui/CityPicker";
 import { toast } from "sonner";
+import { compressImage } from "@/lib/image-compressor";
 
 const QUICK_EMOJIS = [
     "😀", "😂", "😍", "🥳", "😎", "🤩", "🚀", "🔥", "✨", 
@@ -25,6 +26,7 @@ export default function CreatePost({ onPostCreated }) {
     const [selectedImage, setSelectedImage] = useState("");
     const [eventDate, setEventDate] = useState("");
     const [location, setLocation] = useState("");
+    const [isCompressing, setIsCompressing] = useState(false);
 
     // UI toggle state
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -34,19 +36,26 @@ export default function CreatePost({ onPostCreated }) {
 
     const fileInputRef = useRef(null);
 
-    const handleImageSelect = (e) => {
+    const handleImageSelect = async (e) => {
         const file = e.target.files?.[0];
-        if (file) {
-            if (file.size > 8 * 1024 * 1024) {
-                toast.error("Image size should be less than 8MB");
-                return;
-            }
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setSelectedImage(reader.result);
-                toast.success("Image attached!");
-            };
-            reader.readAsDataURL(file);
+        if (!file) return;
+
+        if (!file.type.startsWith("image/")) {
+            toast.error("Please select a valid image file");
+            return;
+        }
+
+        setIsCompressing(true);
+        try {
+            const compressedDataUrl = await compressImage(file, 1000, 0.75);
+            setSelectedImage(compressedDataUrl);
+            toast.success("Image attached & optimized!");
+        } catch (err) {
+            console.error("Compression error:", err);
+            toast.error("Failed to process image");
+        } finally {
+            setIsCompressing(false);
+            if (fileInputRef.current) fileInputRef.current.value = "";
         }
     };
 
@@ -251,11 +260,16 @@ export default function CreatePost({ onPostCreated }) {
                             type="button"
                             variant="ghost"
                             size="icon"
+                            disabled={isCompressing}
                             onClick={() => fileInputRef.current?.click()}
                             className="h-8 w-8 rounded-full text-primary hover:bg-primary/10 cursor-pointer"
                             title="Add Image"
                         >
-                            <ImageIcon className="h-5 w-5" />
+                            {isCompressing ? (
+                                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                            ) : (
+                                <ImageIcon className="h-5 w-5" />
+                            )}
                         </Button>
 
                         {/* Emoji Toggle */}
@@ -297,7 +311,7 @@ export default function CreatePost({ onPostCreated }) {
 
                     <Button
                         onClick={handleSubmit}
-                        disabled={(!content.trim() && !selectedImage) || loading}
+                        disabled={(!content.trim() && !selectedImage) || loading || isCompressing}
                         className="rounded-full font-bold px-6 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md cursor-pointer"
                     >
                         {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Post"}
