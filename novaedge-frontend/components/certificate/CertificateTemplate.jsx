@@ -117,10 +117,10 @@ export default function CertificateTemplate({
                     </div>
                 </div>
 
-                {/* Footer Section: Date/ID, QR Verification Code & Signatory */}
-                <div className="grid grid-cols-3 gap-2 sm:gap-3 items-end pt-1 sm:pt-2 border-t border-transparent">
+                {/* Footer Section: Date/ID, QR Verification Code & Signatory (Harmoniously Aligned 3 Columns) */}
+                <div className="grid grid-cols-3 gap-2 sm:gap-3 items-center pt-1 sm:pt-2 border-t border-transparent">
                     {/* Left Column: Metadata */}
-                    <div className="flex flex-col justify-end space-y-1.5 text-left pr-2 border-r border-dashed border-[#8E75B8]/40">
+                    <div className="flex flex-col justify-center space-y-1.5 text-left pr-2 border-r border-dashed border-[#8E75B8]/40 h-full">
                         <div className="flex items-center gap-1.5">
                             <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-md bg-[#2D1459] text-white flex items-center justify-center flex-shrink-0 shadow-xs">
                                 <Calendar className="w-3 h-3" />
@@ -152,16 +152,16 @@ export default function CertificateTemplate({
                         </div>
                     </div>
 
-                    {/* Center Column: Verification QR Code (Perfectly Centered Alignment) */}
-                    <div className="flex flex-col items-center justify-center text-center px-1 border-r border-dashed border-[#8E75B8]/40 w-full">
+                    {/* Center Column: Verification QR Code */}
+                    <div className="flex flex-col items-center justify-center text-center px-1 border-r border-dashed border-[#8E75B8]/40 w-full h-full">
                         <div className="p-1 bg-white border border-[#331766] rounded-md shadow-xs mx-auto">
                             <QRCodeSVG
                                 value={qrUrl}
-                                size={55}
+                                size={50}
                                 level="H"
                                 fgColor="#1D0C3C"
                                 bgColor="#FFFFFF"
-                                className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 block"
+                                className="w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 block"
                             />
                         </div>
                         <span className="block font-black text-[7px] sm:text-[8px] text-[#1D0C3C] tracking-[0.1em] uppercase mt-1 mb-0.5 text-center w-full">
@@ -173,13 +173,13 @@ export default function CertificateTemplate({
                     </div>
 
                     {/* Right Column: Signature Block */}
-                    <div className="flex flex-col items-center justify-end text-center pl-2">
-                        {/* Perfectly Proportioned Founder Signature Image */}
-                        <div className="relative flex items-end justify-center w-full h-8 sm:h-10 md:h-11 -mb-0.5">
+                    <div className="flex flex-col items-center justify-center text-center pl-2 h-full">
+                        {/* Founder Signature Image */}
+                        <div className="relative flex items-end justify-center w-full h-7 sm:h-9 md:h-10 -mb-0.5">
                             <img
                                 src={signatureImagePath}
                                 alt="Founder Signature"
-                                className="h-full max-h-11 w-auto object-contain pointer-events-none select-none mix-blend-multiply"
+                                className="h-full max-h-10 w-auto object-contain pointer-events-none select-none mix-blend-multiply"
                                 crossOrigin="anonymous"
                             />
                         </div>

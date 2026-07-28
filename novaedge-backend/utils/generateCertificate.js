@@ -92,64 +92,64 @@ const drawCertificateNativePDF = (doc, { studentName, courseName, date, certific
       { align: "center", width: 540 }
     );
 
-  // 5. Footer Metadata & Verification (3 Columns)
-  const footerY = H - 128;
+  // 5. Footer Metadata & Verification (3 Columns Harmoniously Aligned)
+  const footerY = H - 122;
 
   doc.save();
   doc.dash(3, { space: 3 });
-  doc.moveTo(270, footerY - 5).lineTo(270, H - 32).lineWidth(0.75).stroke("#CBBEE0");
-  doc.moveTo(560, footerY - 5).lineTo(560, H - 32).lineWidth(0.75).stroke("#CBBEE0");
+  doc.moveTo(270, footerY - 12).lineTo(270, H - 24).lineWidth(0.75).stroke("#CBBEE0");
+  doc.moveTo(560, footerY - 12).lineTo(560, H - 24).lineWidth(0.75).stroke("#CBBEE0");
   doc.restore();
 
+  // Column 1 (Left - Issue Date & Cert ID):
   const col1X = 65;
-  // Issue Date Icon Box & Vector Calendar Icon
-  doc.roundedRect(col1X, footerY, 22, 22, 4).fill("#381F66");
-  doc.rect(col1X + 5, footerY + 5, 12, 12).lineWidth(1).stroke("#FFFFFF");
-  doc.rect(col1X + 5, footerY + 5, 12, 3.5).fill("#FFFFFF");
-  doc.circle(col1X + 8.5, footerY + 11.5, 0.8).fill("#FFFFFF");
-  doc.circle(col1X + 13.5, footerY + 11.5, 0.8).fill("#FFFFFF");
-  doc.circle(col1X + 8.5, footerY + 14.5, 0.8).fill("#FFFFFF");
-  doc.circle(col1X + 13.5, footerY + 14.5, 0.8).fill("#FFFFFF");
+  doc.roundedRect(col1X, footerY - 6, 22, 22, 4).fill("#381F66");
+  doc.rect(col1X + 5, footerY - 1, 12, 12).lineWidth(1).stroke("#FFFFFF");
+  doc.rect(col1X + 5, footerY - 1, 12, 3.5).fill("#FFFFFF");
+  doc.circle(col1X + 8.5, footerY + 5.5, 0.8).fill("#FFFFFF");
+  doc.circle(col1X + 13.5, footerY + 5.5, 0.8).fill("#FFFFFF");
+  doc.circle(col1X + 8.5, footerY + 8.5, 0.8).fill("#FFFFFF");
+  doc.circle(col1X + 13.5, footerY + 8.5, 0.8).fill("#FFFFFF");
 
   doc
     .fontSize(8)
     .fillColor("#6B5A86")
     .font("Helvetica-Bold")
-    .text("ISSUE DATE", col1X + 30, footerY, { characterSpacing: 1.5 });
+    .text("ISSUE DATE", col1X + 30, footerY - 6, { characterSpacing: 1.5 });
   doc
     .fontSize(10)
     .fillColor("#231046")
     .font("Helvetica-Bold")
-    .text(date, col1X + 30, footerY + 10);
+    .text(date, col1X + 30, footerY + 4);
 
-  doc.moveTo(col1X, footerY + 28).lineTo(col1X + 180, footerY + 28).lineWidth(0.5).stroke("#E5DDEE");
+  doc.moveTo(col1X, footerY + 22).lineTo(col1X + 180, footerY + 22).lineWidth(0.5).stroke("#E5DDEE");
 
-  // Certificate ID Icon Box & Vector Shield Icon
-  doc.roundedRect(col1X, footerY + 34, 22, 22, 4).fill("#381F66");
+  doc.roundedRect(col1X, footerY + 28, 22, 22, 4).fill("#381F66");
   doc.save();
-  doc.path(`M ${col1X + 11} ${footerY + 38} L ${col1X + 17} ${footerY + 41} L ${col1X + 17} ${footerY + 47} C ${col1X + 17} ${footerY + 51}, ${col1X + 11} ${footerY + 53}, ${col1X + 11} ${footerY + 53} C ${col1X + 11} ${footerY + 53}, ${col1X + 5} ${footerY + 51}, ${col1X + 5} ${footerY + 47} L ${col1X + 5} ${footerY + 41} Z`).fill("#FFFFFF");
+  doc.path(`M ${col1X + 11} ${footerY + 32} L ${col1X + 17} ${footerY + 35} L ${col1X + 17} ${footerY + 41} C ${col1X + 17} ${footerY + 45}, ${col1X + 11} ${footerY + 47}, ${col1X + 11} ${footerY + 47} C ${col1X + 11} ${footerY + 47}, ${col1X + 5} ${footerY + 45}, ${col1X + 5} ${footerY + 41} L ${col1X + 5} ${footerY + 35} Z`).fill("#FFFFFF");
   doc.restore();
 
   doc
     .fontSize(8)
     .fillColor("#6B5A86")
     .font("Helvetica-Bold")
-    .text("CERTIFICATE ID", col1X + 30, footerY + 34, { characterSpacing: 1.5 });
+    .text("CERTIFICATE ID", col1X + 30, footerY + 28, { characterSpacing: 1.5 });
   doc
     .fontSize(9)
     .fillColor("#231046")
     .font("Helvetica-Bold")
-    .text(certificateId, col1X + 30, footerY + 44);
+    .text(certificateId, col1X + 30, footerY + 38);
 
+  // Column 2 (Center - QR Code & Caption):
   if (qrCodeBuffer) {
-    const qrSize = 55;
+    const qrSize = 50;
     const qrX = centerX - qrSize / 2;
-    const qrY = footerY - 4;
+    const qrY = footerY - 10;
 
     doc.roundedRect(qrX - 3, qrY - 3, qrSize + 6, qrSize + 6, 5).lineWidth(1.2).stroke("#381F66");
     doc.image(qrCodeBuffer, qrX, qrY, { width: qrSize, height: qrSize });
 
-    // Perfectly Centered Caption Text Box (Centered exactly on centerX)
+    // Perfectly Centered Caption Text Box
     doc
       .fontSize(8)
       .fillColor("#231046")
@@ -159,46 +159,46 @@ const drawCertificateNativePDF = (doc, { studentName, courseName, date, certific
       .fontSize(7)
       .fillColor("#6E6184")
       .font("Helvetica")
-      .text("Authenticity of this certificate", centerX - 140, qrY + qrSize + 19, { width: 280, align: "center" });
+      .text("Authenticity of this certificate", centerX - 140, qrY + qrSize + 18, { width: 280, align: "center" });
   }
 
+  // Column 3 (Right - Founder Signature):
   const sigX = 570;
   const sigW = 200;
 
-  // Real Founder Signature Image - Perfectly Proportioned
   const sigImgPath = path.join(__dirname, "../templates/founder_sign.png");
   const fallbackSigImgPath = path.join(__dirname, "../founder_sign.png");
   const actualSig = fs.existsSync(sigImgPath) ? sigImgPath : (fs.existsSync(fallbackSigImgPath) ? fallbackSigImgPath : null);
 
   if (actualSig) {
-    doc.image(actualSig, sigX + 35, footerY - 18, { fit: [130, 40], align: "center" });
+    doc.image(actualSig, sigX + 35, footerY - 18, { fit: [130, 36], align: "center" });
   } else {
     doc
       .fontSize(20)
       .fillColor("#1F0E3D")
       .font("Times-BoldItalic")
-      .text("Amit Raikwar", sigX, footerY + 2, { width: sigW, align: "center" });
+      .text("Amit Raikwar", sigX, footerY - 4, { width: sigW, align: "center" });
   }
 
-  doc.moveTo(sigX + 25, footerY + 28).lineTo(sigX + sigW - 25, footerY + 28).lineWidth(1.2).stroke("#2C164D");
+  doc.moveTo(sigX + 25, footerY + 22).lineTo(sigX + sigW - 25, footerY + 22).lineWidth(1.2).stroke("#2C164D");
 
   doc
     .fontSize(9)
     .fillColor("#1F0E3D")
     .font("Helvetica-Bold")
-    .text("AMIT KUMAR RAIKWAR", sigX, footerY + 32, { width: sigW, align: "center", characterSpacing: 1 });
+    .text("AMIT KUMAR RAIKWAR", sigX, footerY + 26, { width: sigW, align: "center", characterSpacing: 1 });
 
   doc
     .fontSize(7.5)
     .fillColor("#64537E")
     .font("Helvetica-Bold")
-    .text("FOUNDER & CEO", sigX, footerY + 43, { width: sigW, align: "center", characterSpacing: 1.2 });
+    .text("FOUNDER & CEO", sigX, footerY + 37, { width: sigW, align: "center", characterSpacing: 1.2 });
 
   doc
     .fontSize(7.5)
     .fillColor("#64537E")
     .font("Helvetica")
-    .text("NovaEdge Digital Labs", sigX, footerY + 53, { width: sigW, align: "center" });
+    .text("NovaEdge Digital Labs", sigX, footerY + 47, { width: sigW, align: "center" });
 };
 
 // ── PUPPETEER HTML RENDERER (Used when Chromium binary is present) ─────────────────
@@ -412,6 +412,8 @@ body {
 .footer-col {
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  height: 100%;
 }
 
 .col-left {
@@ -489,8 +491,8 @@ body {
 }
 
 .qr-img {
-  width: 64px;
-  height: 64px;
+  width: 60px;
+  height: 60px;
   display: block;
 }
 
@@ -501,7 +503,7 @@ body {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   margin-top: 5px;
-  margin-bottom: 3px;
+  margin-bottom: 2px;
   text-align: center;
   width: 100%;
 }
@@ -509,7 +511,7 @@ body {
 .qr-text-sub {
   font-size: 8px;
   color: #6E6184;
-  margin-top: 3px;
+  margin-top: 2px;
   line-height: 1.2;
   text-align: center;
   width: 100%;
@@ -517,17 +519,18 @@ body {
 
 .col-right {
   align-items: center;
+  justify-content: center;
   text-align: center;
   padding-left: 20px;
 }
 
 .sig-img {
-  height: 42px;
-  max-width: 145px;
+  height: 38px;
+  max-width: 135px;
   object-fit: contain;
   mix-blend-mode: multiply;
   display: block;
-  margin: 0 auto -3px auto;
+  margin: 0 auto -2px auto;
 }
 
 .signature-text {
