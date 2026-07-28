@@ -8,27 +8,21 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { toggleWishlist } from "@/services/wishlist";
 import { toast } from "sonner";
 import { useState } from "react";
 import { useAuth } from "@/context/auth-context";
+import { formatCurrency } from "@/lib/currency";
 
 export default function CourseCard({ course }) {
   const courseId = course._id || course.id;
   const { user } = useAuth();
-  // Ideally we check if it's in user.wishlist but for now we just toggle locally or fetch initial state
-  // Since we don't pass full user object here or wishlist state, we might need a context or just optimistic UI
-  // For simplicity, we won't show "filled" heart initially unless we have that data. 
-  // But let's assume we want to show it. 
-  // A better approach is to pass `isWishlisted` prop.
-  // For now, I'll just implement the toggle action.
-  const [isWishlisted, setIsWishlisted] = useState(false); // Placeholder state
+  const [isWishlisted, setIsWishlisted] = useState(false);
 
   if (!courseId) return null;
 
   const handleWishlist = async (e) => {
-    e.preventDefault(); // Prevent link navigation
+    e.preventDefault();
     e.stopPropagation();
 
     if (!user) {
@@ -37,12 +31,12 @@ export default function CourseCard({ course }) {
     }
 
     try {
-      setIsWishlisted(!isWishlisted); // Optimistic
+      setIsWishlisted(!isWishlisted);
       const res = await toggleWishlist(courseId);
       toast.success(res.message);
       setIsWishlisted(res.isAdded);
     } catch (err) {
-      setIsWishlisted(!isWishlisted); // Revert
+      setIsWishlisted(!isWishlisted);
       toast.error("Failed to update wishlist");
     }
   };
@@ -79,11 +73,11 @@ export default function CourseCard({ course }) {
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-1 text-amber-500 text-xs font-semibold">
               <Star className="h-3.5 w-3.5 fill-current" />
-              <span>{course.rating}</span>
+              <span>{course.rating || 0}</span>
             </div>
             <div className="flex items-center gap-1 text-muted-foreground text-xs">
               <Users className="h-3.5 w-3.5" />
-              <span>{course.students}</span>
+              <span>{course.students || 0}</span>
             </div>
           </div>
           <h3 className="font-bold text-lg leading-tight group-hover:text-primary transition-colors line-clamp-2">
@@ -95,15 +89,17 @@ export default function CourseCard({ course }) {
             {course.description}
           </p>
           <p className="text-xs font-medium text-muted-foreground">
-            By <span className="text-foreground">{course.instructor}</span>
+            By <span className="text-foreground">{course.instructor || course.createdBy || "NovaEdge"}</span>
           </p>
         </CardContent>
         <CardFooter className="p-5 pt-0 flex items-center justify-between border-t border-border/50 bg-muted/20 mt-auto">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground py-3">
             <Clock className="h-3.5 w-3.5" />
-            <span>{course.duration}</span>
+            <span>{course.duration || "0 min"}</span>
           </div>
-          <div className="text-lg font-bold text-primary">${course.price}</div>
+          <div className="text-lg font-bold text-primary">
+            {formatCurrency(course.price)}
+          </div>
         </CardFooter>
       </Card>
     </Link>

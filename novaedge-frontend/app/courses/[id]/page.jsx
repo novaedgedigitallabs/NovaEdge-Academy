@@ -14,6 +14,7 @@ import { useAuth } from "@/context/auth-context";
 import CourseProgressBar from "@/components/course/CourseProgressBar";
 import ReviewList from "@/components/review/ReviewList";
 import LiveSchedule from "@/components/live/LiveSchedule";
+import { formatCurrency } from "@/lib/currency";
 
 /**
  * Normalize various shapes of image data to a usable string.
@@ -165,7 +166,6 @@ export default function CourseDetailPageClient() {
   const posterRaw = course?.poster || course?.image || "";
   const posterSrc = normalizeImageSrc(posterRaw);
 
-  // Merge public lectures with full lectures (if available)
   const displayLectures = isEnrolled && fullLectures.length > 0 ? fullLectures : (course.lectures || []);
 
   return (
@@ -175,7 +175,6 @@ export default function CourseDetailPageClient() {
 
         {/* Hero Banner - Course Poster + Title */}
         <div className="relative bg-gradient-to-b from-slate-900 to-slate-800 text-white">
-          {/* Background poster overlay (desktop) */}
           {posterSrc && (
             <div className="absolute inset-0 opacity-10">
               <Image
@@ -241,7 +240,7 @@ export default function CourseDetailPageClient() {
                   ) : (
                     <div className="flex items-center gap-4">
                       <span className="text-2xl font-bold">
-                        {course.price > 0 ? `₹${course.price}` : "Free"}
+                        {formatCurrency(course.price)}
                       </span>
                       <Link href={`/checkout?courseId=${courseId}`} className="flex-1">
                         <button className="w-full bg-primary text-primary-foreground py-2.5 rounded-lg font-semibold hover:bg-primary/90 transition-colors">
@@ -284,7 +283,7 @@ export default function CourseDetailPageClient() {
                 </ul>
               </div>
 
-              {/* Course Index - Mobile friendly list */}
+              {/* Course Index */}
               <div>
                 <h3 className="font-semibold text-xl mb-4 flex items-center gap-2">
                   <BookOpen className="w-5 h-5 text-primary" />
@@ -311,12 +310,10 @@ export default function CourseDetailPageClient() {
                           }
                         }}
                       >
-                        {/* Index number */}
                         <span className="flex-shrink-0 w-7 h-7 rounded-full bg-muted flex items-center justify-center text-xs font-semibold text-muted-foreground">
                           {idx + 1}
                         </span>
 
-                        {/* Title */}
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium break-words leading-snug">
                             {lec.title}
@@ -328,7 +325,6 @@ export default function CourseDetailPageClient() {
                           )}
                         </div>
 
-                        {/* Lock / Play icon */}
                         <span className="flex-shrink-0">
                           {isLocked ? (
                             <Lock className="w-4 h-4 text-muted-foreground/50" />
@@ -374,7 +370,7 @@ export default function CourseDetailPageClient() {
                 {/* Price or Progress */}
                 {!isEnrolled && (
                   <div className="text-3xl font-bold">
-                    {course.price > 0 ? `₹${course.price}` : <span className="text-emerald-500">Free</span>}
+                    {formatCurrency(course.price)}
                   </div>
                 )}
 
