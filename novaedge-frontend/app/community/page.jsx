@@ -158,26 +158,6 @@ export default function CommunityPage() {
                     </div>
                 </div>
 
-                {/* Stats Section */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6 rounded-2xl glass-card text-center border border-white/10">
-                    <div>
-                        <div className="text-2xl sm:text-3xl font-black text-primary">10k+</div>
-                        <div className="text-xs text-muted-foreground font-medium mt-0.5">Active Members</div>
-                    </div>
-                    <div>
-                        <div className="text-2xl sm:text-3xl font-black text-primary">500+</div>
-                        <div className="text-xs text-muted-foreground font-medium mt-0.5">Daily Messages</div>
-                    </div>
-                    <div>
-                        <div className="text-2xl sm:text-3xl font-black text-primary">50+</div>
-                        <div className="text-xs text-muted-foreground font-medium mt-0.5">Countries</div>
-                    </div>
-                    <div>
-                        <div className="text-2xl sm:text-3xl font-black text-primary">24/7</div>
-                        <div className="text-xs text-muted-foreground font-medium mt-0.5">Live Support</div>
-                    </div>
-                </div>
-
                 {/* Upcoming Events Section */}
                 <div className="space-y-4">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
