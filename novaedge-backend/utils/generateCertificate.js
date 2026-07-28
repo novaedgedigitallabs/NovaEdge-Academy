@@ -149,16 +149,17 @@ const drawCertificateNativePDF = (doc, { studentName, courseName, date, certific
     doc.roundedRect(qrX - 3, qrY - 3, qrSize + 6, qrSize + 6, 5).lineWidth(1.2).stroke("#381F66");
     doc.image(qrCodeBuffer, qrX, qrY, { width: qrSize, height: qrSize });
 
+    // Perfectly Centered Caption Text Box (Centered exactly on centerX)
     doc
       .fontSize(8)
       .fillColor("#231046")
       .font("Helvetica-Bold")
-      .text("SCAN TO VERIFY", 270, qrY + qrSize + 6, { width: 290, align: "center", characterSpacing: 1.2 });
+      .text("SCAN TO VERIFY", centerX - 140, qrY + qrSize + 6, { width: 280, align: "center", characterSpacing: 1.2 });
     doc
       .fontSize(7)
       .fillColor("#6E6184")
       .font("Helvetica")
-      .text("Authenticity of this certificate", 270, qrY + qrSize + 19, { width: 290, align: "center" });
+      .text("Authenticity of this certificate", centerX - 140, qrY + qrSize + 19, { width: 280, align: "center" });
   }
 
   const sigX = 570;
@@ -469,7 +470,11 @@ body {
 }
 
 .col-center {
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
+  text-align: center;
   border-right: 1px dashed #CBBEE0;
   padding: 0 10px;
 }
@@ -480,6 +485,7 @@ body {
   border: 1.5px solid #381F66;
   border-radius: 10px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  margin: 0 auto;
 }
 
 .qr-img {
@@ -496,6 +502,8 @@ body {
   text-transform: uppercase;
   margin-top: 5px;
   margin-bottom: 3px;
+  text-align: center;
+  width: 100%;
 }
 
 .qr-text-sub {
@@ -503,6 +511,8 @@ body {
   color: #6E6184;
   margin-top: 3px;
   line-height: 1.2;
+  text-align: center;
+  width: 100%;
 }
 
 .col-right {

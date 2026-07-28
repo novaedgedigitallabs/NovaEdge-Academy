@@ -152,22 +152,22 @@ export default function CertificateTemplate({
                         </div>
                     </div>
 
-                    {/* Center Column: Verification QR Code */}
-                    <div className="flex flex-col items-center justify-center text-center px-1 border-r border-dashed border-[#8E75B8]/40">
-                        <div className="p-1 bg-white border border-[#331766] rounded-md shadow-xs">
+                    {/* Center Column: Verification QR Code (Perfectly Centered Alignment) */}
+                    <div className="flex flex-col items-center justify-center text-center px-1 border-r border-dashed border-[#8E75B8]/40 w-full">
+                        <div className="p-1 bg-white border border-[#331766] rounded-md shadow-xs mx-auto">
                             <QRCodeSVG
                                 value={qrUrl}
                                 size={55}
                                 level="H"
                                 fgColor="#1D0C3C"
                                 bgColor="#FFFFFF"
-                                className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14"
+                                className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 block"
                             />
                         </div>
-                        <span className="block font-black text-[7px] sm:text-[8px] text-[#1D0C3C] tracking-[0.1em] uppercase mt-1 mb-0.5">
+                        <span className="block font-black text-[7px] sm:text-[8px] text-[#1D0C3C] tracking-[0.1em] uppercase mt-1 mb-0.5 text-center w-full">
                             SCAN TO VERIFY
                         </span>
-                        <span className="block text-[6.5px] sm:text-[7.5px] text-[#634991] font-medium leading-normal">
+                        <span className="block text-[6.5px] sm:text-[7.5px] text-[#634991] font-medium leading-normal text-center w-full">
                             Authenticity of this certificate
                         </span>
                     </div>
