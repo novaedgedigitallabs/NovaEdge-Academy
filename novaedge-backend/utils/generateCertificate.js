@@ -29,20 +29,20 @@ const drawCertificateNativePDF = (doc, { studentName, courseName, date, certific
     doc.rect(0, 0, W, H).fill("#FAF8F5");
   }
 
-  // 2. Main Title Section (Positioned cleanly below top logo in background image)
+  // 2. Main Title Section (Positioned cleanly below NovaEdge logo at Y = 175)
   doc
-    .fontSize(30)
+    .fontSize(28)
     .fillColor("#1D0C38")
     .font("Times-Bold")
-    .text("Certificate of Completion", 0, 105, { align: "center" });
+    .text("Certificate of Completion", 0, 175, { align: "center" });
 
-  doc.moveTo(centerX - 130, 142).lineTo(centerX + 130, 142).lineWidth(0.8).stroke("#52338B");
-  doc.polygon([centerX - 4, 142], [centerX, 138], [centerX + 4, 142], [centerX, 146]).fill("#52338B");
+  doc.moveTo(centerX - 130, 210).lineTo(centerX + 130, 210).lineWidth(0.8).stroke("#52338B");
+  doc.polygon([centerX - 4, 210], [centerX, 206], [centerX + 4, 210], [centerX, 214]).fill("#52338B");
 
   // 3. Ribbon Banner Course Title
-  const bannerY = 158;
+  const bannerY = 224;
   const courseUpper = (courseName || "ADVANCED FULL STACK WEB DEVELOPMENT").toUpperCase();
-  doc.font("Helvetica-Bold").fontSize(10.5);
+  doc.font("Helvetica-Bold").fontSize(10);
   const textWidth = doc.widthOfString(courseUpper, { characterSpacing: 1.5 });
   const bannerW = Math.max(340, Math.min(680, textWidth + 80));
   const bannerX = centerX - bannerW / 2;
@@ -56,7 +56,7 @@ const drawCertificateNativePDF = (doc, { studentName, courseName, date, certific
   doc.restore();
 
   doc
-    .fontSize(10)
+    .fontSize(9.5)
     .fillColor("#FFFFFF")
     .font("Helvetica-Bold")
     .text(courseUpper, bannerX + 10, bannerY + 8, {
@@ -67,119 +67,119 @@ const drawCertificateNativePDF = (doc, { studentName, courseName, date, certific
 
   // 4. Recipient Section
   doc
-    .fontSize(9)
+    .fontSize(8.5)
     .fillColor("#6E5D87")
     .font("Helvetica-Bold")
-    .text("PRESENTED TO", 0, 208, { align: "center", characterSpacing: 3 });
+    .text("PRESENTED TO", 0, 268, { align: "center", characterSpacing: 3 });
 
   doc
-    .fontSize(36)
+    .fontSize(34)
     .fillColor("#231046")
     .font("Times-BoldItalic")
-    .text(studentName || "Your Name Here", 0, 224, { align: "center" });
+    .text(studentName || "Your Name Here", 0, 282, { align: "center" });
 
-  doc.moveTo(centerX - 160, 270).lineTo(centerX + 160, 270).lineWidth(0.75).stroke("#7E6C9E");
-  doc.polygon([centerX - 3, 270], [centerX, 267], [centerX + 3, 270], [centerX, 273]).fill("#7E6C9E");
+  doc.moveTo(centerX - 160, 326).lineTo(centerX + 160, 326).lineWidth(0.75).stroke("#7E6C9E");
+  doc.polygon([centerX - 3, 326], [centerX, 323], [centerX + 3, 326], [centerX, 329]).fill("#7E6C9E");
 
   doc
-    .fontSize(11)
+    .fontSize(10.5)
     .fillColor("#3E334D")
     .font("Times-Italic")
     .text(
       "for successfully completing the course and demonstrating dedication, knowledge, and excellence in the subject matter.",
       centerX - 270,
-      280,
+      336,
       { align: "center", width: 540 }
     );
 
   // 5. Footer Metadata & Verification (3 Columns)
-  const footerY = H - 138;
+  const footerY = H - 128;
 
   doc.save();
   doc.dash(3, { space: 3 });
-  doc.moveTo(270, footerY - 5).lineTo(270, H - 38).lineWidth(0.75).stroke("#CBBEE0");
-  doc.moveTo(560, footerY - 5).lineTo(560, H - 38).lineWidth(0.75).stroke("#CBBEE0");
+  doc.moveTo(270, footerY - 5).lineTo(270, H - 32).lineWidth(0.75).stroke("#CBBEE0");
+  doc.moveTo(560, footerY - 5).lineTo(560, H - 32).lineWidth(0.75).stroke("#CBBEE0");
   doc.restore();
 
   const col1X = 65;
-  doc.roundedRect(col1X, footerY, 24, 24, 4).fill("#381F66");
-  doc.fontSize(7).fillColor("#FFFFFF").font("Helvetica-Bold").text("CAL", col1X + 4, footerY + 8);
+  doc.roundedRect(col1X, footerY, 22, 22, 4).fill("#381F66");
+  doc.fontSize(6.5).fillColor("#FFFFFF").font("Helvetica-Bold").text("CAL", col1X + 3, footerY + 7);
 
   doc
-    .fontSize(8.5)
+    .fontSize(8)
     .fillColor("#6B5A86")
     .font("Helvetica-Bold")
-    .text("ISSUE DATE", col1X + 32, footerY, { characterSpacing: 1.5 });
+    .text("ISSUE DATE", col1X + 30, footerY, { characterSpacing: 1.5 });
   doc
-    .fontSize(11)
+    .fontSize(10)
     .fillColor("#231046")
     .font("Helvetica-Bold")
-    .text(date, col1X + 32, footerY + 11);
+    .text(date, col1X + 30, footerY + 10);
 
-  doc.moveTo(col1X, footerY + 30).lineTo(col1X + 180, footerY + 30).lineWidth(0.5).stroke("#E5DDEE");
+  doc.moveTo(col1X, footerY + 28).lineTo(col1X + 180, footerY + 28).lineWidth(0.5).stroke("#E5DDEE");
 
-  doc.roundedRect(col1X, footerY + 36, 24, 24, 4).fill("#381F66");
-  doc.fontSize(7).fillColor("#FFFFFF").font("Helvetica-Bold").text("ID", col1X + 8, footerY + 44);
+  doc.roundedRect(col1X, footerY + 34, 22, 22, 4).fill("#381F66");
+  doc.fontSize(6.5).fillColor("#FFFFFF").font("Helvetica-Bold").text("ID", col1X + 7, footerY + 41);
 
   doc
-    .fontSize(8.5)
+    .fontSize(8)
     .fillColor("#6B5A86")
     .font("Helvetica-Bold")
-    .text("CERTIFICATE ID", col1X + 32, footerY + 36, { characterSpacing: 1.5 });
+    .text("CERTIFICATE ID", col1X + 30, footerY + 34, { characterSpacing: 1.5 });
   doc
-    .fontSize(9.5)
+    .fontSize(9)
     .fillColor("#231046")
     .font("Helvetica-Bold")
-    .text(certificateId, col1X + 32, footerY + 47);
+    .text(certificateId, col1X + 30, footerY + 44);
 
   if (qrCodeBuffer) {
-    const qrSize = 60;
+    const qrSize = 55;
     const qrX = centerX - qrSize / 2;
-    const qrY = footerY - 6;
+    const qrY = footerY - 4;
 
-    doc.roundedRect(qrX - 4, qrY - 4, qrSize + 8, qrSize + 8, 6).lineWidth(1.5).stroke("#381F66");
+    doc.roundedRect(qrX - 3, qrY - 3, qrSize + 6, qrSize + 6, 5).lineWidth(1.2).stroke("#381F66");
     doc.image(qrCodeBuffer, qrX, qrY, { width: qrSize, height: qrSize });
 
     doc
-      .fontSize(8.5)
+      .fontSize(8)
       .fillColor("#231046")
       .font("Helvetica-Bold")
-      .text("SCAN TO VERIFY", 270, qrY + qrSize + 8, { width: 290, align: "center", characterSpacing: 1.2 });
+      .text("SCAN TO VERIFY", 270, qrY + qrSize + 6, { width: 290, align: "center", characterSpacing: 1.2 });
     doc
-      .fontSize(7.5)
+      .fontSize(7)
       .fillColor("#6E6184")
       .font("Helvetica")
-      .text("Authenticity of this certificate", 270, qrY + qrSize + 19, { width: 290, align: "center" });
+      .text("Authenticity of this certificate", 270, qrY + qrSize + 16, { width: 290, align: "center" });
   }
 
   const sigX = 570;
   const sigW = 200;
 
   doc
-    .fontSize(22)
+    .fontSize(20)
     .fillColor("#1F0E3D")
     .font("Times-BoldItalic")
-    .text("Amit Raikwar", sigX, footerY + 4, { width: sigW, align: "center" });
+    .text("Amit Raikwar", sigX, footerY + 2, { width: sigW, align: "center" });
 
-  doc.moveTo(sigX + 25, footerY + 32).lineTo(sigX + sigW - 25, footerY + 32).lineWidth(1.5).stroke("#2C164D");
+  doc.moveTo(sigX + 25, footerY + 28).lineTo(sigX + sigW - 25, footerY + 28).lineWidth(1.2).stroke("#2C164D");
 
   doc
-    .fontSize(9.5)
+    .fontSize(9)
     .fillColor("#1F0E3D")
     .font("Helvetica-Bold")
-    .text("AMIT KUMAR RAIKWAR", sigX, footerY + 37, { width: sigW, align: "center", characterSpacing: 1 });
+    .text("AMIT KUMAR RAIKWAR", sigX, footerY + 32, { width: sigW, align: "center", characterSpacing: 1 });
 
   doc
-    .fontSize(8)
+    .fontSize(7.5)
     .fillColor("#64537E")
     .font("Helvetica-Bold")
-    .text("FOUNDER & CEO", sigX, footerY + 49, { width: sigW, align: "center", characterSpacing: 1.2 });
+    .text("FOUNDER & CEO", sigX, footerY + 43, { width: sigW, align: "center", characterSpacing: 1.2 });
 
   doc
-    .fontSize(8)
+    .fontSize(7.5)
     .fillColor("#64537E")
     .font("Helvetica")
-    .text("NovaEdge Digital Labs", sigX, footerY + 60, { width: sigW, align: "center" });
+    .text("NovaEdge Digital Labs", sigX, footerY + 53, { width: sigW, align: "center" });
 };
 
 // ── PUPPETEER HTML RENDERER (Used when Chromium binary is present) ─────────────────
@@ -236,7 +236,7 @@ body {
   width: 1123px;
   height: 794px;
   background-color: #FAF8F5;
-  padding: 50px 70px;
+  padding: 40px 70px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -262,17 +262,18 @@ body {
   flex-direction: column;
   justify-content: space-between;
   text-align: center;
-  padding-top: 100px;
+  padding-top: 180px;
+  padding-bottom: 20px;
 }
 
 .title-section {
-  margin: 4px 0;
+  margin: 2px 0;
 }
 
 .main-title {
   font-family: 'Playfair Display', 'Cinzel', Georgia, serif;
   font-weight: 900;
-  font-size: 44px;
+  font-size: 38px;
   color: #1D0C38;
   letter-spacing: -0.01em;
   text-transform: uppercase;
@@ -283,12 +284,12 @@ body {
   align-items: center;
   justify-content: center;
   gap: 12px;
-  margin-top: 6px;
+  margin-top: 4px;
 }
 
 .flourish-line {
   height: 1px;
-  width: 150px;
+  width: 130px;
   background-color: #A393BD;
 }
 
@@ -296,46 +297,46 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 14px;
-  margin: 6px 0;
+  gap: 12px;
+  margin: 4px 0;
 }
 
 .ribbon-banner {
   background-color: #1F0E3D;
   color: #FFFFFF;
-  padding: 11px 52px;
+  padding: 9px 44px;
   clip-path: polygon(0% 0%, 100% 0%, 96.5% 50%, 100% 100%, 0% 100%, 3.5% 50%);
   font-weight: 800;
-  font-size: 15px;
-  letter-spacing: 0.16em;
+  font-size: 13.5px;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 .banner-diamond {
   color: #2B1450;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .recipient-section {
-  margin: 6px 0;
+  margin: 4px 0;
 }
 
 .presented-to {
   font-weight: 800;
-  font-size: 12px;
-  letter-spacing: 0.28em;
+  font-size: 11px;
+  letter-spacing: 0.25em;
   color: #6E5D87;
   text-transform: uppercase;
 }
 
 .student-name {
   font-family: 'Great Vibes', 'Alex Brush', cursive;
-  font-size: 58px;
+  font-size: 52px;
   color: #231046;
   font-weight: 400;
-  line-height: 1.2;
-  margin: 4px 0;
+  line-height: 1.15;
+  margin: 2px 0;
 }
 
 .name-underline {
@@ -343,7 +344,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  width: 400px;
+  width: 360px;
   margin: 0 auto;
 }
 
@@ -361,19 +362,19 @@ body {
 .citation-text {
   font-family: 'Playfair Display', Georgia, serif;
   font-style: italic;
-  font-size: 14.5px;
+  font-size: 13.5px;
   color: #3E334D;
-  max-width: 620px;
-  margin: 10px auto 0;
-  line-height: 1.4;
+  max-width: 600px;
+  margin: 8px auto 0;
+  line-height: 1.35;
 }
 
 .footer-grid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   align-items: center;
-  padding-top: 14px;
-  margin-bottom: 10px;
+  padding-top: 10px;
+  margin-bottom: 5px;
 }
 
 .footer-col {
@@ -385,19 +386,19 @@ body {
   text-align: left;
   border-right: 1px dashed #CBBEE0;
   padding-right: 20px;
-  gap: 12px;
+  gap: 10px;
 }
 
 .meta-item {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .meta-icon-box {
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
   background-color: #381F66;
   color: #FFFFFF;
   display: flex;
@@ -407,8 +408,8 @@ body {
 }
 
 .meta-icon-box svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   fill: none;
   stroke: currentColor;
   stroke-width: 2;
@@ -416,8 +417,8 @@ body {
 
 .meta-label {
   font-weight: 800;
-  font-size: 9.5px;
-  letter-spacing: 0.15em;
+  font-size: 8.5px;
+  letter-spacing: 0.14em;
   color: #6B5A86;
   text-transform: uppercase;
   display: block;
@@ -425,7 +426,7 @@ body {
 
 .meta-value {
   font-weight: 700;
-  font-size: 13px;
+  font-size: 12px;
   color: #231046;
   display: block;
 }
@@ -443,32 +444,32 @@ body {
 }
 
 .qr-frame {
-  padding: 6px;
+  padding: 5px;
   background: white;
-  border: 2px solid #381F66;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  border: 1.5px solid #381F66;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
 }
 
 .qr-img {
-  width: 72px;
-  height: 72px;
+  width: 64px;
+  height: 64px;
   display: block;
 }
 
 .qr-text-top {
   font-weight: 900;
-  font-size: 10px;
+  font-size: 9px;
   color: #231046;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  margin-top: 6px;
+  margin-top: 4px;
 }
 
 .qr-text-sub {
-  font-size: 9px;
+  font-size: 8px;
   color: #6E6184;
-  margin-top: 2px;
+  margin-top: 1px;
 }
 
 .col-right {
@@ -479,37 +480,37 @@ body {
 
 .signature-text {
   font-family: 'Great Vibes', 'Alex Brush', cursive;
-  font-size: 40px;
+  font-size: 34px;
   color: #1F0E3D;
   line-height: 1;
 }
 
 .signature-line {
-  height: 2px;
-  width: 170px;
+  height: 1.5px;
+  width: 150px;
   background-color: #2C164D;
-  margin: 4px auto 6px;
+  margin: 3px auto 4px;
 }
 
 .sig-name {
   font-weight: 900;
-  font-size: 12.5px;
+  font-size: 11.5px;
   color: #1F0E3D;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
 .sig-role {
   font-weight: 700;
-  font-size: 10px;
+  font-size: 9px;
   color: #64537E;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  margin-top: 2px;
+  margin-top: 1px;
 }
 
 .sig-org {
-  font-size: 10px;
+  font-size: 9px;
   color: #64537E;
   font-weight: 500;
   margin-top: 1px;
@@ -525,7 +526,7 @@ body {
       <h1 class="main-title">Certificate of Completion</h1>
       <div class="flourish-row">
         <div class="flourish-line"></div>
-        <svg style="width: 20px; height: 20px; color: #4E3773; fill: currentColor;" viewBox="0 0 24 24">
+        <svg style="width: 18px; height: 18px; color: #4E3773; fill: currentColor;" viewBox="0 0 24 24">
           <path d="M12 3L14.5 8.5L20 11L14.5 13.5L12 19L9.5 13.5L4 11L9.5 8.5L12 3Z"/>
         </svg>
         <div class="flourish-line"></div>
