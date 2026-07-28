@@ -66,7 +66,6 @@ export default function CoursesPage() {
       setError(null);
 
       try {
-        // build query params - backend may ignore unknown params; adjust if needed
         const params = new URLSearchParams();
         if (debouncedQuery) params.set("search", debouncedQuery);
         if (category && category !== "All") params.set("category", category);
@@ -84,10 +83,6 @@ export default function CoursesPage() {
 
         const data = await res.json();
 
-        // expected shapes:
-        // 1) { courses: [...], totalPages: n }
-        // 2) [...courses]
-        // 3) { data: [...] }
         let fetched = [];
         let totalPages = null;
 
@@ -106,7 +101,6 @@ export default function CoursesPage() {
         if (page === 1) {
           setCourses(fetched);
         } else {
-          // append, but avoid duplicates by id
           const existingIds = new Set(courses.map((c) => c._id || c.id));
           const newOnes = fetched.filter(
             (c) => !existingIds.has(c._id || c.id)
@@ -114,11 +108,9 @@ export default function CoursesPage() {
           setCourses((prev) => [...prev, ...newOnes]);
         }
 
-        // determine hasMore
         if (totalPages != null) {
           setHasMore(page < totalPages);
         } else {
-          // if fetched length is 0 or less than a typical page size, stop
           setHasMore(fetched.length > 0);
         }
       } catch (err) {
@@ -249,14 +241,9 @@ export default function CoursesPage() {
           </div>
         )}
 
-        {/* courses grid */}
+        {/* courses grid: 1 col on mobile, 2 cols on PC/Desktop for clean compact cards */}
         {courses.length > 0 && (
-          <div className={cn(
-            "grid gap-6",
-            courses.length === 1 ? "grid-cols-1 max-w-xl mx-auto" :
-              courses.length === 2 ? "grid-cols-1 md:grid-cols-2" :
-                "grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3"
-          )}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             {courses.map((course) => {
               const key =
                 course._id || course.id || course.slug || Math.random();
