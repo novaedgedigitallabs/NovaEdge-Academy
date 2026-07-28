@@ -1,4 +1,19 @@
-import { getCountryMeta } from "@novaedgedigitallabs/citykit";
+/**
+ * Safe loader for @novaedgedigitallabs/citykit to prevent client-side Turbopack/Webpack
+ * from trying to resolve Node's 'fs' module in browser environment.
+ */
+let citykit = null;
+
+function getCityKit() {
+  if (citykit) return citykit;
+  try {
+    if (typeof window === "undefined") {
+      // eval require prevents static analyzer from bundling Node 'fs' into browser bundles
+      citykit = eval('require')("@novaedgedigitallabs/citykit");
+    }
+  } catch (e) {}
+  return citykit;
+}
 
 /**
  * Detect user's country code based on browser locale and timezone
@@ -28,9 +43,12 @@ export function getUserCountry() {
  */
 export function getCurrencyForCountry(countryCode = "IN") {
   try {
-    const meta = getCountryMeta(countryCode.toUpperCase());
-    if (meta && meta.currency) {
-      return meta.currency;
+    const kit = getCityKit();
+    if (kit && typeof kit.getCountryMeta === "function") {
+      const meta = kit.getCountryMeta(countryCode.toUpperCase());
+      if (meta && meta.currency) {
+        return meta.currency;
+      }
     }
   } catch (e) {}
   return "INR";

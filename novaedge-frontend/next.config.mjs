@@ -6,6 +6,8 @@ const __dirname = path.dirname(__filename);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  serverExternalPackages: ["@novaedgedigitallabs/citykit"],
+  turbopack: {},
   images: {
     remotePatterns: [
       {
@@ -48,6 +50,16 @@ const nextConfig = {
   output: 'standalone',
   experimental: {
     optimizePackageImports: ['lucide-react'],
+  },
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        path: false,
+      };
+    }
+    return config;
   },
 };
 
