@@ -164,13 +164,13 @@ const drawCertificateNativePDF = (doc, { studentName, courseName, date, certific
   const sigX = 570;
   const sigW = 200;
 
-  // Real Founder Signature Image
+  // Real Founder Signature Image - Large & Positioned right above the line
   const sigImgPath = path.join(__dirname, "../templates/founder_sign.png");
   const fallbackSigImgPath = path.join(__dirname, "../founder_sign.png");
   const actualSig = fs.existsSync(sigImgPath) ? sigImgPath : (fs.existsSync(fallbackSigImgPath) ? fallbackSigImgPath : null);
 
   if (actualSig) {
-    doc.image(actualSig, sigX + 25, footerY - 22, { fit: [150, 50], align: "center" });
+    doc.image(actualSig, sigX + 15, footerY - 26, { fit: [170, 52], align: "center" });
   } else {
     doc
       .fontSize(20)
@@ -510,12 +510,12 @@ body {
 }
 
 .sig-img {
-  height: 56px;
-  max-width: 180px;
+  height: 58px;
+  max-width: 190px;
   object-fit: contain;
   mix-blend-mode: multiply;
   display: block;
-  margin: 0 auto;
+  margin: 0 auto -6px auto;
 }
 
 .signature-text {

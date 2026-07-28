@@ -174,21 +174,21 @@ export default function CertificateTemplate({
 
                     {/* Right Column: Signature Block */}
                     <div className="flex flex-col items-center justify-end text-center pl-2">
-                        {/* Real Handwritten Founder Signature Image - Increased Size */}
-                        <div className="h-10 sm:h-12 md:h-14 flex items-end justify-center pb-0.5">
+                        {/* Real Handwritten Founder Signature Image - Large & Positioned right on the line */}
+                        <div className="relative flex items-end justify-center w-full h-11 sm:h-14 md:h-16 -mb-1">
                             <img
                                 src={signatureImagePath}
                                 alt="Founder Signature"
-                                className="h-full max-h-14 w-auto object-contain pointer-events-none select-none mix-blend-multiply scale-110"
+                                className="h-full max-h-16 w-auto object-contain pointer-events-none select-none mix-blend-multiply scale-125 transform translate-y-1"
                                 crossOrigin="anonymous"
                             />
                         </div>
 
                         {/* Signature Line */}
-                        <div className="h-[1px] w-full max-w-[120px] sm:max-w-[150px] bg-[#2D1459] my-0.5" />
+                        <div className="h-[1.5px] w-full max-w-[130px] sm:max-w-[160px] bg-[#2D1459] my-0.5 z-10" />
 
                         {/* Signatory Text */}
-                        <span className="block font-black text-[8px] sm:text-[10px] text-[#1C0938] tracking-[0.1em] uppercase">
+                        <span className="block font-black text-[8px] sm:text-[10px] text-[#1C0938] tracking-[0.1em] uppercase mt-0.5">
                             {signatoryName}
                         </span>
                         <span className="block font-bold text-[7px] sm:text-[8px] text-[#634991] tracking-[0.12em] uppercase">
