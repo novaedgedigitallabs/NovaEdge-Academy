@@ -11,6 +11,7 @@ export default function CertificateTemplate({
     certificateId = "NEA-2025-05-0001",
     signatoryName = "Amit Kumar Raikwar",
     signatureImagePath = "/founder_sign.png",
+    sealImagePath = "/seal.png",
     signatoryRole = "FOUNDER & CEO",
     organization = "NovaEdge Digital Labs",
     verificationUrl = "",
@@ -52,8 +53,8 @@ export default function CertificateTemplate({
                 crossOrigin="anonymous"
             />
 
-            {/* Certificate Content Overlay - Starts below NovaEdge Header Logo at 26% top padding */}
-            <div className="relative z-10 flex flex-col justify-between h-full w-full max-w-[85%] mx-auto pt-[26%] sm:pt-[27%] pb-[5%] px-2">
+            {/* Certificate Content Overlay - Starts below NovaEdge Header Logo at 25% top padding */}
+            <div className="relative z-10 flex flex-col justify-between h-full w-full max-w-[86%] mx-auto pt-[24.5%] sm:pt-[25.5%] pb-[4%] px-2">
                 
                 {/* Main Title Section */}
                 <div className="text-center space-y-0.5 sm:space-y-1">
@@ -117,6 +118,16 @@ export default function CertificateTemplate({
                     </div>
                 </div>
 
+                {/* Official Stamp Seal Badge - Fills Vertical Whitespace Gap & Adds Credibility */}
+                <div className="flex items-center justify-center my-0.5 sm:my-1">
+                    <img
+                        src={sealImagePath}
+                        alt="Official NovaEdge Stamp Seal"
+                        className="w-12 h-12 sm:w-16 sm:h-16 md:w-18 md:h-18 object-contain mix-blend-multiply opacity-90 drop-shadow-sm hover:scale-105 transition-transform"
+                        crossOrigin="anonymous"
+                    />
+                </div>
+
                 {/* Footer Section: Date/ID, QR Verification Code & Signatory */}
                 <div className="grid grid-cols-3 gap-2 sm:gap-3 items-end pt-1 sm:pt-2 border-t border-transparent">
                     {/* Left Column: Metadata */}
@@ -157,11 +168,11 @@ export default function CertificateTemplate({
                         <div className="p-1 bg-white border border-[#331766] rounded-md shadow-xs">
                             <QRCodeSVG
                                 value={qrUrl}
-                                size={55}
+                                size={52}
                                 level="H"
                                 fgColor="#1D0C3C"
                                 bgColor="#FFFFFF"
-                                className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14"
+                                className="w-10 h-10 sm:w-12 sm:h-12 md:w-13 md:h-13"
                             />
                         </div>
                         <span className="block font-black text-[7px] sm:text-[8px] text-[#1D0C3C] tracking-[0.1em] uppercase mt-0.5">

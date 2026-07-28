@@ -9,7 +9,8 @@
                     "dist/**",
                     "templates/**",
                     "certificate_background.png",
-                    "founder_sign.png"
+                    "founder_sign.png",
+                    "seal.png"
                 ]
             }
         }

@@ -92,9 +92,18 @@ const drawCertificateNativePDF = (doc, { studentName, courseName, date, certific
       { align: "center", width: 540 }
     );
 
-  // 5. Footer Metadata & Verification (3 Columns)
+  // 5. Official Stamp Seal Badge - Fills Vertical Whitespace Gap
+  const sealPath = path.join(__dirname, "../templates/seal.png");
+  const fallbackSealPath = path.join(__dirname, "../seal.png");
+  const actualSeal = fs.existsSync(sealPath) ? sealPath : (fs.existsSync(fallbackSealPath) ? fallbackSealPath : null);
+
   const footerY = H - 128;
 
+  if (actualSeal) {
+    doc.image(actualSeal, centerX - 26, footerY - 68, { width: 52, height: 52 });
+  }
+
+  // 6. Footer Metadata & Verification (3 Columns)
   doc.save();
   doc.dash(3, { space: 3 });
   doc.moveTo(270, footerY - 5).lineTo(270, H - 32).lineWidth(0.75).stroke("#CBBEE0");
@@ -228,6 +237,19 @@ const getCertificateHTML = ({ studentName, courseName, date, certificateId, qrDa
     console.warn("Could not read signature image for base64 HTML:", e);
   }
 
+  let sealDataUrl = '';
+  try {
+    const sealPath = path.join(__dirname, "../templates/seal.png");
+    const fallbackSealPath = path.join(__dirname, "../seal.png");
+    const actualSeal = fs.existsSync(sealPath) ? sealPath : (fs.existsSync(fallbackSealPath) ? fallbackSealPath : null);
+    if (actualSeal) {
+      const fileData = fs.readFileSync(actualSeal);
+      sealDataUrl = `data:image/png;base64,${fileData.toString("base64")}`;
+    }
+  } catch (e) {
+    console.warn("Could not read seal image for base64 HTML:", e);
+  }
+
   return `<!DOCTYPE html>
 <html>
 <head>
@@ -293,8 +315,8 @@ body {
   flex-direction: column;
   justify-content: space-between;
   text-align: center;
-  padding-top: 180px;
-  padding-bottom: 20px;
+  padding-top: 175px;
+  padding-bottom: 15px;
 }
 
 .title-section {
@@ -398,6 +420,16 @@ body {
   max-width: 600px;
   margin: 8px auto 0;
   line-height: 1.35;
+}
+
+.official-seal-img {
+  width: 60px;
+  height: 60px;
+  margin: 4px auto 0;
+  display: block;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+  opacity: 0.9;
 }
 
 .footer-grid {
@@ -589,6 +621,8 @@ body {
       </div>
       <p class="citation-text">for successfully completing the course and demonstrating dedication, knowledge, and excellence in the subject matter.</p>
     </div>
+
+    ${sealDataUrl ? `<img src="${sealDataUrl}" class="official-seal-img" />` : ''}
 
     <div class="footer-grid">
       <div class="footer-col col-left">
