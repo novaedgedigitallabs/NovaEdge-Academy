@@ -6,47 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare, Calendar, Github, Plus, CheckCircle2, Clock, User, Loader2, Sparkles, ExternalLink, Video, Link as LinkIcon } from "lucide-react";
+import { MessageSquare, Calendar, Github, Plus, CheckCircle2, Clock, User, Loader2, Sparkles, ExternalLink, Video, Link as LinkIcon, CalendarX } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/context/auth-context";
 
-const DEFAULT_EVENTS = [
-    {
-        id: "evt-1",
-        title: "Full Stack Workshop: Building Scalable Apps",
-        description: "Join us for a deep dive into modern backend architecture, microservices, and frontend performance optimizations.",
-        date: "Dec 11, 2025",
-        time: "7:00 PM IST",
-        category: "Workshop",
-        speaker: "Sarah Johnson",
-        joinUrl: "https://discord.gg/novaedge-live-stage"
-    },
-    {
-        id: "evt-2",
-        title: "System Design & Distributed Systems",
-        description: "Learn how high-traffic platforms handle millions of requests using Redis caching, Kafka, and sharded databases.",
-        date: "Dec 15, 2025",
-        time: "6:00 PM IST",
-        category: "Masterclass",
-        speaker: "David Chen",
-        joinUrl: "https://meet.google.com/novaedge-system-design"
-    },
-    {
-        id: "evt-3",
-        title: "AI & LLM Integration in Web Apps",
-        description: "Explore building production AI agents, prompt optimization, RAG pipelines, and vector database integrations.",
-        date: "Dec 20, 2025",
-        time: "8:00 PM IST",
-        category: "Webinar",
-        speaker: "Alex Rivera",
-        joinUrl: "https://discord.gg/novaedge-ai-workshop"
-    }
-];
-
 export default function CommunityPage() {
     const { user } = useAuth();
-    const [events, setEvents] = useState(DEFAULT_EVENTS);
+    const [events, setEvents] = useState([]);
     const [registeredEvents, setRegisteredEvents] = useState({});
     const [loadingRegister, setLoadingRegister] = useState({});
     const [selectedEvent, setSelectedEvent] = useState(null);
@@ -66,9 +33,7 @@ export default function CommunityPage() {
     useEffect(() => {
         if (typeof window !== "undefined") {
             const customEvents = JSON.parse(localStorage.getItem("novaedge_community_events") || "[]");
-            if (customEvents.length > 0) {
-                setEvents([...customEvents, ...DEFAULT_EVENTS]);
-            }
+            setEvents(customEvents);
 
             const savedRegs = JSON.parse(localStorage.getItem("novaedge_event_registrations") || "{}");
             setRegisteredEvents(savedRegs);
@@ -138,7 +103,7 @@ export default function CommunityPage() {
                 category: newEventCategory,
                 description: newEventDescription.trim(),
                 speaker: newEventSpeaker.trim() || user?.name || "Community Host",
-                joinUrl: newEventJoinUrl.trim() || "https://discord.gg/novaedge-live-stage"
+                joinUrl: newEventJoinUrl.trim() || "https://discord.gg"
             };
 
             const updatedEvents = [createdEvent, ...events];
@@ -233,80 +198,99 @@ export default function CommunityPage() {
                         </Button>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                        {events.map((event) => {
-                            const isRegistered = !!registeredEvents[event.id];
-                            const isLoading = !!loadingRegister[event.id];
+                    {events.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                            {events.map((event) => {
+                                const isRegistered = !!registeredEvents[event.id];
+                                const isLoading = !!loadingRegister[event.id];
 
-                            return (
-                                <div 
-                                    key={event.id} 
-                                    onClick={() => setSelectedEvent(event)}
-                                    className="group relative overflow-hidden rounded-2xl glass-card border border-white/10 flex flex-col justify-between cursor-pointer"
-                                >
-                                    <div className="p-5 space-y-3">
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-1.5 text-xs font-bold text-primary">
-                                                <Calendar className="w-3.5 h-3.5" />
-                                                <span>{event.date}</span>
+                                return (
+                                    <div 
+                                        key={event.id} 
+                                        onClick={() => setSelectedEvent(event)}
+                                        className="group relative overflow-hidden rounded-2xl glass-card border border-white/10 flex flex-col justify-between cursor-pointer"
+                                    >
+                                        <div className="p-5 space-y-3">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-1.5 text-xs font-bold text-primary">
+                                                    <Calendar className="w-3.5 h-3.5" />
+                                                    <span>{event.date}</span>
+                                                </div>
+                                                <Badge variant="outline" className="text-[10px] font-semibold border-border/60">
+                                                    {event.category || "Workshop"}
+                                                </Badge>
                                             </div>
-                                            <Badge variant="outline" className="text-[10px] font-semibold border-border/60">
-                                                {event.category || "Workshop"}
-                                            </Badge>
-                                        </div>
 
-                                        <h3 className="text-base font-bold text-foreground group-hover:text-primary transition-colors leading-snug">
-                                            {event.title}
-                                        </h3>
-                                        
-                                        <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-                                            {event.description}
-                                        </p>
+                                            <h3 className="text-base font-bold text-foreground group-hover:text-primary transition-colors leading-snug">
+                                                {event.title}
+                                            </h3>
+                                            
+                                            <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+                                                {event.description}
+                                            </p>
 
-                                        <div className="flex items-center gap-3 pt-2 text-[11px] text-muted-foreground border-t border-border/40">
-                                            <span className="flex items-center gap-1">
-                                                <Clock className="w-3 h-3 text-primary" /> {event.time}
-                                            </span>
-                                            {event.speaker && (
-                                                <span className="flex items-center gap-1 truncate">
-                                                    <User className="w-3 h-3 text-purple-400" /> {event.speaker}
+                                            <div className="flex items-center gap-3 pt-2 text-[11px] text-muted-foreground border-t border-border/40">
+                                                <span className="flex items-center gap-1">
+                                                    <Clock className="w-3 h-3 text-primary" /> {event.time}
                                                 </span>
-                                            )}
+                                                {event.speaker && (
+                                                    <span className="flex items-center gap-1 truncate">
+                                                        <User className="w-3 h-3 text-purple-400" /> {event.speaker}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="p-4 border-t border-border/40 bg-secondary/20 flex items-center justify-between">
+                                            <span className="text-[10px] font-semibold text-muted-foreground">
+                                                {isRegistered ? "Click to view link" : "Seats available"}
+                                            </span>
+                                            <Button 
+                                                size="sm"
+                                                disabled={isLoading}
+                                                onClick={(e) => handleRegister(event, e)}
+                                                className={`rounded-full text-xs font-bold px-4 h-8 transition-all cursor-pointer flex items-center gap-1.5 ${
+                                                    isRegistered 
+                                                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30" 
+                                                        : "bg-primary hover:bg-primary/90 text-primary-foreground shadow-md"
+                                                }`}
+                                            >
+                                                {isLoading ? (
+                                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                                ) : isRegistered ? (
+                                                    <>
+                                                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                                                        Registered ✓
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        Register Now &rarr;
+                                                    </>
+                                                )}
+                                            </Button>
                                         </div>
                                     </div>
-
-                                    <div className="p-4 border-t border-border/40 bg-secondary/20 flex items-center justify-between">
-                                        <span className="text-[10px] font-semibold text-muted-foreground">
-                                            {isRegistered ? "Click to view link" : "Seats available"}
-                                        </span>
-                                        <Button 
-                                            size="sm"
-                                            disabled={isLoading}
-                                            onClick={(e) => handleRegister(event, e)}
-                                            className={`rounded-full text-xs font-bold px-4 h-8 transition-all cursor-pointer flex items-center gap-1.5 ${
-                                                isRegistered 
-                                                    ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30" 
-                                                    : "bg-primary hover:bg-primary/90 text-primary-foreground shadow-md"
-                                            }`}
-                                        >
-                                            {isLoading ? (
-                                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                            ) : isRegistered ? (
-                                                <>
-                                                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                                                    Registered ✓
-                                                </>
-                                            ) : (
-                                                <>
-                                                    Register Now &rarr;
-                                                </>
-                                            )}
-                                        </Button>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <div className="p-10 text-center flex flex-col items-center justify-center gap-3 rounded-2xl glass-card border border-white/10 my-4">
+                            <div className="h-14 w-14 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+                                <CalendarX className="w-7 h-7" />
+                            </div>
+                            <div className="space-y-1 max-w-sm">
+                                <h3 className="text-base font-bold text-foreground">No upcoming events scheduled</h3>
+                                <p className="text-xs text-muted-foreground">Publish a workshop, hackathon, or meetup for community members.</p>
+                            </div>
+                            <Button 
+                                onClick={() => setIsAddEventOpen(true)}
+                                size="sm"
+                                className="rounded-full gap-1.5 font-bold text-xs h-9 px-5 bg-primary text-primary-foreground shadow-md cursor-pointer mt-1"
+                            >
+                                <Plus className="w-4 h-4" /> Publish First Event
+                            </Button>
+                        </div>
+                    )}
                 </div>
             </div>
 
