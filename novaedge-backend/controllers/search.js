@@ -74,7 +74,7 @@ exports.globalSearch = async (req, res) => {
 
         // Search Users (by name, username, or email)
         if (!type || type === "user") {
-            const cleanQuery = q.trim().replace(/^@/, "");
+            const cleanQuery = q.trim().replace(/^@/, "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
             const userRegex = new RegExp(cleanQuery, "i");
             searchPromises.push(
                 User.find({
@@ -88,6 +88,7 @@ exports.globalSearch = async (req, res) => {
                     .limit(limit)
                     .lean()
                     .then(results => results.map(r => ({ ...r, type: "user", score: 1 })))
+                    .catch(() => [])
             );
         }
 
@@ -107,6 +108,7 @@ exports.globalSearch = async (req, res) => {
             page: parseInt(page),
             pages: Math.ceil(total / limit),
             data: paginatedResults,
+            results: paginatedResults,
         });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });

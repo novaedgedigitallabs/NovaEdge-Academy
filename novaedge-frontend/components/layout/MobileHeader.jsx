@@ -93,13 +93,15 @@ export default function MobileHeader() {
       setSearching(true);
       try {
         const res = await apiGet(`/api/v1/search?q=${encodeURIComponent(searchQuery.trim())}`);
-        if (res.success && Array.isArray(res.results)) {
-          setSearchResults(res.results);
+        const items = res.data || res.results;
+        if (res.success && Array.isArray(items)) {
+          setSearchResults(items);
         } else {
           setSearchResults([]);
         }
       } catch (err) {
         console.error("Search error", err);
+        setSearchResults([]);
       } finally {
         setSearching(false);
       }
@@ -303,18 +305,10 @@ export default function MobileHeader() {
       <Dialog open={isSearchOpen} onOpenChange={setIsSearchOpen}>
         <DialogContent className="sm:max-w-lg p-4 bg-[#0b0e17] border border-border rounded-2xl shadow-2xl">
           <div className="space-y-4">
-            <div className="flex items-center justify-between border-b border-border/60 pb-2.5">
+            <div className="flex items-center justify-between border-b border-border/60 pb-2.5 pr-8">
               <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
                 <Search className="w-4 h-4 text-primary" /> Global Search
               </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsSearchOpen(false)}
-                className="h-6 text-xs text-muted-foreground hover:text-foreground"
-              >
-                Close
-              </Button>
             </div>
 
             <div className="relative">
@@ -336,30 +330,44 @@ export default function MobileHeader() {
                   <Loader2 className="w-4 h-4 animate-spin text-primary" /> Searching...
                 </div>
               ) : searchResults.length > 0 ? (
-                searchResults.map((item, idx) => (
-                  <div
-                    key={item._id || idx}
-                    onClick={() => {
-                      setIsSearchOpen(false);
-                      setSearchQuery("");
-                      if (item.type === "user") router.push(`/${item.username || item._id}`);
-                      else if (item.type === "course") router.push(`/courses/${item.slug || item._id}`);
-                      else if (item.type === "mentor") router.push(`/mentors`);
-                      else if (item.type === "blog") router.push(`/blog/${item.slug || item._id}`);
-                    }}
-                    className="p-3 hover:bg-primary/10 transition-colors cursor-pointer flex items-center justify-between text-xs"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs uppercase">
-                        {item.type?.[0] || "S"}
-                      </div>
-                      <div>
-                        <p className="font-bold text-foreground">{item.name || item.title}</p>
-                        <p className="text-[10px] text-muted-foreground capitalize">{item.type} · {item.subtitle || "NovaEdge"}</p>
+                searchResults.map((item, idx) => {
+                  const title = item.name || item.title;
+                  const avatarUrl = item.avatar?.url || item.image || item.poster?.url;
+                  const subtitle = item.username ? `@${item.username}` : item.role || item.category || item.subtitle || "NovaEdge";
+
+                  return (
+                    <div
+                      key={item._id || idx}
+                      onClick={() => {
+                        setIsSearchOpen(false);
+                        setSearchQuery("");
+                        if (item.type === "user") router.push(item.username ? `/${item.username}` : `/user/${item._id}`);
+                        else if (item.type === "course") router.push(`/courses/${item.slug || item._id}`);
+                        else if (item.type === "mentor") router.push(`/mentors`);
+                        else if (item.type === "blog") router.push(`/blog/${item.slug || item._id}`);
+                      }}
+                      className="p-3 hover:bg-primary/10 transition-colors cursor-pointer flex items-center justify-between text-xs rounded-lg"
+                    >
+                      <div className="flex items-center gap-3">
+                        {avatarUrl ? (
+                          <img
+                            src={avatarUrl}
+                            alt={title}
+                            className="w-8 h-8 rounded-full object-cover border border-border/40"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs uppercase">
+                            {title?.[0] || item.type?.[0] || "S"}
+                          </div>
+                        )}
+                        <div>
+                          <p className="font-bold text-foreground">{title}</p>
+                          <p className="text-[10px] text-muted-foreground capitalize">{item.type} · {subtitle}</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               ) : searchQuery.trim() ? (
                 <div className="p-6 text-center text-xs text-muted-foreground">
                   No matching results found.
