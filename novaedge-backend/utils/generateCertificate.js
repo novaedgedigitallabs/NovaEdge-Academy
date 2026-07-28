@@ -17,134 +17,82 @@ const drawCertificateNativePDF = (doc, { studentName, courseName, date, certific
   const H = doc.page.height;  // 595.28
   const centerX = W / 2;
 
-  // 1. Paper Background (Warm Off-White / Ivory Cream)
-  doc.rect(0, 0, W, H).fill("#FAF8F5");
+  // 1. Draw High-Res Certificate Background Image
+  const bgPath = path.join(__dirname, "../templates/certificate_background.png");
+  const fallbackBgPath = path.join(__dirname, "../certificate_background.png");
+  const actualBg = fs.existsSync(bgPath) ? bgPath : (fs.existsSync(fallbackBgPath) ? fallbackBgPath : null);
 
-  // 2. Outer Royal Purple Border Frame
-  const B = 14;
-  doc.rect(B, B, W - B * 2, H - B * 2).fill("#2A144E");
+  if (actualBg) {
+    doc.image(actualBg, 0, 0, { width: W, height: H });
+  } else {
+    // Fallback background color if image isn't found
+    doc.rect(0, 0, W, H).fill("#FAF8F5");
+  }
 
-  const gap = 20;
-  doc.rect(B + gap, B + gap, W - (B + gap) * 2, H - (B + gap) * 2).fill("#FAF8F5");
-
-  // Double Fine Inner Border Lines
-  doc.rect(B + gap + 8, B + gap + 8, W - (B + gap + 8) * 2, H - (B + gap + 8) * 2)
-     .lineWidth(1.5)
-     .stroke("#381D63");
-
-  doc.rect(B + gap + 12, B + gap + 12, W - (B + gap + 12) * 2, H - (B + gap + 12) * 2)
-     .lineWidth(1.0)
-     .stroke("#381D63");
-
-  // Scalloped corner accents
-  const c1 = B + gap + 12;
-  const c2 = W - (B + gap + 12);
-  const c3 = H - (B + gap + 12);
-  const r = 24;
-
-  doc.lineWidth(1.2).strokeColor("#381D63");
-  doc.moveTo(c1, c1 + r).bezierCurveTo(c1 + r, c1 + r, c1 + r, c1, c1 + r, c1).stroke();
-  doc.moveTo(c2, c1 + r).bezierCurveTo(c2 - r, c1 + r, c2 - r, c1, c2 - r, c1).stroke();
-  doc.moveTo(c1, c3 - r).bezierCurveTo(c1 + r, c3 - r, c1 + r, c3, c1 + r, c3).stroke();
-  doc.moveTo(c2, c3 - r).bezierCurveTo(c2 - r, c3 - r, c2 - r, c3, c2 - r, c3).stroke();
-
-  // 3. Header Section (Logo & Brand Name)
-  const logoY = 48;
-  const hexX = centerX - 95;
-  const hexY = logoY + 12;
-  const size = 14;
-  doc.save();
-  doc.lineWidth(2).strokeColor("#2A134E");
-  doc.polygon(
-    [hexX, hexY - size],
-    [hexX + size * 0.866, hexY - size * 0.5],
-    [hexX + size * 0.866, hexY + size * 0.5],
-    [hexX, hexY + size],
-    [hexX - size * 0.866, hexY + size * 0.5],
-    [hexX - size * 0.866, hexY - size * 0.5]
-  ).stroke();
-  doc.circle(hexX, hexY, 3).fill("#2A134E");
-  doc.restore();
-
+  // 2. Main Title Section (Positioned cleanly below top logo in background image)
   doc
-    .fontSize(16)
-    .fillColor("#241045")
-    .font("Helvetica-Bold")
-    .text("NOVAEDGE", centerX - 72, logoY, { characterSpacing: 3, lineBreak: false });
-
-  doc
-    .fontSize(8.5)
-    .fillColor("#584577")
-    .font("Helvetica-Bold")
-    .text("DIGITAL LABS", centerX - 72, logoY + 19, { characterSpacing: 4.5, lineBreak: false });
-
-  doc.moveTo(centerX - 120, logoY + 36).lineTo(centerX + 120, logoY + 36).lineWidth(0.5).stroke("#8E7AA8");
-  doc.circle(centerX, logoY + 36, 2).fill("#8E7AA8");
-
-  // 4. Main Title Section
-  doc
-    .fontSize(32)
+    .fontSize(30)
     .fillColor("#1D0C38")
     .font("Times-Bold")
-    .text("Certificate of Completion", 0, 108, { align: "center" });
+    .text("Certificate of Completion", 0, 105, { align: "center" });
 
-  doc.moveTo(centerX - 130, 148).lineTo(centerX + 130, 148).lineWidth(0.8).stroke("#A393BD");
-  doc.polygon([centerX - 4, 148], [centerX, 144], [centerX + 4, 148], [centerX, 152]).fill("#4E3773");
+  doc.moveTo(centerX - 130, 142).lineTo(centerX + 130, 142).lineWidth(0.8).stroke("#52338B");
+  doc.polygon([centerX - 4, 142], [centerX, 138], [centerX + 4, 142], [centerX, 146]).fill("#52338B");
 
-  // 5. Ribbon Banner Course Title
-  const bannerY = 166;
+  // 3. Ribbon Banner Course Title
+  const bannerY = 158;
   const courseUpper = (courseName || "ADVANCED FULL STACK WEB DEVELOPMENT").toUpperCase();
-  doc.font("Helvetica-Bold").fontSize(12);
+  doc.font("Helvetica-Bold").fontSize(10.5);
   const textWidth = doc.widthOfString(courseUpper, { characterSpacing: 1.5 });
   const bannerW = Math.max(340, Math.min(680, textWidth + 80));
   const bannerX = centerX - bannerW / 2;
 
-  doc.polygon([bannerX - 16, bannerY + 15], [bannerX - 11, bannerY + 10], [bannerX - 6, bannerY + 15], [bannerX - 11, bannerY + 20]).fill("#2B1450");
-  doc.polygon([bannerX + bannerW + 6, bannerY + 15], [bannerX + bannerW + 11, bannerY + 10], [bannerX + bannerW + 16, bannerY + 15], [bannerX + bannerW + 11, bannerY + 20]).fill("#2B1450");
+  doc.polygon([bannerX - 16, bannerY + 14], [bannerX - 11, bannerY + 9], [bannerX - 6, bannerY + 14], [bannerX - 11, bannerY + 19]).fill("#2B1450");
+  doc.polygon([bannerX + bannerW + 6, bannerY + 14], [bannerX + bannerW + 11, bannerY + 9], [bannerX + bannerW + 16, bannerY + 14], [bannerX + bannerW + 11, bannerY + 19]).fill("#2B1450");
 
   doc.save();
-  doc.path(`M ${bannerX} ${bannerY} L ${bannerX + bannerW} ${bannerY} L ${bannerX + bannerW - 10} ${bannerY + 15} L ${bannerX + bannerW} ${bannerY + 30} L ${bannerX} ${bannerY + 30} L ${bannerX + 10} ${bannerY + 15} Z`)
+  doc.path(`M ${bannerX} ${bannerY} L ${bannerX + bannerW} ${bannerY} L ${bannerX + bannerW - 10} ${bannerY + 14} L ${bannerX + bannerW} ${bannerY + 28} L ${bannerX} ${bannerY + 28} L ${bannerX + 10} ${bannerY + 14} Z`)
      .fill("#1F0E3D");
   doc.restore();
 
   doc
-    .fontSize(11)
+    .fontSize(10)
     .fillColor("#FFFFFF")
     .font("Helvetica-Bold")
-    .text(courseUpper, bannerX + 10, bannerY + 9, {
+    .text(courseUpper, bannerX + 10, bannerY + 8, {
       width: bannerW - 20,
       align: "center",
       characterSpacing: 1.5
     });
 
-  // 6. Recipient Section
+  // 4. Recipient Section
   doc
-    .fontSize(9.5)
+    .fontSize(9)
     .fillColor("#6E5D87")
     .font("Helvetica-Bold")
-    .text("PRESENTED TO", 0, 218, { align: "center", characterSpacing: 3 });
+    .text("PRESENTED TO", 0, 208, { align: "center", characterSpacing: 3 });
 
   doc
-    .fontSize(38)
+    .fontSize(36)
     .fillColor("#231046")
     .font("Times-BoldItalic")
-    .text(studentName || "Your Name Here", 0, 236, { align: "center" });
+    .text(studentName || "Your Name Here", 0, 224, { align: "center" });
 
-  doc.moveTo(centerX - 160, 284).lineTo(centerX + 160, 284).lineWidth(0.75).stroke("#7E6C9E");
-  doc.polygon([centerX - 3, 284], [centerX, 281], [centerX + 3, 284], [centerX, 287]).fill("#7E6C9E");
+  doc.moveTo(centerX - 160, 270).lineTo(centerX + 160, 270).lineWidth(0.75).stroke("#7E6C9E");
+  doc.polygon([centerX - 3, 270], [centerX, 267], [centerX + 3, 270], [centerX, 273]).fill("#7E6C9E");
 
   doc
-    .fontSize(11.5)
+    .fontSize(11)
     .fillColor("#3E334D")
     .font("Times-Italic")
     .text(
       "for successfully completing the course and demonstrating dedication, knowledge, and excellence in the subject matter.",
       centerX - 270,
-      294,
+      280,
       { align: "center", width: 540 }
     );
 
-  // 7. Footer Metadata & Verification (3 Columns)
+  // 5. Footer Metadata & Verification (3 Columns)
   const footerY = H - 138;
 
   doc.save();
@@ -236,6 +184,19 @@ const drawCertificateNativePDF = (doc, { studentName, courseName, date, certific
 
 // ── PUPPETEER HTML RENDERER (Used when Chromium binary is present) ─────────────────
 const getCertificateHTML = ({ studentName, courseName, date, certificateId, qrDataUrl }) => {
+  let bgDataUrl = '';
+  try {
+    const bgPath = path.join(__dirname, "../templates/certificate_background.png");
+    const fallbackBgPath = path.join(__dirname, "../certificate_background.png");
+    const actualBg = fs.existsSync(bgPath) ? bgPath : (fs.existsSync(fallbackBgPath) ? fallbackBgPath : null);
+    if (actualBg) {
+      const fileData = fs.readFileSync(actualBg);
+      bgDataUrl = `data:image/png;base64,${fileData.toString("base64")}`;
+    }
+  } catch (e) {
+    console.warn("Could not read bg image for base64 HTML:", e);
+  }
+
   return `<!DOCTYPE html>
 <html>
 <head>
@@ -275,20 +236,22 @@ body {
   width: 1123px;
   height: 794px;
   background-color: #FAF8F5;
-  padding: 60px 80px;
+  padding: 50px 70px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   box-sizing: border-box;
 }
 
-.border-overlay {
+.bg-img-overlay {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
+  object-fit: fill;
   pointer-events: none;
+  z-index: 0;
 }
 
 .content {
@@ -299,79 +262,20 @@ body {
   flex-direction: column;
   justify-content: space-between;
   text-align: center;
-}
-
-.header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  margin-top: 10px;
-}
-
-.logo-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.logo-svg {
-  width: 44px;
-  height: 44px;
-  fill: #2A134E;
-}
-
-.brand-title {
-  font-weight: 900;
-  font-size: 24px;
-  color: #241045;
-  letter-spacing: 0.22em;
-  line-height: 1;
-}
-
-.brand-subtitle {
-  font-weight: 600;
-  font-size: 11px;
-  color: #584577;
-  letter-spacing: 0.38em;
-  margin-top: 3px;
-}
-
-.header-divider {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 280px;
-  margin-top: 6px;
-}
-
-.divider-line {
-  height: 1px;
-  flex-grow: 1;
-  background: linear-gradient(to right, transparent, #8E7AA8, #8E7AA8);
-}
-.divider-line-right {
-  height: 1px;
-  flex-grow: 1;
-  background: linear-gradient(to left, transparent, #8E7AA8, #8E7AA8);
-}
-
-.diamond-node {
-  font-size: 10px;
-  color: #8E7AA8;
+  padding-top: 100px;
 }
 
 .title-section {
-  margin: 6px 0;
+  margin: 4px 0;
 }
 
 .main-title {
   font-family: 'Playfair Display', 'Cinzel', Georgia, serif;
   font-weight: 900;
-  font-size: 46px;
+  font-size: 44px;
   color: #1D0C38;
   letter-spacing: -0.01em;
+  text-transform: uppercase;
 }
 
 .flourish-row {
@@ -614,72 +518,9 @@ body {
 </head>
 <body>
 <div class="certificate-card">
-  <svg class="border-overlay" viewBox="0 0 1123 794" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <pattern id="guilloche-pattern" width="30" height="30" patternUnits="userSpaceOnUse">
-        <path d="M 0 15 C 7.5 0, 22.5 30, 30 15" fill="none" stroke="#3A1E66" stroke-width="1.2" opacity="0.85" />
-        <path d="M 0 15 C 7.5 30, 22.5 0, 30 15" fill="none" stroke="#3A1E66" stroke-width="1.2" opacity="0.85" />
-        <path d="M 0 7.5 C 7.5 22.5, 22.5 -7.5, 30 7.5" fill="none" stroke="#54338A" stroke-width="0.8" opacity="0.6" />
-        <path d="M 0 22.5 C 7.5 37.5, 22.5 7.5, 30 22.5" fill="none" stroke="#54338A" stroke-width="0.8" opacity="0.6" />
-        <path d="M 0 0 L 30 30 M 0 30 L 30 0" fill="none" stroke="#261047" stroke-width="0.4" opacity="0.3" />
-      </pattern>
-    </defs>
-    <rect x="16" y="16" width="1091" height="762" fill="url(#guilloche-pattern)" stroke="#261148" stroke-width="2.5" />
-    <rect x="42" y="42" width="1039" height="710" fill="#FAF8F5" stroke="#261148" stroke-width="2" />
-    <rect x="52" y="52" width="1019" height="690" fill="none" stroke="#381D63" stroke-width="1.5" />
-    <rect x="56" y="56" width="1011" height="682" fill="none" stroke="#381D63" stroke-width="1" />
-    <g stroke="#381D63" fill="none">
-      <path d="M 56 90 C 74 90, 90 74, 90 56" stroke-width="1.8" />
-      <path d="M 56 80 C 69 80, 80 69, 80 56" stroke-width="1.2" />
-      <circle cx="90" cy="56" r="2.5" fill="#381D63" />
-      <circle cx="56" cy="90" r="2.5" fill="#381D63" />
-    </g>
-    <g stroke="#381D63" fill="none">
-      <path d="M 1067 90 C 1049 90, 1033 74, 1033 56" stroke-width="1.8" />
-      <path d="M 1067 80 C 1054 80, 1043 69, 1043 56" stroke-width="1.2" />
-      <circle cx="1033" cy="56" r="2.5" fill="#381D63" />
-      <circle cx="1067" cy="90" r="2.5" fill="#381D63" />
-    </g>
-    <g stroke="#381D63" fill="none">
-      <path d="M 56 704 C 74 704, 90 720, 90 738" stroke-width="1.8" />
-      <path d="M 56 714 C 69 714, 80 725, 80 738" stroke-width="1.2" />
-      <circle cx="90" cy="738" r="2.5" fill="#381D63" />
-      <circle cx="56" cy="704" r="2.5" fill="#381D63" />
-    </g>
-    <g stroke="#381D63" fill="none">
-      <path d="M 1067 704 C 1049 704, 1033 720, 1033 738" stroke-width="1.8" />
-      <path d="M 1067 714 C 1054 714, 1043 725, 1043 738" stroke-width="1.2" />
-      <circle cx="1033" cy="738" r="2.5" fill="#381D63" />
-      <circle cx="1067" cy="704" r="2.5" fill="#381D63" />
-    </g>
-  </svg>
+  ${bgDataUrl ? `<img src="${bgDataUrl}" class="bg-img-overlay" />` : ''}
 
   <div class="content">
-    <div class="header">
-      <div class="logo-row">
-        <svg viewBox="0 0 100 100" class="logo-svg">
-          <polygon points="50 5, 90 27.5, 90 72.5, 50 95, 10 72.5, 10 27.5" fill="none" stroke="currentColor" stroke-width="6"/>
-          <path d="M 50 18 L 75 32 L 75 62 L 50 76 L 25 62 L 25 32 Z" fill="none" stroke="currentColor" stroke-width="4"/>
-          <circle cx="50" cy="50" r="8"/>
-          <line x1="50" y1="18" x2="50" y2="42" stroke="currentColor" stroke-width="4"/>
-          <line x1="25" y1="32" x2="42" y2="42" stroke="currentColor" stroke-width="4"/>
-          <line x1="75" y1="32" x2="58" y2="42" stroke="currentColor" stroke-width="4"/>
-          <line x1="25" y1="62" x2="42" y2="58" stroke="currentColor" stroke-width="4"/>
-          <line x1="75" y1="62" x2="58" y2="58" stroke="currentColor" stroke-width="4"/>
-          <circle cx="50" cy="18" r="4"/><circle cx="25" cy="32" r="4"/><circle cx="75" cy="32" r="4"/><circle cx="25" cy="62" r="4"/><circle cx="75" cy="62" r="4"/>
-        </svg>
-        <div style="text-align: left;">
-          <div class="brand-title">NOVAEDGE</div>
-          <div class="brand-subtitle">DIGITAL LABS</div>
-        </div>
-      </div>
-      <div class="header-divider">
-        <div class="divider-line"></div>
-        <span class="diamond-node">◆</span>
-        <div class="divider-line-right"></div>
-      </div>
-    </div>
-
     <div class="title-section">
       <h1 class="main-title">Certificate of Completion</h1>
       <div class="flourish-row">
@@ -860,7 +701,7 @@ const generateCertificate = async (studentName, courseName, date, certificateId,
       const tmpDir = os.tmpdir();
       const fileName = `cert-${certificateId}.pdf`;
       const filePath = path.join(tmpDir, fileName);
-      fs.writeFileSync(filePath, pdfBuffer);
+      fs.writeFileSync(filePath, tmpDir, fileName);
       return filePath;
     } catch (e) {
       console.warn("Puppeteer generateCertificate failed, using PDFKit:", e.message);

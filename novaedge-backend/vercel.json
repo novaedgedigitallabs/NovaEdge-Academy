@@ -6,7 +6,9 @@
             "use": "@vercel/node",
             "config": {
                 "includeFiles": [
-                    "dist/**"
+                    "dist/**",
+                    "templates/**",
+                    "certificate_background.png"
                 ]
             }
         }
