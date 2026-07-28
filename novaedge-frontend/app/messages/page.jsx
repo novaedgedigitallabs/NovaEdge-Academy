@@ -14,12 +14,11 @@ import AppLayout from "@/components/layout/AppLayout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Send, MessageSquare, Bot, ArrowLeft, UserCheck, UserX, UserPlus, Search } from "lucide-react";
+import { Loader2, Send, MessageSquare, Bot, ArrowLeft, UserCheck, UserX, UserPlus, Search, Image as ImageIcon, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import MarkdownRenderer from "@/components/ui/markdown-renderer";
 import { toast } from "sonner";
+import { compressImage } from "@/lib/image-compressor";
 
 import { Suspense } from "react";
 
@@ -34,12 +33,17 @@ function MessagesContent() {
     const [selectedFriend, setSelectedFriend] = useState(null);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [isCompressing, setIsCompressing] = useState(false);
     const [loadingFriends, setLoadingFriends] = useState(true);
     const [loadingRequests, setLoadingRequests] = useState(true);
     const [loadingMessages, setLoadingMessages] = useState(false);
+    const [sending, setSending] = useState(false);
     const [showAiSuggestion, setShowAiSuggestion] = useState(false);
     const [activeTab, setActiveTab] = useState("friends"); // "friends" | "requests"
+    
     const messagesContainerRef = useRef(null);
+    const fileInputRef = useRef(null);
 
     // Fetch friends list & pending friend requests
     const fetchFriendsData = async () => {
@@ -138,30 +142,63 @@ function MessagesContent() {
         }
     };
 
+    // Client-side image compress & select handler
+    const handleImageChange = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (!file.type.startsWith("image/")) {
+            toast.error("Please select a valid image file");
+            return;
+        }
+
+        setIsCompressing(true);
+        try {
+            const compressedBase64 = await compressImage(file, 1000, 0.75);
+            setSelectedImage(compressedBase64);
+            toast.success("Image attached & optimized");
+        } catch (err) {
+            console.error("Compression error:", err);
+            toast.error("Failed to process image");
+        } finally {
+            setIsCompressing(false);
+            if (fileInputRef.current) fileInputRef.current.value = "";
+        }
+    };
+
     const handleSendMessage = async (e) => {
         e.preventDefault();
-        if (!newMessage.trim() || !selectedFriend) return;
+        if ((!newMessage.trim() && !selectedImage) || !selectedFriend || sending) return;
+
+        const imageToSend = selectedImage;
+        const textToSend = newMessage.trim();
 
         const tempMessage = {
             _id: Date.now(),
             sender: user._id,
             receiver: selectedFriend._id,
-            message: newMessage,
+            message: textToSend,
+            image: imageToSend ? { url: imageToSend } : undefined,
             createdAt: new Date(),
             temp: true
         };
 
         setMessages(prev => [...prev, tempMessage]);
         setNewMessage("");
+        setSelectedImage(null);
         setShowAiSuggestion(false);
+        setSending(true);
 
         try {
-            const res = await sendMessage(selectedFriend._id, tempMessage.message);
+            const res = await sendMessage(selectedFriend._id, textToSend, imageToSend);
             if (res.success) {
                 setMessages(prev => prev.map(m => m.temp && m._id === tempMessage._id ? res.message : m));
             }
         } catch (error) {
             console.error("Failed to send message", error);
+            toast.error("Failed to send message");
+        } finally {
+            setSending(false);
         }
     };
 
@@ -380,12 +417,13 @@ function MessagesContent() {
                                     <div className="flex flex-col items-center justify-center h-full text-muted-foreground opacity-50 py-12">
                                         <MessageSquare className="w-10 h-10 mb-2 text-primary/40" />
                                         <p className="font-semibold text-sm">No messages yet.</p>
-                                        <p className="text-xs">Send a greeting to {selectedFriend.name}!</p>
+                                        <p className="text-xs">Send a greeting or image to {selectedFriend.name}!</p>
                                     </div>
                                 ) : (
                                     messages.map((msg, i) => {
                                         const isMe = msg.sender === user._id;
                                         const isAi = msg.isAi;
+                                        const imgUrl = msg.image?.url || (typeof msg.image === "string" ? msg.image : null);
 
                                         return (
                                             <div key={i} className={cn("flex", isMe && !isAi ? "justify-end" : "justify-start")}>
@@ -399,13 +437,27 @@ function MessagesContent() {
                                                             <Bot className="w-4 h-4" /> NovaEdge AI
                                                         </div>
                                                     )}
+
+                                                    {/* Image attachment rendering */}
+                                                    {imgUrl && (
+                                                        <div className="my-1 overflow-hidden rounded-xl border border-white/10 max-w-xs sm:max-w-sm">
+                                                            <img
+                                                                src={imgUrl}
+                                                                alt="Chat attachment"
+                                                                className="w-full h-auto max-h-72 object-cover rounded-xl transition-transform hover:scale-[1.02]"
+                                                                loading="lazy"
+                                                            />
+                                                        </div>
+                                                    )}
+
                                                     {isAi ? (
                                                         <MarkdownRenderer content={msg.message} />
-                                                    ) : (
+                                                    ) : msg.message ? (
                                                         <div className="whitespace-pre-wrap break-words leading-relaxed">
                                                             {msg.message}
                                                         </div>
-                                                    )}
+                                                    ) : null}
+
                                                     <p className={cn("text-[10px] mt-1.5 opacity-70 text-right font-medium", isMe && !isAi ? "text-primary-foreground" : "text-muted-foreground")}>
                                                         {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                     </p>
@@ -430,15 +482,72 @@ function MessagesContent() {
                                         </button>
                                     </div>
                                 )}
+
+                                {/* Image Preview Box */}
+                                {selectedImage && (
+                                    <div className="mb-2 relative inline-block group">
+                                        <div className="relative w-20 h-20 rounded-xl overflow-hidden border-2 border-primary shadow-md bg-secondary">
+                                            <img
+                                                src={selectedImage}
+                                                alt="Preview"
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => setSelectedImage(null)}
+                                            className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 shadow-md hover:scale-110 transition-transform"
+                                        >
+                                            <X className="w-3.5 h-3.5" />
+                                        </button>
+                                    </div>
+                                )}
+
                                 <form onSubmit={handleSendMessage} className="flex gap-2 items-center">
+                                    {/* Hidden File Input */}
+                                    <input
+                                        type="file"
+                                        ref={fileInputRef}
+                                        accept="image/*"
+                                        onChange={handleImageChange}
+                                        className="hidden"
+                                    />
+
+                                    {/* Attach Image Button */}
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        disabled={isCompressing || sending}
+                                        onClick={() => fileInputRef.current?.click()}
+                                        className="rounded-full h-11 w-11 shrink-0 text-muted-foreground hover:text-foreground hover:bg-secondary/60 cursor-pointer"
+                                        title="Attach optimized image"
+                                    >
+                                        {isCompressing ? (
+                                            <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                                        ) : (
+                                            <ImageIcon className="w-5 h-5" />
+                                        )}
+                                    </Button>
+
                                     <Input
                                         value={newMessage}
                                         onChange={handleInputChange}
-                                        placeholder="Start a new message..."
+                                        placeholder={selectedImage ? "Add a caption..." : "Start a new message..."}
                                         className="flex-1 rounded-full bg-secondary/40 border-border focus-visible:ring-primary/20 px-4 min-h-[44px]"
                                     />
-                                    <Button type="submit" size="icon" disabled={!newMessage.trim()} className="rounded-full h-11 w-11 shrink-0 bg-primary text-primary-foreground hover:bg-primary/90">
-                                        <Send className="w-4 h-4" />
+
+                                    <Button
+                                        type="submit"
+                                        size="icon"
+                                        disabled={(!newMessage.trim() && !selectedImage) || sending || isCompressing}
+                                        className="rounded-full h-11 w-11 shrink-0 bg-primary text-primary-foreground hover:bg-primary/90"
+                                    >
+                                        {sending ? (
+                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                        ) : (
+                                            <Send className="w-4 h-4" />
+                                        )}
                                     </Button>
                                 </form>
                             </div>

@@ -1,10 +1,11 @@
 const Message = require("../models/Message");
 const User = require("../models/User");
+const cloudinary = require("cloudinary").v2;
 
 // 1. Send Message
 exports.sendMessage = async (req, res) => {
     try {
-        const { receiverId, message } = req.body;
+        const { receiverId, message, image } = req.body;
         const senderId = req.user.id;
 
         // Verify they are friends
@@ -13,52 +14,78 @@ exports.sendMessage = async (req, res) => {
             return res.status(403).json({ success: false, message: "You can only message friends" });
         }
 
+        if (!message && !image && !(req.files && req.files.image)) {
+            return res.status(400).json({ success: false, message: "Message or image is required" });
+        }
+
+        let uploadedImage = null;
+
+        if (req.files && req.files.image) {
+            const result = await cloudinary.uploader.upload(req.files.image.tempFilePath, {
+                folder: "lms_chat_images",
+                quality: "auto:good",
+                fetch_format: "auto",
+                width: 1080,
+                crop: "limit",
+            });
+            uploadedImage = {
+                public_id: result.public_id,
+                url: result.secure_url || result.url,
+            };
+        } else if (image && typeof image === "string" && image.startsWith("data:")) {
+            const result = await cloudinary.uploader.upload(image, {
+                folder: "lms_chat_images",
+                quality: "auto:good",
+                fetch_format: "auto",
+                width: 1080,
+                crop: "limit",
+            });
+            uploadedImage = {
+                public_id: result.public_id,
+                url: result.secure_url || result.url,
+            };
+        } else if (image && typeof image === "string" && image.startsWith("http")) {
+            uploadedImage = {
+                public_id: "external_url",
+                url: image,
+            };
+        }
+
         const newMessage = await Message.create({
             sender: senderId,
             receiver: receiverId,
-            message,
+            message: message || "",
+            image: uploadedImage || undefined,
         });
 
         res.status(200).json({ success: true, message: newMessage });
 
-        // Check for AI mention
-        // Matches: @NovaEdge Academy "prompt" OR @NovaEdge Academy prompt
-        // Case insensitive for name, but prompt extraction needs care.
-        const aiRegex = /@NovaEdge\s+Academy\s+(.*)/i;
-        const match = message.match(aiRegex);
+        // Check for AI mention if message text exists
+        if (message) {
+            const aiRegex = /@NovaEdge\s+Academy\s+(.*)/i;
+            const match = message.match(aiRegex);
 
-        if (match) {
-            const prompt = match[1].replace(/^"|"$/g, '').trim(); // Remove surrounding quotes if present
+            if (match) {
+                const prompt = match[1].replace(/^"|"$/g, '').trim();
 
-            if (prompt) {
-                // Generate AI Response
-                // We'll reuse the llmService. Since it expects 'context', we'll pass empty or minimal context.
-                // Or we can create a specific function for general chat.
-                // For now, let's use generateChatResponse with empty context but a modified prompt inside the service?
-                // Actually, generateChatResponse is designed for RAG. Let's import the raw gemini model or adapt.
-                // Let's adapt by passing a dummy context that says "General Knowledge".
+                if (prompt) {
+                    const { generateChatResponse } = require("../utils/llmService");
 
-                const { generateChatResponse } = require("../utils/llmService");
+                    (async () => {
+                        try {
+                            const aiResponse = await generateChatResponse(prompt, [{ title: "General Knowledge", text: "You are a helpful AI assistant in a chat." }]);
 
-                // We run this asynchronously without waiting for it to respond to the user immediately
-                // But since we already sent the response, this is fine.
-
-                (async () => {
-                    try {
-                        const aiResponse = await generateChatResponse(prompt, [{ title: "General Knowledge", text: "You are a helpful AI assistant in a chat." }]);
-
-                        // Save AI response as a message from the SENDER to the RECEIVER (so it appears in the chat flow)
-                        // But marked as isAi: true
-                        await Message.create({
-                            sender: senderId, // It appears as if the user said it (or we could flip it, but schema requires User ID)
-                            receiver: receiverId,
-                            message: `**NovaEdge AI:** ${aiResponse.text}`,
-                            isAi: true
-                        });
-                    } catch (err) {
-                        console.error("AI Generation failed", err);
-                    }
-                })();
+                            await Message.create({
+                                sender: senderId,
+                                receiver: receiverId,
+                                message: `**NovaEdge AI:** ${aiResponse.text}`,
+                                isAi: true
+                            });
+                        } catch (err) {
+                            console.error("AI Generation failed", err);
+                        }
+                    })();
+                }
             }
         }
 
@@ -86,8 +113,7 @@ exports.getMessages = async (req, res) => {
     }
 };
 
-// 3. Mark as Read (Optional for now, but good structure)
+// 3. Mark as Read
 exports.markAsRead = async (req, res) => {
-    // Implementation for marking messages as read
     res.status(200).json({ success: true });
 };
