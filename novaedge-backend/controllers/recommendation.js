@@ -136,7 +136,7 @@ exports.getRecommendations = async (req, res) => {
 // --- GET SUGGESTED PEERS / FRIENDS TAKING SAME COURSES ONLY ---
 exports.getSuggestedPeers = async (req, res) => {
     try {
-        const userId = req.user ? req.user._id || req.user.id : null;
+        const userId = req.user ? (req.user._id || req.user.id).toString() : null;
 
         if (!userId) {
             return res.status(200).json({
@@ -147,18 +147,21 @@ exports.getSuggestedPeers = async (req, res) => {
             });
         }
 
-        let currentUser = await User.findById(userId).select("friends");
-        let friendsSet = new Set();
+        const currentUser = await User.findById(userId).select("friends");
+        const friendsSet = new Set();
         if (currentUser && Array.isArray(currentUser.friends)) {
-            currentUser.friends.forEach(id => friendsSet.add(id.toString()));
+            currentUser.friends.forEach(id => {
+                if (id) friendsSet.add(id.toString());
+            });
         }
 
-        // Find courses current user is enrolled in
-        const userEnrollments = await Enrollment.find({ user: userId, status: "active" }).select("course");
-        const courseIds = userEnrollments.map(e => e.course);
+        // Find courses current user is enrolled in (robust status query)
+        const userEnrollments = await Enrollment.find({
+            user: userId,
+            status: { $ne: "refunded" }
+        }).select("course");
 
-        if (courseIds.length === 0) {
-            // User is not enrolled in any course yet
+        if (!userEnrollments || userEnrollments.length === 0) {
             return res.status(200).json({
                 success: true,
                 enrolled: false,
@@ -167,29 +170,40 @@ exports.getSuggestedPeers = async (req, res) => {
             });
         }
 
-        // Find other learners enrolled in the EXACT SAME courses
+        const courseIds = userEnrollments
+            .map(e => e.course ? e.course.toString() : null)
+            .filter(Boolean);
+
+        // Find other learners enrolled in ANY of the same courses
         const peerEnrollments = await Enrollment.find({
             course: { $in: courseIds },
-            user: { $ne: userId, $nin: Array.from(friendsSet) }
+            user: { $ne: userId },
+            status: { $ne: "refunded" }
         })
         .populate("user", "name username avatar role email")
         .populate("course", "title")
-        .limit(30);
+        .limit(50);
 
         const peerMap = new Map();
 
         peerEnrollments.forEach(e => {
-            if (!e.user) return;
+            if (!e.user || !e.user._id) return;
             const pId = e.user._id.toString();
+
+            // Skip if already friends
+            if (friendsSet.has(pId)) return;
+
+            const courseTitle = e.course ? e.course.title : "Same Course";
+
             if (!peerMap.has(pId)) {
                 peerMap.set(pId, {
                     user: e.user,
-                    courses: [e.course ? e.course.title : "Same Course"],
+                    courses: [courseTitle],
                 });
             } else {
                 const existing = peerMap.get(pId);
-                if (e.course && !existing.courses.includes(e.course.title)) {
-                    existing.courses.push(e.course.title);
+                if (!existing.courses.includes(courseTitle)) {
+                    existing.courses.push(courseTitle);
                 }
             }
         });
@@ -199,7 +213,7 @@ exports.getSuggestedPeers = async (req, res) => {
             suggestedPeers.push({
                 _id: val.user._id,
                 name: val.user.name,
-                username: val.user.username || val.user.email?.split("@")[0],
+                username: val.user.username || (val.user.email ? val.user.email.split("@")[0] : "user"),
                 avatar: val.user.avatar?.url,
                 reason: val.courses.length > 1 
                     ? `Enrolled in ${val.courses.length} same courses` 
@@ -214,6 +228,7 @@ exports.getSuggestedPeers = async (req, res) => {
             message: suggestedPeers.length === 0 ? "No classmates found in your enrolled courses yet" : ""
         });
     } catch (error) {
+        console.error("Error in getSuggestedPeers:", error);
         res.status(500).json({ success: false, message: error.message });
     }
 };
