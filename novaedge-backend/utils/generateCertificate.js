@@ -84,14 +84,14 @@ const drawCertificateNativePDF = (doc, { studentName, courseName, date, certific
   const descText = `For successfully completing all comprehensive course modules, practical assessments, and hands-on project builds, while demonstrating solid technical skills, dedication, and a strong commitment to continuous learning throughout the ${courseName || "program"}. This certificate acknowledges the recipient's proficiency and readiness to apply these skills in real-world development environments.`;
 
   doc
-    .fontSize(8.5)
+    .fontSize(10)
     .fillColor("#3E334D")
     .font("Times-Italic")
     .text(
       descText,
-      centerX - 290,
-      330,
-      { align: "center", width: 580, lineGap: 2 }
+      centerX - 300,
+      328,
+      { align: "center", width: 600, lineGap: 3 }
     );
 
   // 5. Footer Metadata & Verification (3 Columns Harmoniously Aligned)
@@ -203,7 +203,7 @@ const drawCertificateNativePDF = (doc, { studentName, courseName, date, certific
     .text("NovaEdge Digital Labs", sigX, footerY + 47, { width: sigW, align: "center" });
 };
 
-// ── PUPPETEER HTML RENDERER (Used when Chromium binary is present) ─────────────────
+// ── PUPPETEER HTML RRENDERER (Used when Chromium binary is present) ─────────────────
 const getCertificateHTML = ({ studentName, courseName, date, certificateId, qrDataUrl }) => {
   let bgDataUrl = '';
   try {
@@ -396,11 +396,11 @@ body {
 .citation-text {
   font-family: 'Playfair Display', Georgia, serif;
   font-style: italic;
-  font-size: 12px;
+  font-size: 14.5px;
   color: #3E334D;
-  max-width: 660px;
+  max-width: 680px;
   margin: 6px auto 0;
-  line-height: 1.35;
+  line-height: 1.45;
 }
 
 .footer-grid {
