@@ -78,18 +78,20 @@ const drawCertificateNativePDF = (doc, { studentName, courseName, date, certific
     .font("Times-BoldItalic")
     .text(studentName || "Your Name Here", 0, 282, { align: "center" });
 
-  doc.moveTo(centerX - 160, 326).lineTo(centerX + 160, 326).lineWidth(0.75).stroke("#7E6C9E");
-  doc.polygon([centerX - 3, 326], [centerX, 323], [centerX + 3, 326], [centerX, 329]).fill("#7E6C9E");
+  doc.moveTo(centerX - 160, 324).lineTo(centerX + 160, 324).lineWidth(0.75).stroke("#7E6C9E");
+  doc.polygon([centerX - 3, 324], [centerX, 321], [centerX + 3, 324], [centerX, 327]).fill("#7E6C9E");
+
+  const descText = `For successfully completing all comprehensive course modules, practical assessments, and hands-on project builds, while demonstrating solid technical skills, dedication, and a strong commitment to continuous learning throughout the ${courseName || "program"}. This certificate acknowledges the recipient's proficiency and readiness to apply these skills in real-world development environments.`;
 
   doc
-    .fontSize(10)
+    .fontSize(8.5)
     .fillColor("#3E334D")
     .font("Times-Italic")
     .text(
-      "For successfully completing all comprehensive course modules, practical assessments, and hands-on project builds while demonstrating solid technical skills and commitment in",
-      centerX - 280,
-      334,
-      { align: "center", width: 560, lineGap: 2.5 }
+      descText,
+      centerX - 290,
+      330,
+      { align: "center", width: 580, lineGap: 2 }
     );
 
   // 5. Footer Metadata & Verification (3 Columns Harmoniously Aligned)
@@ -394,11 +396,11 @@ body {
 .citation-text {
   font-family: 'Playfair Display', Georgia, serif;
   font-style: italic;
-  font-size: 13.5px;
+  font-size: 12px;
   color: #3E334D;
-  max-width: 640px;
-  margin: 8px auto 0;
-  line-height: 1.4;
+  max-width: 660px;
+  margin: 6px auto 0;
+  line-height: 1.35;
 }
 
 .footer-grid {
@@ -602,7 +604,7 @@ body {
         <span style="font-size: 9px; color: #7E6C9E;">◆</span>
         <div class="name-line-right"></div>
       </div>
-      <p class="citation-text">For successfully completing all comprehensive course modules, practical assessments, and hands-on project builds while demonstrating solid technical skills and commitment in</p>
+      <p class="citation-text">For successfully completing all comprehensive course modules, practical assessments, and hands-on project builds, while demonstrating solid technical skills, dedication, and a strong commitment to continuous learning throughout the ${courseName || "program"}. This certificate acknowledges the recipient's proficiency and readiness to apply these skills in real-world development environments.</p>
     </div>
 
     <div class="footer-grid">

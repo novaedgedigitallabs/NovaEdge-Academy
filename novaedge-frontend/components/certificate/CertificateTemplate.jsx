@@ -94,12 +94,12 @@ export default function CertificateTemplate({
                 </div>
 
                 {/* Citation & Course Banner */}
-                <div className="text-center max-w-2xl mx-auto space-y-1.5 px-2">
+                <div className="text-center max-w-2xl mx-auto space-y-1 px-2">
                     <p
-                        className="text-[10.5px] sm:text-xs md:text-sm text-[#3B285E] italic font-medium leading-relaxed"
+                        className="text-[9.5px] sm:text-[11px] md:text-xs text-[#3B285E] italic font-medium leading-relaxed"
                         style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
                     >
-                        For successfully completing all comprehensive course modules, practical assessments, and hands-on project builds while demonstrating solid technical skills and commitment in
+                        For successfully completing all comprehensive course modules, practical assessments, and hands-on project builds, while demonstrating solid technical skills, dedication, and a strong commitment to continuous learning throughout the {courseTitle || "program"}. This certificate acknowledges the recipient&apos;s proficiency and readiness to apply these skills in real-world development environments.
                     </p>
 
                     {/* Course Ribbon Badge */}
