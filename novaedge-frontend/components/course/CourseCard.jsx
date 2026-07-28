@@ -41,6 +41,8 @@ export default function CourseCard({ course }) {
     }
   };
 
+  const studentCount = course.students ?? course.studentsEnrolled ?? 0;
+
   return (
     <Link href={`/courses/${courseId}`} className="group h-full relative block">
       {/* Wishlist Button */}
@@ -77,7 +79,7 @@ export default function CourseCard({ course }) {
             </div>
             <div className="flex items-center gap-1 text-muted-foreground text-xs">
               <Users className="h-3.5 w-3.5" />
-              <span>{course.students || 0}</span>
+              <span>{studentCount}</span>
             </div>
           </div>
           <h3 className="font-bold text-lg leading-tight group-hover:text-primary transition-colors line-clamp-2">

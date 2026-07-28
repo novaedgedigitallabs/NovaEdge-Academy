@@ -1,5 +1,6 @@
 // controllers/courses.js
 const Course = require("../models/Course");
+const Enrollment = require("../models/Enrollment");
 const cloudinary = require("cloudinary").v2;
 
 /**
@@ -50,11 +51,29 @@ exports.getAllCourses = async (req, res) => {
       query.category = category;
     }
 
-    const courses = await Course.find(query).select("-lectures");
+    const courses = await Course.find(query).select("-lectures").lean();
+
+    // Calculate real active enrolled student count for each course
+    const courseIds = courses.map((c) => c._id);
+    const enrollmentCounts = await Enrollment.aggregate([
+      { $match: { course: { $in: courseIds }, status: "active" } },
+      { $group: { _id: "$course", count: { $sum: 1 } } }
+    ]);
+
+    const countMap = {};
+    enrollmentCounts.forEach((item) => {
+      countMap[item._id.toString()] = item.count;
+    });
+
+    const coursesWithStats = courses.map((c) => ({
+      ...c,
+      students: countMap[c._id.toString()] || 0,
+      studentsEnrolled: countMap[c._id.toString()] || 0,
+    }));
 
     res.status(200).json({
       success: true,
-      courses,
+      courses: coursesWithStats,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -64,15 +83,21 @@ exports.getAllCourses = async (req, res) => {
 // --- 1.5 GET COURSE DETAILS (Public) ---
 exports.getCourseDetails = async (req, res) => {
   try {
-    const course = await Course.findById(req.params.id);
+    const course = await Course.findById(req.params.id).lean();
 
     if (!course) {
       return res.status(404).json({ success: false, message: "Course not found" });
     }
 
+    const studentCount = await Enrollment.countDocuments({ course: course._id, status: "active" });
+
     res.status(200).json({
       success: true,
-      course,
+      course: {
+        ...course,
+        students: studentCount,
+        studentsEnrolled: studentCount,
+      },
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -420,7 +445,6 @@ exports.fetchYouTubePlaylist = async (req, res) => {
     const { playlistUrl, videoUrls } = req.body;
     let lectures = [];
 
-    // If an array or multiline list of video URLs is provided
     const urlsToProcess = [];
     if (Array.isArray(videoUrls)) {
       urlsToProcess.push(...videoUrls);
@@ -463,7 +487,6 @@ exports.fetchYouTubePlaylist = async (req, res) => {
       return res.status(400).json({ success: false, message: "Playlist URL, ID, or video links required" });
     }
 
-    // Extract Playlist ID
     let playlistId = playlistUrl.trim();
     if (playlistUrl.includes("list=")) {
       const match = playlistUrl.match(/[?&]list=([^&]+)/);
@@ -472,7 +495,6 @@ exports.fetchYouTubePlaylist = async (req, res) => {
       }
     }
 
-    // 1. Try YouTube Data API v3 with full pagination (loops until all playlist items fetched)
     const apiKey = process.env.YOUTUBE_API_KEY;
     if (apiKey) {
       try {
