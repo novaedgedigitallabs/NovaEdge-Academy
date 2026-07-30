@@ -1,6 +1,4 @@
-import axios from "axios";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
+import { apiGet, apiPost } from "./api";
 
 /**
  * Convert VAPID Public Key string to Uint8Array
@@ -39,8 +37,8 @@ export async function registerServiceWorker() {
  */
 export async function getVapidPublicKey() {
   try {
-    const response = await axios.get(`${API_BASE}/push/vapid-key`);
-    return response.data.publicKey;
+    const data = await apiGet("/api/v1/push/vapid-key");
+    return data.publicKey;
   } catch (error) {
     console.error("Failed to fetch VAPID key:", error);
     return null;
@@ -80,14 +78,10 @@ export async function subscribeUserToPush() {
 
   // Send subscription to backend
   const deviceInfo = `${navigator.userAgent.slice(0, 100)}`;
-  await axios.post(
-    `${API_BASE}/push/subscribe`,
-    {
-      subscription: subscription.toJSON(),
-      deviceInfo,
-    },
-    { withCredentials: true }
-  );
+  await apiPost("/api/v1/push/subscribe", {
+    subscription: subscription.toJSON(),
+    deviceInfo,
+  });
 
   return subscription;
 }
@@ -103,11 +97,7 @@ export async function unsubscribeUserFromPush() {
 
   const subscription = await registration.pushManager.getSubscription();
   if (subscription) {
-    await axios.post(
-      `${API_BASE}/push/unsubscribe`,
-      { endpoint: subscription.endpoint },
-      { withCredentials: true }
-    );
+    await apiPost("/api/v1/push/unsubscribe", { endpoint: subscription.endpoint });
     await subscription.unsubscribe();
   }
 }

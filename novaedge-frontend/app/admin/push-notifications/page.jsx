@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import axios from "axios";
+import { apiGet, apiPost } from "@/lib/api";
 import { motion } from "framer-motion";
 import {
   BellRing,
@@ -30,8 +30,6 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import PushNotificationPrompt from "@/components/notification/PushNotificationPrompt";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
 
 export default function AdminPushNotificationsPage() {
   const [stats, setStats] = useState({
@@ -63,15 +61,15 @@ export default function AdminPushNotificationsPage() {
     setLoading(true);
     try {
       const [statsRes, logsRes] = await Promise.all([
-        axios.get(`${API_BASE}/push/admin/stats`, { withCredentials: true }),
-        axios.get(`${API_BASE}/push/admin/logs`, { withCredentials: true }),
+        apiGet("/api/v1/push/admin/stats"),
+        apiGet("/api/v1/push/admin/logs"),
       ]);
 
-      if (statsRes.data.success) {
-        setStats(statsRes.data.stats);
+      if (statsRes?.success) {
+        setStats(statsRes.stats);
       }
-      if (logsRes.data.success) {
-        setLogs(logsRes.data.logs);
+      if (logsRes?.success) {
+        setLogs(logsRes.logs);
       }
     } catch (error) {
       toast.error("Failed to load push stats and logs");
@@ -92,17 +90,15 @@ export default function AdminPushNotificationsPage() {
 
     setSending(true);
     try {
-      const response = await axios.post(`${API_BASE}/push/admin/broadcast`, form, {
-        withCredentials: true,
-      });
+      const response = await apiPost("/api/v1/push/admin/broadcast", form);
 
-      if (response.data.success) {
-        toast.success(response.data.message || "Web Push Broadcast sent!");
+      if (response?.success) {
+        toast.success(response.message || "Web Push Broadcast sent!");
         setConfirmModalOpen(false);
         fetchStatsAndLogs();
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to broadcast push notification");
+      toast.error(error.response?.data?.message || error.message || "Failed to broadcast push notification");
     } finally {
       setSending(false);
     }
@@ -111,17 +107,13 @@ export default function AdminPushNotificationsPage() {
   const handleTriggerRssPush = async () => {
     setRssSending(true);
     try {
-      const response = await axios.post(
-        `${API_BASE}/rss/trigger-push`,
-        {},
-        { withCredentials: true }
-      );
-      if (response.data.success) {
-        toast.success(response.data.message || "RSS Push Triggered!");
+      const response = await apiPost("/api/v1/rss/trigger-push", {});
+      if (response?.success) {
+        toast.success(response.message || "RSS Push Triggered!");
         fetchStatsAndLogs();
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to trigger RSS Web Push");
+      toast.error(error.response?.data?.message || error.message || "Failed to trigger RSS Web Push");
     } finally {
       setRssSending(false);
     }

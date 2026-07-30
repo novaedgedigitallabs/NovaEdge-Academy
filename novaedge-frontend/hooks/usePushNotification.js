@@ -6,10 +6,8 @@ import {
   unsubscribeUserFromPush,
   getCurrentPushSubscription,
 } from "@/lib/pushNotification";
+import { apiPost } from "@/lib/api";
 import { toast } from "sonner";
-import axios from "axios";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
 
 export function usePushNotification() {
   const [isSupported, setIsSupported] = useState(false);
@@ -71,14 +69,10 @@ export function usePushNotification() {
         toast.error("Please subscribe to notifications first!");
         return;
       }
-      await axios.post(
-        `${API_BASE}/push/test`,
-        { subscription: sub.toJSON() },
-        { withCredentials: true }
-      );
+      await apiPost("/api/v1/push/test", { subscription: sub.toJSON() });
       toast.success("Test notification dispatched! Check your desktop/browser.");
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to send test notification.");
+      toast.error(error.response?.data?.message || error.message || "Failed to send test notification.");
     }
   };
 
