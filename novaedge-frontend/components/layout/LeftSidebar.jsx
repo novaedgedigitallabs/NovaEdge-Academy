@@ -17,7 +17,8 @@ import {
     PenSquare,
     LogOut,
     Newspaper,
-    UserPlus
+    UserPlus,
+    Bell,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
