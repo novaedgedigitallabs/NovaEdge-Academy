@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
-import { Shield, Smartphone, User, LogOut } from "lucide-react";
+import { Shield, Smartphone, User, LogOut, Bell } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 
 const sidebarNavItems = [
@@ -13,6 +13,11 @@ const sidebarNavItems = [
         title: "Profile",
         href: "/settings/profile",
         icon: <User className="w-4 h-4 mr-2" />,
+    },
+    {
+        title: "Notifications",
+        href: "/settings/notifications",
+        icon: <Bell className="w-4 h-4 mr-2" />,
     },
     {
         title: "Security",
