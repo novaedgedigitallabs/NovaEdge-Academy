@@ -16,6 +16,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { useAuth } from "@/context/auth-context";
+import PushNotificationPrompt from "./PushNotificationPrompt";
 
 export default function NotificationCenter() {
     const { user } = useAuth();
@@ -79,7 +80,7 @@ export default function NotificationCenter() {
                     )}
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-80" align="end">
+            <DropdownMenuContent className="w-84 p-2" align="end">
                 <DropdownMenuLabel className="flex justify-between items-center">
                     <span>Notifications</span>
                     {unreadCount > 0 && (
@@ -88,6 +89,9 @@ export default function NotificationCenter() {
                         </Button>
                     )}
                 </DropdownMenuLabel>
+                <div className="my-1">
+                    <PushNotificationPrompt compact={true} />
+                </div>
                 <DropdownMenuSeparator />
                 <ScrollArea className="h-[300px]">
                     {notifications.length === 0 ? (
