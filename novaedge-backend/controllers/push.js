@@ -5,9 +5,10 @@ const { publicVapidKey, sendSinglePush, broadcastPushToSegment } = require("../u
 // 1. Get VAPID Public Key
 exports.getVapidPublicKey = async (req, res) => {
   try {
+    const key = publicVapidKey || process.env.VAPID_PUBLIC_KEY || "BM5WWLLnEGCp8pR7lR76a8MEixuQJaWULzDZlpT6C_y71W72rjK2ZlB99zWx4cBZSOWUd0fdItSThabbfXtUpXE";
     res.status(200).json({
       success: true,
-      publicKey: publicVapidKey || process.env.VAPID_PUBLIC_KEY,
+      publicKey: key,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

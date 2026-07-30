@@ -2,9 +2,9 @@ const webPush = require("web-push");
 const PushSubscription = require("../models/PushSubscription");
 const PushLog = require("../models/PushLog");
 
-// Initialize VAPID Keys
-const publicVapidKey = process.env.VAPID_PUBLIC_KEY;
-const privateVapidKey = process.env.VAPID_PRIVATE_KEY;
+// Initialize VAPID Keys with Production Fallbacks
+const publicVapidKey = process.env.VAPID_PUBLIC_KEY || "BM5WWLLnEGCp8pR7lR76a8MEixuQJaWULzDZlpT6C_y71W72rjK2ZlB99zWx4cBZSOWUd0fdItSThabbfXtUpXE";
+const privateVapidKey = process.env.VAPID_PRIVATE_KEY || "Kwuhh5kDDOKlnZi9UY9stKFIUMtrY-Fp5Y0GKRfDqGY";
 const vapidSubject = process.env.VAPID_SUBJECT || "mailto:admin@novaedge.in";
 
 if (publicVapidKey && privateVapidKey) {

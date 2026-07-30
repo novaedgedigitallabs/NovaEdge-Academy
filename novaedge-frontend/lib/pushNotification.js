@@ -36,12 +36,13 @@ export async function registerServiceWorker() {
  * Fetch VAPID Public Key from backend API
  */
 export async function getVapidPublicKey() {
+  const fallbackKey = "BM5WWLLnEGCp8pR7lR76a8MEixuQJaWULzDZlpT6C_y71W72rjK2ZlB99zWx4cBZSOWUd0fdItSThabbfXtUpXE";
   try {
     const data = await apiGet("/api/v1/push/vapid-key");
-    return data.publicKey;
+    return data?.publicKey || fallbackKey;
   } catch (error) {
     console.error("Failed to fetch VAPID key:", error);
-    return null;
+    return fallbackKey;
   }
 }
 
