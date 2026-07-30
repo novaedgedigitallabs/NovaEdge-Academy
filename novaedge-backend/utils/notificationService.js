@@ -39,7 +39,25 @@ class NotificationService {
                 }
             }
 
-            // 3. Send SMS/Push (Not implemented yet)
+            // 3. Send Web Push Notification
+            if (user.notificationPreferences?.push !== false) {
+                try {
+                    const PushSubscription = require("../models/PushSubscription");
+                    const { sendSinglePush } = require("./webPush");
+                    const pushSubs = await PushSubscription.find({ user: userId, active: true });
+                    
+                    for (const sub of pushSubs) {
+                        await sendSinglePush(sub, {
+                            title: title || "NovaEdge Notification",
+                            body: message,
+                            url: link || "/",
+                            icon: "/icon.png"
+                        });
+                    }
+                } catch (pushErr) {
+                    console.error("Web Push send failed:", pushErr.message);
+                }
+            }
 
         } catch (error) {
             console.error("Notification Error:", error);

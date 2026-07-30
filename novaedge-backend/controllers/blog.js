@@ -53,6 +53,21 @@ exports.createPost = async (req, res, next) => {
     try {
         const post = await Blog.create(req.body);
 
+        // Automatic Web Push Notification on New Article
+        try {
+            const { broadcastPushToSegment } = require("../utils/webPush");
+            broadcastPushToSegment({
+                target: "all",
+                title: `📰 New Article: ${post.title}`,
+                body: post.excerpt || (post.content ? post.content.substring(0, 100) : "Check out our latest post!"),
+                url: `/blogs/${post.slug || post._id}`,
+                image: post.coverImage || "",
+                type: "automated"
+            });
+        } catch (pushErr) {
+            console.error("Auto blog push trigger failed:", pushErr.message);
+        }
+
         res.status(201).json({
             success: true,
             data: post

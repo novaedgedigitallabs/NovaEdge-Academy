@@ -11,6 +11,7 @@ export const ROLE_PERMISSIONS = {
   admin: [
     "/admin/dashboard",
     "/admin/analytics",
+    "/admin/push-notifications",
     "/admin/courses",
     "/admin/users",
     "/admin/enrollments",

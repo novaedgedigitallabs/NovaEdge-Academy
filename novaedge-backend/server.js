@@ -121,7 +121,10 @@ app.use("/api/v1", require("./routes/driveUpload"));
 app.use("/api/v1", require("./routes/city"));
 app.use("/api/v1/hashtag", hashtag);
 app.use("/api/v1", require("./routes/mentors"));
+app.use("/api/v1/push", require("./routes/push"));
+app.use("/api/v1/rss", require("./routes/rss"));
 app.use(require("./middleware/error"));
+
 
 
 // 6. Health Check (Simple test route)

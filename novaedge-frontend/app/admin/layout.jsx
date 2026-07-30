@@ -26,6 +26,7 @@ import {
   Sparkles,
   ScrollText,
   Video,
+  BellRing,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -35,6 +36,7 @@ import AdminGuard, { hasRoutePermission } from "@/components/admin/AdminGuard";
 const navItems = [
   { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
   { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
+  { label: "Push Broadcast", href: "/admin/push-notifications", icon: BellRing },
   { label: "Courses", href: "/admin/courses", icon: BookOpen },
   { label: "Live Classes", href: "/admin/live-classes", icon: Video },
   { label: "Users", href: "/admin/users", icon: Users },
