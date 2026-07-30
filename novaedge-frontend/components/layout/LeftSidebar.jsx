@@ -87,6 +87,11 @@ const sidebarLinks = [
         badgeKey: "requests",
     },
     {
+        icon: Bell,
+        route: "/settings/notifications",
+        label: "Notifications",
+    },
+    {
         icon: User,
         route: "/profile",
         label: "Profile",
