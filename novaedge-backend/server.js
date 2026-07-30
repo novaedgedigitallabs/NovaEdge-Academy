@@ -6,6 +6,7 @@ const cloudinary = require("cloudinary");
 const fileUpload = require("express-fileupload");
 const cors = require("cors");
 const path = require("path");
+const compression = require("compression");
 
 // 1. Load Config
 dotenv.config({ path: "./.env" });
@@ -18,6 +19,7 @@ connectDB();
 connectCloudinary();
 
 // 3. Middleware (The Gatekeepers)
+app.use(compression()); // Gzip/Brotli response compression (70%+ smaller payloads)
 app.use(async (req, res, next) => {
   try {
     await connectDB();
