@@ -123,7 +123,9 @@ app.use("/api/v1/hashtag", hashtag);
 app.use("/api/v1", require("./routes/mentors"));
 app.use("/api/v1/push", require("./routes/push"));
 app.use("/api/v1/rss", require("./routes/rss"));
+app.use("/api/v1/database-lab", require("./routes/databaseLab"));
 app.use(require("./middleware/error"));
+
 
 
 

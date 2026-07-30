@@ -6,8 +6,18 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Badge } from "@/components/ui/badge";
 import { BookOpen, Clock, Trophy, ArrowRight, Code, Database, Brain, Smartphone, Sparkles } from "lucide-react";
 import Link from "next/link";
-
 const paths = [
+    {
+        id: "database-systems",
+        title: "Database Engineering & System Architecture",
+        description: "Master ACID Transactions, CAP Theorem, Database Normalization (1NF-3NF), B-Tree & Hash Indexing, and Concurrency Locks in our interactive lab.",
+        icon: <Database className="w-6 h-6 text-emerald-500" />,
+        courses: "Interactive Suite",
+        duration: "Self-Paced",
+        level: "Intermediate to Advanced",
+        color: "bg-emerald-500/10 text-emerald-500",
+        href: "/learning-paths/database-lab",
+    },
     {
         id: "full-stack",
         title: "Full Stack Web Developer",
@@ -96,7 +106,7 @@ export default function LearningPathsPage() {
 
                             <CardFooter className="pt-2">
                                 <Button asChild className="w-full rounded-full text-xs font-bold h-9 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm">
-                                    <Link href="/courses">
+                                    <Link href={path.href || "/courses"}>
                                         Start Path <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
                                     </Link>
                                 </Button>
