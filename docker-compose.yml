@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./novaedge-backend
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./novaedge-backend/.env
+    restart: unless-stopped
+    # If the backend requires MongoDB, you might want to uncomment and configure a mongo service.
+    # depends_on:
+    #   - mongodb
+
+  frontend:
+    build:
+      context: ./novaedge-frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./novaedge-frontend/.env
+    restart: unless-stopped
+    depends_on:
+      - backend
+
+#  mongodb:
+#    image: mongo:latest
+#    ports:
+#      - "27017:27017"
+#    volumes:
+#      - mongo-data:/data/db
+
+#volumes:
+#  mongo-data:
